@@ -143,6 +143,29 @@ const projects: Project[] = [
   },
   {
     id: 2,
+    title: "Ecommerce Electro Mart App",
+    description:
+      "Aplikasi E-Commerce untuk penjualan sebuah peralatan elektronik seperti Laptop, Komputer, TV dan lain-lain. Dibuat dengan Flutter untuk mobile app dan Nextjs untuk website app.",
+    techStacks: ["Nextjs", "Flutter"],
+    image: ImageFour,
+    githubURL: "https://github.com/agungkurniawanid/webapp-electro-mart-app",
+    liveURL: "/maintenance",
+    githubApi: "",
+  },
+  {
+    id: 3,
+    title: "Emotional Facecs Classification App",
+    description:
+      "90% Accurate. Sebuah Classification Faces atau wajah dengan membedakan 6 kelas yang didefinisikan pada data dengan menggunakan metode CNN (Convolutional Neural Network)",
+    techStacks: ["Flutter"],
+    image: ImageSix,
+    githubURL:
+      "https://github.com/agungkurniawanid/notebook-cnn-emotional-faces-classification",
+    liveURL: "/maintenance",
+    githubApi: "",
+  },
+  {
+    id: 4,
     title: "Marketplace KampSewa: Tempat Sewa & Menyewakan Alat Kamping",
     description:
       "Sebuah aplikasi yang menyediakan tempat penyewaan & sewa peralatan kamping kepada seluruh wilayah yang memungkinkan user dapat saling menyewa dan menyewakan barang campig mereka.",
@@ -154,7 +177,7 @@ const projects: Project[] = [
     githubApi: "",
   },
   {
-    id: 3,
+    id: 5,
     title: "Dapnetwork App",
     description:
       "Dapnetwork App, yang dikembangkan oleh DAPNetwork, memudahkan manajemen jaringan internet. Ini mencakup platform mobile untuk pegawai yang menangani penagihan dan pemasangan pelanggan baru, serta website untuk admin mengelola operasional melalui dashboard komprehensif.",
@@ -166,36 +189,13 @@ const projects: Project[] = [
     githubApi: "",
   },
   {
-    id: 4,
-    title: "Ecommerce Electro Mart App",
-    description:
-      "Aplikasi E-Commerce untuk penjualan sebuah peralatan elektronik seperti Laptop, Komputer, TV dan lain-lain. Dibuat dengan Flutter untuk mobile app dan Nextjs untuk website app.",
-    techStacks: ["Nextjs", "Flutter"],
-    image: ImageFour,
-    githubURL: "https://github.com/agungkurniawanid/webapp-electro-mart-app",
-    liveURL: "/maintenance",
-    githubApi: "",
-  },
-  {
-    id: 5,
+    id: 6,
     title: "Digital Library App",
     description:
       "DigitalLibrary adalah platform perpustakaan digital yang dirancang untuk memberikan akses mudah ke berbagai e-book dari berbagai genre dan kategori. Dengan antarmuka yang ramah pengguna dan fitur canggih, DigitalLibrary memungkinkan pengguna untuk menjelajahi, membaca, dan mengelola koleksi buku elektronik mereka di satu tempat.",
     techStacks: ["Nextjs", "Flutter"],
     image: ImageFive,
     githubURL: "https://github.com/agungkurniawanid/webapp-digital-library",
-    liveURL: "/maintenance",
-    githubApi: "",
-  },
-  {
-    id: 6,
-    title: "Emotional Facecs Classification App",
-    description:
-      "90% Accurate. Sebuah Classification Faces atau wajah dengan membedakan 6 kelas yang didefinisikan pada data dengan menggunakan metode CNN (Convolutional Neural Network)",
-    techStacks: ["Flutter"],
-    image: ImageSix,
-    githubURL:
-      "https://github.com/agungkurniawanid/notebook-cnn-emotional-faces-classification",
     liveURL: "/maintenance",
     githubApi: "",
   },

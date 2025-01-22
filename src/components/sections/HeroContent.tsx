@@ -1,19 +1,19 @@
-import { useEffect, useRef } from "react"
-import { ArrowRightIcon } from "@radix-ui/react-icons"
-import { gsap } from "gsap"
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
-import Link from "next/link"
+import { useEffect, useRef } from "react";
+import { ArrowRightIcon } from "@radix-ui/react-icons";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import Link from "next/link";
 
 export default function HeroContent() {
-  const sectionRef = useRef(null)
-  const q = gsap.utils.selector(sectionRef)
+  const sectionRef = useRef(null);
+  const q = gsap.utils.selector(sectionRef);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger)
+    gsap.registerPlugin(ScrollTrigger);
 
     const textAnimationTimeline = gsap.timeline({
       defaults: { stagger: 0.2, duration: 0.3 },
-    })
+    });
 
     textAnimationTimeline.fromTo(
       q(".text-animation"),
@@ -24,7 +24,7 @@ export default function HeroContent() {
         y: 0,
         delay: 2.2,
       }
-    )
+    );
     textAnimationTimeline.fromTo(
       ".bio-animation ",
       {
@@ -35,8 +35,8 @@ export default function HeroContent() {
         ease: "back",
         duration: 0.3,
       }
-    )
-  }, [q])
+    );
+  }, [q]);
 
   return (
     <div
@@ -51,23 +51,24 @@ export default function HeroContent() {
 
       <div className="overflow-hidden">
         <div className="text-animation text-2xl md:text-4xl font-semibold">
-          <span className="bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-transparent bg-clip-text">
+          <span className="bg-gradient-to-b from-black to-gray-600 dark:from-white dark:to-gray-400 inline-block text-transparent bg-clip-text">
             Seorang
           </span>{" "}
           <span className="text-accentColor">Software</span>{" "}
-          <span className="bg-[linear-gradient(#000000,rgba(255,255,255,.6))] dark:bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-transparent bg-clip-text">
+          <span className="bg-gradient-to-b from-black to-gray-600 dark:from-white dark:to-gray-400 inline-block text-transparent bg-clip-text">
             Developer
           </span>
         </div>
       </div>
 
       <div className="w-[300px] md:w-[370px] relative z-30 text-center text-sm dark:bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-black dark:text-transparent bg-clip-text">
-      Seorang pengembang Software yang penuh semangat dan detail, dengan kemampuan untuk
-      menciptakan antarmuka web yang menarik dan ramah pengguna.
+        Seorang pengembang Software yang penuh semangat dan detail, dengan
+        kemampuan untuk menciptakan antarmuka web yang menarik dan ramah
+        pengguna.
       </div>
 
       <div className="bio-animation dark:bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-black dark:text-transparent bg-clip-text text-md md:text-lg">
-      Tempat di mana kreativitas bertemu dengan fungsionalitas.
+        Tempat di mana kreativitas bertemu dengan fungsionalitas.
       </div>
 
       <Link
@@ -76,7 +77,9 @@ export default function HeroContent() {
         target="_blank"
         className="contact_me_btn px-4 py-[6px] shadow-md mt-10 md:mt-3 group flex items-center gap-2"
       >
-        <div className="dark:text-black relative z-[3] text-sm">Contact Saya</div>
+        <div className="dark:text-black relative z-[3] text-sm">
+          Contact Saya
+        </div>
         <div className="sr-only">Contact Me</div>
         <div className="contact_me_btn_overlay group-hover:opacity-100" />
         <div className="relative group overflow-hidden w-4 z-[3]">
@@ -87,5 +90,5 @@ export default function HeroContent() {
         </div>
       </Link>
     </div>
-  )
+  );
 }

@@ -1,19 +1,27 @@
 const navlinks = [
     {
-        title:"About",
-        href:"#about"
+        title:"Index",
+        href:"/"
     },
     {
-        title:"Project",
-        href:"#project"
+        title:"Skills",
+        href:"/maintenance"
     },
     {
-        title:"Blog",
-        href:"#blog"
+        title:"Projects",
+        href:"/maintenance"
+    },
+    {
+        title:"Blogs",
+        href:"/maintenance"
     },
     {
         title:"Contact",
-        href:"#contact"
+        href:"/maintenance"
+    },
+    {
+        title:"More",
+        href:"/maintenance"
     },
 ]
 

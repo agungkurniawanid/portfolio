@@ -45,16 +45,16 @@ export default function HeroContent() {
     >
       <div className="overflow-hidden">
         <div className="text-animation  dark:bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-black dark:text-transparent bg-clip-text leading-none text-4xl md:text-6xl font-semibold">
-          It&apos;s Shinn Thant
+          Saya Agung Kurniawan
         </div>
       </div>
 
       <div className="overflow-hidden">
         <div className="text-animation text-2xl md:text-4xl font-semibold">
           <span className="bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-transparent bg-clip-text">
-            A
+            Seorang
           </span>{" "}
-          <span className="text-accentColor">Front-End</span>{" "}
+          <span className="text-accentColor">Software</span>{" "}
           <span className="bg-[linear-gradient(#000000,rgba(255,255,255,.6))] dark:bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-transparent bg-clip-text">
             Developer
           </span>
@@ -62,20 +62,21 @@ export default function HeroContent() {
       </div>
 
       <div className="w-[300px] md:w-[370px] relative z-30 text-center text-sm dark:bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-black dark:text-transparent bg-clip-text">
-        Passionate and detail-oriented frontend developer with a knack for
-        creating visually appealing and user-friendly web interfaces
+      Seorang pengembang Software yang penuh semangat dan detail, dengan kemampuan untuk
+      menciptakan antarmuka web yang menarik dan ramah pengguna.
       </div>
 
       <div className="bio-animation dark:bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-black dark:text-transparent bg-clip-text text-md md:text-lg">
-        Where creativity meets functionality.
+      Tempat di mana kreativitas bertemu dengan fungsionalitas.
       </div>
 
       <Link
-        href="#contact"
+        href="https://wa.me/6281331640909"
         aria-label="Contact Me"
+        target="_blank"
         className="contact_me_btn px-4 py-[6px] shadow-md mt-10 md:mt-3 group flex items-center gap-2"
       >
-        <div className="dark:text-black relative z-[3] text-sm">Contact Me</div>
+        <div className="dark:text-black relative z-[3] text-sm">Contact Saya</div>
         <div className="sr-only">Contact Me</div>
         <div className="contact_me_btn_overlay group-hover:opacity-100" />
         <div className="relative group overflow-hidden w-4 z-[3]">

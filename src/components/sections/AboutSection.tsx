@@ -1,116 +1,108 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import useScrollActive from "@/hooks/UseScrollActive"
-import Circle from "@/assets/about/circle.svg"
-import Signs from "@/assets/about/signs.svg"
-import Star from "@/assets/about/star.svg"
-import Triangle from "@/assets/about/triangle.svg"
-import ShinThantImage from "@/assets/me-5.jpg"
-import { useSectionStore } from "@/stores/Section"
-import { gsap } from "gsap"
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
-import Image from "next/image"
-import SplitType from "split-type"
+import { useEffect, useRef } from "react";
+import useScrollActive from "@/hooks/UseScrollActive";
+import Circle from "@/assets/about/circle.svg";
+import Signs from "@/assets/about/signs.svg";
+import Star from "@/assets/about/star.svg";
+import Triangle from "@/assets/about/triangle.svg";
+import ShinThantImage from "@/assets/IMG_20221112_005922.jpg";
+import { useSectionStore } from "@/stores/Section";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import Image from "next/image";
+import SplitType from "split-type";
 
 export default function AboutSection() {
-    gsap.registerPlugin(ScrollTrigger)
+  gsap.registerPlugin(ScrollTrigger);
 
-    // Menginisialisasi sectionRef dengan tipe HTMLElement dan memberi tahu TypeScript bahwa ini tidak akan null
-    const sectionRef = useRef<HTMLElement>(null!)
-  
-    useEffect(() => {
-      const q = gsap.utils.selector(sectionRef)
-  
-      // Tidak perlu lagi memeriksa null karena kita memberi tahu TypeScript bahwa ini tidak akan null
-      new SplitType(q(".title"), {
-        types: "chars",
-        tagName: "span",
-      })
-  
-      gsap.from(q(".title .char"), {
-        opacity: 0.3,
-        duration: 0.5,
-        ease: "power1.out",
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: q(".title"),
-          start: "top center",
-          scrub: true,
-        },
-      })
-  
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          scrub: true,
-          onEnter: () => {
-            const tl = gsap.timeline({
-              defaults: {
-                stagger: 0.2,
-                duration: 0.3,
-              },
-            })
-  
-            tl.fromTo(
-              q(".image-animation"),
-              { x: 200 },
-              { x: 0 }
-            )
-  
-            tl.fromTo(
-              q(".text-animation"),
-              { y: 100 },
-              { y: 0 }
-            )
-  
-            tl.to(q(".experience-count"), {
-              innerText: 2,
+  // Menginisialisasi sectionRef dengan tipe HTMLElement dan memberi tahu TypeScript bahwa ini tidak akan null
+  const sectionRef = useRef<HTMLElement>(null!);
+
+  useEffect(() => {
+    const q = gsap.utils.selector(sectionRef);
+
+    // Tidak perlu lagi memeriksa null karena kita memberi tahu TypeScript bahwa ini tidak akan null
+    new SplitType(q(".title"), {
+      types: "chars",
+      tagName: "span",
+    });
+
+    gsap.from(q(".title .char"), {
+      opacity: 0.3,
+      duration: 0.5,
+      ease: "power1.out",
+      stagger: 0.1,
+      scrollTrigger: {
+        trigger: q(".title"),
+        start: "top center",
+        scrub: true,
+      },
+    });
+
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        scrub: true,
+        onEnter: () => {
+          const tl = gsap.timeline({
+            defaults: {
+              stagger: 0.2,
+              duration: 0.3,
+            },
+          });
+
+          tl.fromTo(q(".image-animation"), { x: 200 }, { x: 0 });
+
+          tl.fromTo(q(".text-animation"), { y: 100 }, { y: 0 });
+
+          tl.to(q(".experience-count"), {
+            innerText: 2,
+            duration: 0.5,
+            snap: {
+              innerText: 1,
+            },
+          });
+
+          tl.to(
+            q(".project-count"),
+            {
+              innerText: 15,
               duration: 0.5,
               snap: {
                 innerText: 1,
               },
-            })
-  
-            tl.to(
-              q(".project-count"),
-              {
-                innerText: 15,
-                duration: 0.5,
-                snap: {
-                  innerText: 1,
-                },
+            },
+            "-=0.3"
+          );
+
+          tl.to(
+            q(".user-count"),
+            {
+              innerText: 30,
+              duration: 0.5,
+              snap: {
+                innerText: 1,
               },
-              "-=0.3"
-            )
-  
-            tl.to(
-              q(".user-count"),
-              {
-                innerText: 30,
-                duration: 0.5,
-                snap: {
-                  innerText: 1,
-                },
-              },
-              "-=0.3"
-            )
-          },
+            },
+            "-=0.3"
+          );
         },
-      })
-    }, [])
-  
-    // Set Active Session
-    const aboutSectionOnView = useScrollActive(sectionRef)
-    const { setSection } = useSectionStore()
-  
-    useEffect(() => {
-      if (aboutSectionOnView) {
-        setSection("#about")
-      } else {
-        setSection("#home")
-      }
-    }, [aboutSectionOnView, setSection])
+      },
+    });
+  }, []);
+
+  // Set Active Session
+  const aboutSectionOnView = useScrollActive(sectionRef);
+  const { setSection } = useSectionStore();
+
+  useEffect(() => {
+    if (aboutSectionOnView) {
+      setSection("#about");
+    } else {
+      setSection("#home");
+    }
+  }, [aboutSectionOnView, setSection]);
 
   return (
     <section
@@ -120,7 +112,7 @@ export default function AboutSection() {
     >
       <div className="w-full max-w-[1100px] h-full m-auto flex flex-col items-center gap-24">
         <div className="relative title text-xl md:text-4xl tracking-tight font-medium w-fit dark:text-white">
-          Simplicity is the soul of efficiency.
+          Kesederhanaan adalah jiwa dari efisiensi.
           <div className="absolute -right-[10px] top-2">
             <Image
               className="w-14 pointer-events-none select-none"
@@ -134,7 +126,7 @@ export default function AboutSection() {
             <div className="relative">
               <div className="overflow-hidden">
                 <div className="text-animation dark:text-accentColor text-3xl md:text-4xl font-medium">
-                  About me
+                  Tentang Saya
                 </div>
               </div>
 
@@ -157,25 +149,28 @@ export default function AboutSection() {
             <div className="flex flex-col items-start gap-4">
               <div className="overflow-hidden">
                 <div className="dark:text-white text-animation">
-                  With over 2 years of experience as a frontend developer, I
-                  specialize in crafting responsive and user-friendly web
-                  applications. I excel in creating intuitive interfaces and
-                  enjoy working in collaborative, agile environments.
+                  Dengan pengalaman lebih dari 2 tahun sebagai pengembang
+                  Software, saya mengkhususkan diri dalam membuat aplikasi web
+                  yang responsif dan ramah pengguna. Saya ahli dalam menciptakan
+                  antarmuka yang intuitif dan menikmati bekerja di lingkungan
+                  kolaboratif yang gesit.
                 </div>
               </div>
 
               <div className="overflow-hidden">
                 <div className="dark:text-white text-animation">
-                  My Educational background.
+                  Background Edukasi Saya.
                 </div>
               </div>
               <div className="flex gap-1 flex-col items-start">
-                <div className="text-accentColor">NCC Education</div>
+                <div className="text-accentColor">
+                  S1/D4 Politeknik Negeri Jember
+                </div>
                 <div className="overflow-hidden">
                   <div className="dark:text-white text-animation">
-                    Joined Level 3 Program to embark on an enriching educational
-                    journey designed to build a solid foundation in key
-                    subjects.
+                    Bergabung kedalam study informatika dimana mempelajari
+                    berbagai pengembangan software, implementasi jaringan
+                    internet, dan pembuatan project di setiap akhir semester.
                   </div>
                 </div>
               </div>
@@ -184,7 +179,7 @@ export default function AboutSection() {
             <div className="w-full border-t-accentColor py-5 border-b-accentColor border-t-[0.01px] border-b-[0.01px] flex items-center gap-6 md:gap-6 lg:gap-20">
               <div className="flex flex-col items-center">
                 <div className="text-3xl md:text-4xl font-medium dark:text-white">
-                  <span className="experience-count">0</span>{" "}
+                  <span className="experience-count">2</span>{" "}
                   <span className="text-accentColor">+</span>
                 </div>
                 <div className="dark:text-white text-sm">Experiences</div>
@@ -192,7 +187,7 @@ export default function AboutSection() {
 
               <div className="flex flex-col font-medium items-center">
                 <div className="text-3xl md:text-4xl dark:text-white">
-                  <span className="project-count">0</span>{" "}
+                  <span className="project-count">34</span>{" "}
                   <span className="text-accentColor">+</span>
                 </div>
                 <div className="dark:text-white text-sm">
@@ -202,7 +197,7 @@ export default function AboutSection() {
 
               <div className="flex flex-col font-medium items-center">
                 <div className="text-3xl md:text-4xl dark:text-white">
-                  <span className="user-count">0</span>{" "}
+                  <span className="user-count">11</span>{" "}
                   <span className="text-accentColor">+</span>
                 </div>
                 <div className="dark:text-white text-sm">Contributions</div>
@@ -257,7 +252,7 @@ export default function AboutSection() {
         <TechStack />
       </div>
     </section>
-  )
+  );
 }
 
 const TechStack = () => {
@@ -578,5 +573,5 @@ const TechStack = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

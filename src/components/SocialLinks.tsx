@@ -25,7 +25,7 @@ export default function SocialLinks() {
 
       <div className="fixed bottom-0 group flex flex-col gap-2 items-center left-4">
         <Link
-          href={`mailto:${process.env.NEXT_PUBLIC_EMAIL}`}
+          href='https://wa.me/6281331640909'
           style={{
             writingMode: "vertical-lr",
           }}
@@ -39,7 +39,7 @@ export default function SocialLinks() {
 
       <div className="hidden md:block absolute bottom-4 right-4">
         <Link
-          href="#project"
+          href="/maintenance"
           aria-label="project"
           className="flex items-center gap-2 dark:text-gray-400"
         >
@@ -65,8 +65,8 @@ export default function SocialLinks() {
 const socialLinks = [
   {
     id: 1,
-    title: "Shinn Thant's Github Profile",
-    link: "https://github.com/devshinthant",
+    title: "Agung Kurniawan Github Profile",
+    link: "https://github.com/agungkurniawanid",
     svg: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -80,8 +80,8 @@ const socialLinks = [
   },
   {
     id: 2,
-    title: "Shinn Thant's LinkedIn Profile",
-    link: "https://www.linkedin.com/in/shinn-thant-b90533231/",
+    title: "Agung Kurniawan LinkedIn Profile",
+    link: "https://www.linkedin.com/in/agung-k-74530028b",
     svg: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -96,17 +96,20 @@ const socialLinks = [
   },
   {
     id: 3,
-    title: "Check Shinn Thant on Dev.to",
-    link: "https://dev.to/shinnthant2004",
+    title: "Check Agung Kurniawan on Instagram",
+    link: "https://www.instagram.com/agungkurniawan.id?igsh=MWJ5Z3k4d2MzOGl2cg==",
     svg: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
         height="24"
-        className="dark:fill-gray-400  hover:fill-accentColor dark:hover:fill-accentColor"
+        className="dark:fill-gray-400 hover:fill-accentColor dark:hover:fill-accentColor"
+        viewBox="0 0 24 24"
       >
-        <path d="M7.826 10.083a.784.784 0 0 0-.468-.175h-.701v4.198h.701a.786.786 0 0 0 .469-.175c.155-.117.233-.292.233-.525v-2.798c.001-.233-.079-.408-.234-.525zM19.236 3H4.764C3.791 3 3.002 3.787 3 4.76v14.48c.002.973.791 1.76 1.764 1.76h14.473c.973 0 1.762-.787 1.764-1.76V4.76A1.765 1.765 0 0 0 19.236 3zM9.195 13.414c0 .755-.466 1.901-1.942 1.898H5.389V8.665h1.903c1.424 0 1.902 1.144 1.903 1.899v2.85zm4.045-3.562H11.1v1.544h1.309v1.188H11.1v1.543h2.142v1.188h-2.498a.813.813 0 0 1-.833-.792V9.497a.813.813 0 0 1 .792-.832h2.539l-.002 1.187zm4.165 4.632c-.531 1.235-1.481.99-1.906 0l-1.548-5.818h1.309l1.193 4.569 1.188-4.569h1.31l-1.546 5.818z"></path>
+        <path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2 0 2.4.4 3.2 1.1.8.8 1.1 2 1.1 3.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c0 1.2-.4 2.4-1.1 3.2-.8.8-2 1.1-3.2 1.1-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2 0-2.4-.4-3.2-1.1-.8-.8-1.1-2-1.1-3.2-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c0-1.2.4-2.4 1.1-3.2.8-.8 2-1.1 3.2-1.1zm0-2C8.8 0 8.4 0 7.2.1 5.4.1 3.8.5 2.5 1.8.2 3 .1 4.8.1 7.6 0 8.8 0 9.2 0 12c0 2.8 0 3.2.1 4.4.1 2.8.5 4.4 1.8 5.7 1.2 1.2 2.8 1.7 5.7 1.8 1.2 0 .8.1 4.9.1 2.8 0 3.6 0 4.9-.1 2.9-.1 4.5-.5 5.7-1.8 1.2-1.2 1.7-2.8 1.8-5.7.1-1.2.1-1.6.1-4.4s0-3.2-.1-4.4c-.1-2.9-.5-4.5-1.8-5.7-1.2-1.2-2.8-1.7-5.7-1.8C15.6 0 15.2 0 12 0z" />
+        <path d="M12 5.8a6.2 6.2 0 1 0 0 12.4 6.2 6.2 0 0 0 0-12.4zm0 10.1a3.9 3.9 0 1 1 0-7.8 3.9 3.9 0 0 1 0 7.8zm6.7-10.5a1.4 1.4 0 1 1 0 2.8 1.4 1.4 0 0 1 0-2.8z" />
       </svg>
     ),
-  },
+}
+
 ]

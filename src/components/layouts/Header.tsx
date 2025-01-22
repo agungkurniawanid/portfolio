@@ -2,13 +2,13 @@
 
 import { useEffect, useRef } from "react"
 import navlinks from "@/lib/NavConfig" 
-import { cn } from "@/lib/Utils"
 import { useSectionStore } from "@/stores/Section"
 import gsap from "gsap"
 import Link from "next/link"
 import ResumeBtn from "../ResumeButton"
 import ThemeSwitch from "../ThemeSwitch"
 import MobileNav from "./MobileNav"
+import { cn } from "@/lib/Utils"
 
 export default function Header() {
   const headerRef = useRef(null)

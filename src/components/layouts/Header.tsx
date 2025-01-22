@@ -38,9 +38,9 @@ export default function Header() {
                   section === "#project" && "dark:text-black"
                 )}
               >
-                ShinThant
+                AgungKurniawan
               </span>
-              <span className="text-accentColor font-bold">.dev</span>
+              <span className="text-accentColor font-bold text-[#0EBD7A]">.dev</span>
             </Link>
           </div>
           <div className="col-span-4 hidden md:block m-auto">

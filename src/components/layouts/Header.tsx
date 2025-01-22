@@ -40,7 +40,7 @@ export default function Header() {
               >
                 AgungKurniawan
               </span>
-              <span className="text-accentColor font-bold text-[#0EBD7A]">.dev</span>
+              <span className="text-accentColor font-bold text-[#0EBD7A]">.Dev</span>
             </Link>
           </div>
           <div className="col-span-4 hidden md:block m-auto">

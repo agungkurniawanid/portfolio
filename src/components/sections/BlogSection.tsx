@@ -16,16 +16,22 @@ import { RoughNotation } from "react-rough-notation"
 import BlogCard from "../BlogCard"
 
 export default function BlogSection() {
-  gsap.registerPlugin(ScrollTrigger)
-  const sectionRef = useRef(null)
+  gsap.registerPlugin(ScrollTrigger);
 
-  const elementRef = useRef<HTMLDivElement>(null)
-  const isOnScreen = useOnScreen(elementRef)
+  // Fix: Properly type the refs
+  const sectionRef = useRef<HTMLElement>(null);
+  const elementRef = useRef<HTMLDivElement>(null);
+  
+  // Fix: Type assertion for useOnScreen
+  const isOnScreen = useOnScreen(elementRef as React.RefObject<HTMLElement>);
 
   useEffect(() => {
-    const q = gsap.utils.selector(sectionRef)
+    if (!sectionRef.current) return;
 
-    gsap.timeline({
+    const q = gsap.utils.selector(sectionRef);
+    
+    // Create and store the timeline
+    const tl = gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
         scrub: true,
@@ -38,19 +44,27 @@ export default function BlogSection() {
             {
               y: 0,
             }
-          )
+          );
         },
       },
-    })
-  }, [])
+    });
 
-  // Set Active Session
-  const aboutSectionOnView = useScrollActive(sectionRef)
-  const { setSection } = useSectionStore()
+    // Cleanup function
+    return () => {
+      tl.kill();
+      ScrollTrigger.getAll().forEach(t => t.kill());
+    };
+  }, []);
+
+  // Fix: Type assertion for useScrollActive
+  const aboutSectionOnView = useScrollActive(sectionRef as React.RefObject<HTMLElement>);
+  const { setSection } = useSectionStore();
 
   useEffect(() => {
-    aboutSectionOnView && setSection("#blog")
-  }, [aboutSectionOnView, setSection])
+    if (aboutSectionOnView) {
+      setSection("#blog");
+    }
+  }, [aboutSectionOnView, setSection]);
 
   return (
     <section

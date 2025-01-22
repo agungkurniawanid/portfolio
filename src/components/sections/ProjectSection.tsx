@@ -20,15 +20,18 @@ import ImageSix from "@/assets/projects/6.jpeg";
 export default function ProjectSection() {
   gsap.registerPlugin(ScrollTrigger);
 
-  const sectionRef = useRef(null);
-
+  // Fix 1: Properly type the refs
+  const sectionRef = useRef<HTMLElement>(null);
   const elementRef = useRef<HTMLDivElement>(null);
-  const isOnScreen = useOnScreen(elementRef);
+
+  // Fix 2: Make sure useOnScreen accepts the correct type
+  const isOnScreen = useOnScreen(elementRef as React.RefObject<HTMLElement>);
 
   useEffect(() => {
     const q = gsap.utils.selector(sectionRef);
 
-    gsap.timeline({
+    // Fix 3: Add proper type checking for the timeline
+    const timeline = gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
         scrub: true,
@@ -45,14 +48,21 @@ export default function ProjectSection() {
         },
       },
     });
+
+    // Optional: Clean up the timeline on component unmount
+    return () => {
+      timeline.kill();
+    };
   }, []);
 
   // Set Active Session
-  const projectSectionOnView = useScrollActive(sectionRef);
+  const projectSectionOnView = useScrollActive(sectionRef as React.RefObject<HTMLElement>);
   const { setSection } = useSectionStore();
 
   useEffect(() => {
-    projectSectionOnView && setSection("#project");
+    if (projectSectionOnView) {
+      setSection("#project");
+    }
   }, [projectSectionOnView, setSection]);
 
   return (

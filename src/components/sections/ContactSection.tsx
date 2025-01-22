@@ -8,17 +8,23 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
 import Link from "next/link"
 
 export default function ContactSection() {
-  gsap.registerPlugin(ScrollTrigger)
-  const sectionRef = useRef(null)
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Fix: Properly type the ref
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const q = gsap.utils.selector(sectionRef)
+    if (!sectionRef.current) return;
 
-    gsap.timeline({
+    const q = gsap.utils.selector(sectionRef);
+    
+    // Create and store the timeline
+    const tl = gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
         scrub: true,
         onEnter: () => {
+          // First animation
           gsap.fromTo(
             q(".title-animation"),
             {
@@ -27,27 +33,39 @@ export default function ContactSection() {
             {
               y: 0,
             }
-          )
+          );
 
+          // Second animation
           gsap.fromTo(
             q(".end-title"),
-            { scale: 0 },
-            { scale: 1, ease: "back.inOut" }
-          )
+            { 
+              scale: 0 
+            }, 
+            { 
+              scale: 1, 
+              ease: "back.inOut" 
+            }
+          );
         },
       },
-    })
-  }, [])
+    });
 
-  // Set Active Session
+    // Cleanup function
+    return () => {
+      tl.kill();
+      ScrollTrigger.getAll().forEach(t => t.kill());
+    };
+  }, []);
 
-  const contactSectionOnView = useScrollActive(sectionRef)
-
-  const { setSection } = useSectionStore()
+  // Fix: Type assertion for useScrollActive
+  const contactSectionOnView = useScrollActive(sectionRef as React.RefObject<HTMLElement>);
+  const { setSection } = useSectionStore();
 
   useEffect(() => {
-    contactSectionOnView && setSection("#contact")
-  }, [contactSectionOnView, setSection])
+    if (contactSectionOnView) {
+      setSection("#contact");
+    }
+  }, [contactSectionOnView, setSection]);
 
   return (
     <section

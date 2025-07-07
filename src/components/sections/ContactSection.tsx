@@ -70,7 +70,7 @@ export default function ContactSection() {
   return (
     <section
       ref={sectionRef}
-      id="contact"
+      id="contacts"
       className="max-h-max bg-gray-100 dark:bg-[#161D1F] py-[140px] px-10 lg:px-[5%]"
     >
       <div className="w-full max-w-[1100px] h-full m-auto flex flex-col gap-40 items-center">

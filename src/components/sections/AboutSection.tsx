@@ -107,7 +107,7 @@ export default function AboutSection() {
   return (
     <section
       ref={sectionRef}
-      id="about"
+      id="skills"
       className="relative h-full bg-gray-100 dark:bg-[#161D1F] overflow-hidden py-14 px-10 lg:px-[5%]"
     >
       <div className="w-full max-w-[1100px] h-full m-auto flex flex-col items-center gap-24">

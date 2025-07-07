@@ -69,7 +69,7 @@ export default function BlogSection() {
   return (
     <section
       ref={sectionRef}
-      id="blog"
+      id="blogs"
       className="h-full bg-baseBackground py-14 px-10 lg:px-[5%]"
     >
       <div className="w-full max-w-[1100px] h-full m-auto flex flex-col items-center gap-14">

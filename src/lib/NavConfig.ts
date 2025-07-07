@@ -5,23 +5,23 @@ const navlinks = [
     },
     {
         title:"Skills",
-        href:"/maintenance"
+        href:"#skills"
     },
     {
         title:"Projects",
-        href:"/maintenance"
+        href:"#projects"
     },
     {
         title:"Blogs",
-        href:"/maintenance"
+        href:"#blogs"
     },
     {
         title:"Contact",
-        href:"/maintenance"
+        href:"#contact"
     },
     {
         title:"More",
-        href:"/maintenance"
+        href:"#more"
     },
 ]
 

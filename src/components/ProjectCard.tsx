@@ -7,7 +7,6 @@ import Image from "next/image";
 import { Project } from "./sections/ProjectSection";
 import { Code2, FileCode, Github, MonitorSmartphone } from "lucide-react";
 import { getTechIcon } from "./TechIcon";
-import { Youtube } from "iconsax-react";
 import { FaYoutube } from "react-icons/fa";
 
 interface Props {

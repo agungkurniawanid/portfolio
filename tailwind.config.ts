@@ -24,6 +24,7 @@ const config = {
       boxShadow: {
         resume_btn_shadow:
           "0 0 5px hsl(var(--accent-color)), 0 0 25px hsl(var(--accent-color)), 0 0 50px hsl(var(--accent-color)), 0 0 200px hsl(var(--accent-color))",
+          shadow0: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
       },
       colors: {
         accentColor: "hsl(var(--accent-color))",

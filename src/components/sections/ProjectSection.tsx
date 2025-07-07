@@ -10,27 +10,17 @@ import { StaticImageData } from "next/image";
 import Link from "next/link";
 import { RoughNotation } from "react-rough-notation";
 import ProjectCard from "../ProjectCard";
-import ImageOne from "@/assets/projects/1.jpeg";
-import ImageTwo from "@/assets/projects/2.jpeg";
-import ImageTree from "@/assets/projects/3.jpeg";
-import ImageFour from "@/assets/projects/4.jpeg";
-import ImageFive from "@/assets/projects/5.jpeg";
-import ImageSix from "@/assets/projects/6.jpeg";
+import ImageOne from "@/assets/projects/thumbnail_in_progress2.png";
 
 export default function ProjectSection() {
   gsap.registerPlugin(ScrollTrigger);
 
-  // Fix 1: Properly type the refs
   const sectionRef = useRef<HTMLElement>(null);
   const elementRef = useRef<HTMLDivElement>(null);
-
-  // Fix 2: Make sure useOnScreen accepts the correct type
   const isOnScreen = useOnScreen(elementRef as React.RefObject<HTMLElement>);
 
   useEffect(() => {
     const q = gsap.utils.selector(sectionRef);
-
-    // Fix 3: Add proper type checking for the timeline
     const timeline = gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
@@ -48,15 +38,13 @@ export default function ProjectSection() {
         },
       },
     });
-
-    // Optional: Clean up the timeline on component unmount
     return () => {
       timeline.kill();
     };
   }, []);
-
-  // Set Active Session
-  const projectSectionOnView = useScrollActive(sectionRef as React.RefObject<HTMLElement>);
+  const projectSectionOnView = useScrollActive(
+    sectionRef as React.RefObject<HTMLElement>
+  );
   const { setSection } = useSectionStore();
 
   useEffect(() => {
@@ -87,10 +75,10 @@ export default function ProjectSection() {
           <div ref={elementRef} className="overflow-hidden ">
             <div className="qoutes-animation  md:w-full text-center font-medium flex flex-col items-center">
               <div>
-                Desain yang baik itu terlihat jelas. Desain yang hebat itu
+                "Desain yang baik itu terlihat jelas. Desain yang hebat itu
                 transparan.
               </div>
-              <div>Desain bukan untuk filosofi, melainkan untuk kehidupan.</div>
+              <div>Desain bukan untuk filosofi, melainkan untuk kehidupan."</div>
             </div>
           </div>
         </div>
@@ -121,11 +109,14 @@ export interface Project {
   id: number;
   title: string;
   description: string;
-  techStacks: string[];
+  platformApp: string[];
   image: StaticImageData;
-  githubURL: string;
+  githubURL: {
+    [key: string]: string;
+  };
   githubApi: string;
   liveURL: string;
+  technologies: string[];
 }
 
 const projects: Project[] = [
@@ -133,70 +124,156 @@ const projects: Project[] = [
     id: 1,
     title: "Intelligence Quality Air Control System Greenhouse Kopi Nrsery App",
     description:
-      "Menggabungkan Website, Mobile App dan IoT. Proyek ini adalah sebuah sistem kontrol kualitas udara berbasis kecerdasan buatan yang dirancang khusus untuk nursery kopi. Sistem ini bertujuan untuk memonitor, menganalisis, dan mengontrol udara juga diagnosa penyakit kopi melalui mobile app dengan deep learning CNN.",
-    techStacks: ["Laravel", "Flutter"],
+      "Menggabungkan Situs Web, Aplikasi Seluler, dan IoT. Proyek ini merupakan sistem kontrol kualitas udara berbasis kecerdasan buatan yang dirancang khusus untuk pembibitan kopi. Sistem ini bertujuan untuk memantau, menganalisis, dan mengontrol udara serta mendiagnosis penyakit kopi melalui aplikasi seluler dengan deep learning CNN.",
+    platformApp: ["Web App", "Mobile App", "IoT Device"],
     image: ImageOne,
-    githubURL:
-      "https://github.com/agungkurniawanid/mobileapp-intelligence-quality-air-control-system-greenhouse-kopi-nursery-app",
-    liveURL: "/maintenance",
+    githubURL: {
+      web: "https://github.com/agungkurniawanid/kopi_greenhouse_aircontrol_web",
+      mobile:
+        "https://github.com/agungkurniawanid/kopi_greenhouse_aircontrol_app",
+      "model AI":
+        "https://github.com/agungkurniawanid/kopi_greenhouse_aircontrol_coffee_leaf_model",
+      iot: "https://github.com/agungkurniawanid/kopi_greenhouse_aircontrol_iot",
+    },
+    liveURL: "#",
     githubApi: "",
-  },
-  {
-    id: 2,
-    title: "Ecommerce Electro Mart App",
-    description:
-      "Aplikasi E-Commerce untuk penjualan sebuah peralatan elektronik seperti Laptop, Komputer, TV dan lain-lain. Dibuat dengan Flutter untuk mobile app dan Nextjs untuk website app.",
-    techStacks: ["Nextjs", "Flutter"],
-    image: ImageFour,
-    githubURL: "https://github.com/agungkurniawanid/webapp-electro-mart-app",
-    liveURL: "/maintenance",
-    githubApi: "",
-  },
-  {
-    id: 3,
-    title: "Emotional Facecs Classification App",
-    description:
-      "90% Accurate. Sebuah Classification Faces atau wajah dengan membedakan 6 kelas yang didefinisikan pada data dengan menggunakan metode CNN (Convolutional Neural Network)",
-    techStacks: ["Flutter"],
-    image: ImageSix,
-    githubURL:
-      "https://github.com/agungkurniawanid/notebook-cnn-emotional-faces-classification",
-    liveURL: "/maintenance",
-    githubApi: "",
+    technologies: [
+      "Laravel",
+      "Flutter",
+      "Python",
+      "Tensorflow",
+      "FastAPI",
+      "Convolusional Neural Network",
+      "Deep Learning",
+    ],
   },
   {
     id: 4,
-    title: "Marketplace KampSewa: Tempat Sewa & Menyewakan Alat Kamping",
+    title: "Emotional Faces Classification",
     description:
-      "Sebuah aplikasi yang menyediakan tempat penyewaan & sewa peralatan kamping kepada seluruh wilayah yang memungkinkan user dapat saling menyewa dan menyewakan barang campig mereka.",
-    techStacks: ["Laravel", "Flutter"],
-    image: ImageTwo,
-    githubURL:
-      "https://github.com/agungkurniawanid/mobileapp-marketplace-kampsewa",
-    liveURL: "/maintenance",
+      "Sebuah aplikasi yang dibuat untuk memberikan kesimpulan pada foto yang diupload dengan beberapa ekspresi yang akan didapatkan seperti marah, sedih dan lain-lain. Aplikasi ini dibuat dengan Flutter untuk App, Nextjs dan Fast API untuk backend, dan metode deep learning yaitu Convolutional Neural Network.",
+    platformApp: ["Web App", "Mobile App"],
+    image: ImageOne,
+    githubURL: {
+      web: "https://github.com/agungkurniawanid/emotional_faces_classification_web",
+      mobile:
+        "https://github.com/agungkurniawanid/emotional_faces_classification_app",
+    },
+    liveURL: "#",
     githubApi: "",
+    technologies: [
+      "Flutter",
+      "Laravel",
+      "FastAPI",
+      "TailwindCSS",
+      "MySQL",
+      "Python",
+      "Convolutional Neural Network",
+      "Deep Learning",
+      "Tensorflow",
+    ],
+  },
+  {
+    id: 2,
+    title:
+      "Marketplace KampSewa: Jual Beli, Sewa dan Menyewakan Alat Kamping App",
+    description:
+      "Aplikasi yang menyediakan penyewaan & penyewaan peralatan berkemah ke seluruh wilayah yang memungkinkan pengguna untuk saling menyewakan dan menyewakan peralatan berkemah mereka.",
+    platformApp: ["Web App", "Mobile App"],
+    image: ImageOne,
+    githubURL: {
+      web: "https://github.com/agungkurniawanid/marketplace_kampsewa_web",
+      mobile: "https://github.com/agungkurniawanid/marketplace_kampsewa_app",
+    },
+    liveURL: "#",
+    githubApi: "",
+    technologies: ["Laravel", "Flutter", "TailwindCSS", "MySQL", "Midtrans"],
+  },
+  {
+    id: 3,
+    title: "Speech to Speech With AI ElevenLabs App",
+    description:
+      "Sebuah aplikasi di mana pengguna dapat melakukan percakapan dua arah dengan AI, speech to speech dalam aplikasi ini dilakukan secara Real-Time. Dibangun dengan API Gemini dan ElevenLabs AI.",
+    platformApp: ["Mobile App"],
+    image: ImageOne,
+    githubURL: {
+      mobile:
+        "https://github.com/agungkurniawanid/speech_to_speech_ai_evenlabs_app",
+    },
+    liveURL: "#",
+    githubApi: "",
+    technologies: ["Flutter", "Gemini API", "ElevenLabs AI"],
+  },
+  {
+    id: 8,
+    title: "Dapnetwork (Old Version) App",
+    description:
+      "Aplikasi DAPNetwork, yang dikembangkan oleh DAPNetwork, membuat manajemen jaringan internet menjadi mudah. Aplikasi ini mencakup platform seluler bagi staf untuk menangani penagihan dan pemasangan pelanggan baru, dan situs web bagi admin untuk mengelola operasi melalui dasbor yang komprehensif.",
+    platformApp: ["Web App", "Mobile App"],
+    image: ImageOne,
+    githubURL: {
+      webs: "https://github.com/agungkurniawanid/dapnetwork_web",
+      mobile: "https://github.com/agungkurniawanid/dapnetwork_old_app",
+    },
+    liveURL: "#",
+    githubApi: "",
+    technologies: ["Java Native", "PHP Native", "TailwindCSS", "MySQL"],
   },
   {
     id: 5,
-    title: "Dapnetwork App",
+    title: "Clock App",
     description:
-      "Dapnetwork App, yang dikembangkan oleh DAPNetwork, memudahkan manajemen jaringan internet. Ini mencakup platform mobile untuk pegawai yang menangani penagihan dan pemasangan pelanggan baru, serta website untuk admin mengelola operasional melalui dashboard komprehensif.",
-    techStacks: ["PHP", "Java"],
-    image: ImageTree,
-    githubURL:
-      "https://github.com/agungkurniawanid/mobileapp-dapnetwork-app-old",
-    liveURL: "/maintenance",
+      "Clock App adalah aplikasi canggih yang dirancang untuk memberikan pengalaman pengguna terbaik dalam mengelola waktu.",
+    platformApp: ["Mobile App"],
+    image: ImageOne,
+    githubURL: {
+      mobile: "https://github.com/agungkurniawanid/clock_app",
+    },
+    liveURL: "#",
     githubApi: "",
+    technologies: ["Flutter"],
   },
   {
     id: 6,
-    title: "Digital Library App",
+    title: "Electro Mart App",
     description:
-      "DigitalLibrary adalah platform perpustakaan digital yang dirancang untuk memberikan akses mudah ke berbagai e-book dari berbagai genre dan kategori. Dengan antarmuka yang ramah pengguna dan fitur canggih, DigitalLibrary memungkinkan pengguna untuk menjelajahi, membaca, dan mengelola koleksi buku elektronik mereka di satu tempat.",
-    techStacks: ["Nextjs", "Flutter"],
-    image: ImageFive,
-    githubURL: "https://github.com/agungkurniawanid/webapp-digital-library",
-    liveURL: "/maintenance",
+      "Aplikasi E-Commerce untuk menjual peralatan elektronik seperti Laptop, Komputer, TV dan lain-lain. Dibuat dengan Flutter untuk aplikasi mobile dan Nextjs untuk aplikasi website.",
+    platformApp: ["Web App", "Mobile App"],
+    image: ImageOne,
+    githubURL: {
+      web: "https://github.com/agungkurniawanid/electro_mart_web",
+      mobile: "https://github.com/agungkurniawanid/electro_mart_app",
+    },
+    liveURL: "#",
     githubApi: "",
+    technologies: ["Flutter", "Next.js", "MySQL", "TailwindCSS"],
+  },
+  {
+    id: 7,
+    title: "QR Code Reader App",
+    description:
+      "QRCode Reader adalah aplikasi yang memungkinkan pengguna untuk memindai dan membaca kode QR dengan cepat dan efisien. Aplikasi ini mendukung berbagai jenis konten yang dikodekan dalam QR, seperti URL, teks, kontak, dan informasi lainnya.",
+    platformApp: ["Mobile App"],
+    image: ImageOne,
+    githubURL: {
+      mobile: "https://github.com/agungkurniawanid/qrcode_reader_app",
+    },
+    liveURL: "#",
+    githubApi: "",
+    technologies: ["Flutter"],
+  },
+    {
+    id: 9,
+    title: "HandyCraft App",
+    description:
+      "Aplikasi untuk UMKM yang bergerak di bidang usaha kerajinan dan perkakas, aplikasi ini berisi sistem yang dapat mengatur transaksi, keuangan seperti pemasukan dan pengeluaran serta pemasukan dari supplier. Dan integrasi Firebase",
+    platformApp: ["Mobile App"],
+    image: ImageOne,
+    githubURL: {
+      mobile: "https://github.com/agungkurniawanid/handycraft_app",
+    },
+    liveURL: "#",
+    githubApi: "",
+    technologies: ["Flutter"],
   },
 ];

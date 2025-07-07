@@ -57,7 +57,7 @@ export default function AboutSection() {
           tl.fromTo(q(".text-animation"), { y: 100 }, { y: 0 });
 
           tl.to(q(".experience-count"), {
-            innerText: 2,
+            innerText: 4,
             duration: 0.5,
             snap: {
               innerText: 1,
@@ -67,7 +67,7 @@ export default function AboutSection() {
           tl.to(
             q(".project-count"),
             {
-              innerText: 15,
+              innerText: 27,
               duration: 0.5,
               snap: {
                 innerText: 1,
@@ -79,7 +79,7 @@ export default function AboutSection() {
           tl.to(
             q(".user-count"),
             {
-              innerText: 30,
+              innerText: 18,
               duration: 0.5,
               snap: {
                 innerText: 1,
@@ -179,7 +179,7 @@ export default function AboutSection() {
             <div className="w-full border-t-accentColor py-5 border-b-accentColor border-t-[0.01px] border-b-[0.01px] flex items-center gap-6 md:gap-6 lg:gap-20">
               <div className="flex flex-col items-center">
                 <div className="text-3xl md:text-4xl font-medium dark:text-white">
-                  <span className="experience-count">2</span>{" "}
+                  <span className="experience-count">4</span>{" "}
                   <span className="text-accentColor">+</span>
                 </div>
                 <div className="dark:text-white text-sm">Experiences</div>
@@ -187,7 +187,7 @@ export default function AboutSection() {
 
               <div className="flex flex-col font-medium items-center">
                 <div className="text-3xl md:text-4xl dark:text-white">
-                  <span className="project-count">34</span>{" "}
+                  <span className="project-count">27</span>{" "}
                   <span className="text-accentColor">+</span>
                 </div>
                 <div className="dark:text-white text-sm">
@@ -197,7 +197,7 @@ export default function AboutSection() {
 
               <div className="flex flex-col font-medium items-center">
                 <div className="text-3xl md:text-4xl dark:text-white">
-                  <span className="user-count">11</span>{" "}
+                  <span className="user-count">18</span>{" "}
                   <span className="text-accentColor">+</span>
                 </div>
                 <div className="dark:text-white text-sm">Contributions</div>

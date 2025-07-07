@@ -13,7 +13,6 @@ import {
   SiMysql,
   SiPostgresql,
   SiFirebase,
-  SiAndroid,
   SiApacheairflow,
   SiIota,
   SiOpenai,
@@ -35,7 +34,6 @@ import {
   SiVercel,
   SiGooglegemini,
   SiElevenlabs,
-  SiGoogle,
   SiPhp
 } from "react-icons/si";
 

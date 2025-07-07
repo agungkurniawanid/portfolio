@@ -75,10 +75,10 @@ export default function ProjectSection() {
           <div ref={elementRef} className="overflow-hidden ">
             <div className="qoutes-animation  md:w-full text-center font-medium flex flex-col items-center">
               <div>
-                "Desain yang baik itu terlihat jelas. Desain yang hebat itu
+                &quot;Desain yang baik itu terlihat jelas. Desain yang hebat itu
                 transparan.
               </div>
-              <div>Desain bukan untuk filosofi, melainkan untuk kehidupan."</div>
+              <div>Desain bukan untuk filosofi, melainkan untuk kehidupan.&quot;</div>
             </div>
           </div>
         </div>

@@ -323,19 +323,6 @@ export default function SkillsPage() {
         </div>
 
         <div className="relative max-w-[1100px] mx-auto px-[5%] py-16">
-          {/* back button */}
-          <Link
-            href="/"
-            className="back-btn inline-flex items-center gap-2 text-sm text-gray-500 dark:text-white/50
-              hover:text-[#0acf83] dark:hover:text-[#0acf83] transition-colors mb-10 group"
-          >
-            <FaArrowLeft
-              size={12}
-              className="group-hover:-translate-x-0.5 transition-transform"
-            />
-            Back to Home
-          </Link>
-
           {/* title */}
           <div className="hero-title overflow-hidden flex flex-wrap gap-x-3 text-4xl md:text-5xl lg:text-[3.4rem] font-semibold tracking-tight text-gray-900 dark:text-white leading-tight mb-5">
             <span className="inline-block">My</span>

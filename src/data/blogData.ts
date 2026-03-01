@@ -2,137 +2,156 @@ import { Blog } from "@/types/blog"
 
 export const DEVELOPER_BLOGS: Blog[] = [
   {
-    id: "dev-001",
-    title: "Building a Modern Portfolio with Next.js 15 & GSAP",
+    id: "blog-001",
+    title: "Membangun Sistem IoT Cerdas untuk Monitoring Kualitas Udara di Greenhouse",
     excerpt:
-      "A deep dive into how I built this portfolio — from architecture decisions to smooth animations with GSAP and a clean dark/light theme system.",
+      "Bagaimana saya menggabungkan sensor MQ-135, ESP32, FastAPI, dan model Deep Learning CNN untuk memantau dan mengontrol kualitas udara secara real-time di greenhouse pembibitan kopi.",
     content: `
-      <h2>Why Next.js 15?</h2>
-      <p>When I started building my portfolio, I wanted something that felt <strong>fast</strong>, looked great, and showcased my skills as a full-stack developer. Next.js 15 was the obvious choice — with the App Router, Server Components, and built-in image optimization.</p>
-      <h2>The Animation Stack</h2>
-      <p>I went with <strong>GSAP</strong> for animations because it gives fine-grained control. The hero section uses a staggered reveal timeline, and section transitions use ScrollTrigger to tie animation progress directly to scroll position.</p>
-      <blockquote><p>"Good animation is invisible — it guides the eye without demanding attention."</p></blockquote>
-      <h2>Dark / Light Theme</h2>
-      <p>The theme system is powered by <code>next-themes</code>, with CSS custom properties for every color token. Switching themes feels instant because there's no JavaScript color recalculation — just a class swap on <code>&lt;html&gt;</code>.</p>
-      <h2>Tech Stack Summary</h2>
+      <h2>Latar Belakang Proyek</h2>
+      <p>Greenhouse pembibitan kopi membutuhkan kondisi udara yang optimal — kadar CO₂, kelembaban, dan suhu harus dijaga ketat. Saya membangun sistem IoT yang tidak hanya memantau, tetapi juga <strong>secara otomatis mengontrol</strong> kondisi tersebut menggunakan kecerdasan buatan.</p>
+      <h2>Arsitektur Sistem</h2>
+      <p>Sistem ini terdiri dari tiga lapisan utama:</p>
       <ul>
-        <li>Next.js 15 (App Router)</li>
-        <li>TypeScript</li>
-        <li>Tailwind CSS + ShadcnUI</li>
-        <li>GSAP + ScrollTrigger</li>
-        <li>Zustand for state</li>
+        <li><strong>Edge Layer:</strong> Mikrokontroler ESP32 + sensor MQ-135, DHT22, dan kamera OV2640</li>
+        <li><strong>Backend Layer:</strong> FastAPI sebagai API server, mengelola data sensor dan trigger aktuator</li>
+        <li><strong>Intelligence Layer:</strong> Model CNN TensorFlow untuk klasifikasi penyakit daun kopi dari gambar</li>
       </ul>
-      <p>Building this portfolio was an exercise in restraint — keeping it minimal while making every interaction feel intentional.</p>
+      <h2>Deep Learning untuk Diagnosis Penyakit</h2>
+      <p>Model CNN dilatih dengan dataset 3.000+ gambar daun kopi yang dikategorikan: <em>sehat</em>, <em>karat daun</em>, dan <em>bercak daun</em>. Arsitektur yang digunakan adalah MobileNetV2 dengan transfer learning, mencapai akurasi ~94% pada validation set.</p>
+      <pre><code>model = tf.keras.applications.MobileNetV2(
+    input_shape=(224, 224, 3),
+    include_top=False,
+    weights='imagenet'
+)
+model.trainable = False  # freeze base layers</code></pre>
+      <h2>Komunikasi Real-Time dengan MQTT</h2>
+      <p>Data sensor dikirim setiap 5 detik via protokol <strong>MQTT</strong> ke broker Mosquitto yang berjalan di server. FastAPI subscribe ke topik tersebut dan langsung menyimpan ke PostgreSQL sambil mengevaluasi apakah perlu trigger aktuator (kipas, pompa, lampu UV).</p>
+      <blockquote><p>"IoT bukan sekadar menghubungkan perangkat — ini tentang membuat lingkungan fisik menjadi cerdas dan responsif."</p></blockquote>
+      <h2>Hasil & Pelajaran</h2>
+      <p>Sistem berhasil menjaga kualitas udara dalam rentang optimal 95% waktu operasional. Respons aktuator rata-rata di bawah 2 detik sejak sensor mendeteksi anomali. Proyek ini mengajarkan saya pentingnya <strong>edge computing</strong> — tidak semua inferensi harus di cloud.</p>
     `,
     thumbnail:
-      "https://images.unsplash.com/photo-1555066931-4365d14431b9?w=800&q=80",
+      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
     category: "Tutorial",
     author: {
       name: "Agung Kurniawan",
       email: "agung@dev.com",
       type: "developer",
     },
-    publishedAt: "2025-12-01T08:00:00.000Z",
-    readingTime: 7,
-    tags: ["Next.js", "GSAP", "TypeScript"],
+    publishedAt: "2025-11-20T08:00:00.000Z",
+    readingTime: 9,
+    tags: ["IoT", "ESP32", "Deep Learning", "FastAPI", "TensorFlow"],
   },
   {
-    id: "dev-002",
-    title: "Zustand vs Redux: Choosing the Right State Manager in 2025",
+    id: "blog-002",
+    title: "Implementasi CNN untuk Klasifikasi Ekspresi Wajah dengan Flutter",
     excerpt:
-      "A practical comparison of Zustand and Redux Toolkit for modern React apps — when to use each and why I chose Zustand for this project.",
+      "Perjalanan membangun model Deep Learning CNN dari nol hingga deployment di Flutter — mulai dari preprocessing dataset FER2013 hingga optimasi model untuk mobile inference.",
     content: `
-      <h2>The State Management Dilemma</h2>
-      <p>Every non-trivial React app eventually hits the state management question. For years, Redux was the de-facto answer. In 2025, the landscape looks very different.</p>
-      <h2>Zustand: Small but Mighty</h2>
-      <p>Zustand is a <strong>bear-necessities</strong> state library — pun intended. No reducers, no action creators, no boilerplate. Just a store:</p>
-      <pre><code>const useStore = create((set) => ({
-  count: 0,
-  increment: () => set((state) => ({ count: state.count + 1 })),
-}))</code></pre>
-      <p>For my portfolio, Zustand handles the active section state and persists it to localStorage with the <code>persist</code> middleware — 10 lines total.</p>
-      <h2>Redux Toolkit: Power for Complex Apps</h2>
-      <p>RTK is fantastic when you need:</p>
-      <ul>
-        <li>Complex derived state with <strong>RTK Query</strong> for data fetching</li>
-        <li>Time-travel debugging with Redux DevTools</li>
-        <li>Large teams that benefit from enforced patterns</li>
-      </ul>
-      <h2>My Verdict</h2>
-      <p>Use Zustand for personal projects and small-to-medium apps. Reach for RTK when you're building enterprise apps with complex async flows and need the full DevTools experience.</p>
+      <h2>Mengapa Klasifikasi Ekspresi Wajah?</h2>
+      <p>Ekspresi wajah adalah salah satu kanal komunikasi manusia yang paling kaya informasi. Membangun sistem yang bisa mengenali emosi secara otomatis membuka peluang aplikasi di bidang <strong>kesehatan mental</strong>, <strong>UX research</strong>, hingga <strong>keamanan</strong>.</p>
+      <h2>Dataset: FER2013</h2>
+      <p>Dataset FER2013 berisi 35.887 gambar wajah 48×48 piksel grayscale dengan 7 label emosi. Distribusinya tidak seimbang — saya menggunakan kombinasi <strong>class weighting</strong> dan <strong>augmentasi data</strong> untuk mengatasinya.</p>
+      <h2>Arsitektur CNN Custom</h2>
+      <pre><code>model = Sequential([
+    Conv2D(64, (3,3), activation='relu', input_shape=(48,48,1)),
+    BatchNormalization(),
+    MaxPooling2D(2,2),
+    Dropout(0.25),
+    Conv2D(128, (3,3), activation='relu'),
+    Flatten(),
+    Dense(256, activation='relu'),
+    Dropout(0.5),
+    Dense(7, activation='softmax')
+])</code></pre>
+      <h2>Optimasi untuk Mobile (TFLite)</h2>
+      <p>Model ~45MB dikompres menjadi ~11MB menggunakan <strong>quantization-aware training</strong> dengan penurunan akurasi kurang dari 1%. Inferensi on-device rata-rata hanya 34ms pada midrange Android.</p>
+      <blockquote><p>"Model yang akurat di Jupyter Notebook tidak berguna jika tidak bisa berjalan di perangkat pengguna."</p></blockquote>
     `,
     thumbnail:
-      "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&q=80",
+      "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80",
     category: "Technology",
     author: {
       name: "Agung Kurniawan",
       email: "agung@dev.com",
       type: "developer",
     },
-    publishedAt: "2026-01-15T09:00:00.000Z",
-    readingTime: 5,
-    tags: ["React", "State Management", "Zustand"],
+    publishedAt: "2026-01-08T09:00:00.000Z",
+    readingTime: 10,
+    tags: ["Deep Learning", "CNN", "TensorFlow", "Flutter", "Computer Vision"],
   },
   {
-    id: "dev-003",
-    title: "Tailwind CSS Tips That Will Level Up Your UI Game",
+    id: "blog-003",
+    title: "FastAPI + PostgreSQL: Membangun REST API Scalable untuk Aplikasi IoT",
     excerpt:
-      "10 practical Tailwind CSS techniques I use daily — from custom variants to performance tricks that keep your stylesheet lean.",
+      "Panduan lengkap membangun backend API yang mampu menangani ribuan request data sensor per menit menggunakan FastAPI, async SQLAlchemy, dan PostgreSQL dengan connection pooling.",
     content: `
-      <h2>1. Use CSS Custom Properties as Design Tokens</h2>
-      <p>Instead of hardcoding hex values everywhere, define them as CSS variables and map them in your Tailwind config. This enables themes that hot-swap without a single JS color object.</p>
-      <h2>2. Group Variants for Readability</h2>
-      <p>Tailwind's <code>group</code> and <code>peer</code> modifiers are underused. With <code>group-hover</code>, you can trigger child transitions from a parent hover — no JavaScript needed.</p>
-      <h2>3. Arbitrary Values Sparingly</h2>
-      <p>The <code>[value]</code> syntax is powerful but can become a design token graveyard. If you use the same arbitrary value three times, it's time to add it to your theme.</p>
-      <blockquote><p>Consistency beats cleverness in design systems.</p></blockquote>
-      <h2>4. Safelist Critical Classes</h2>
-      <p>If you dynamically construct class names (e.g., from an API), Tailwind's purge will strip them. Use <code>safelist</code> or <code>content</code> array in config to preserve them.</p>
-      <h2>5. Dark Mode with Class Strategy</h2>
-      <p>Use <code>darkMode: 'class'</code> and pair it with <code>next-themes</code> for instant, flicker-free theme switching that respects the user's OS preference.</p>
+      <h2>Kenapa FastAPI untuk IoT Backend?</h2>
+      <p>Ketika membangun backend untuk sistem IoT, ada dua tantangan utama: <strong>throughput tinggi</strong> dan <strong>latensi rendah</strong>. FastAPI dengan async/await adalah jawaban yang tepat.</p>
+      <h2>Async Database dengan SQLAlchemy 2.0</h2>
+      <pre><code>engine = create_async_engine(
+    settings.DATABASE_URL,
+    pool_size=20,
+    max_overflow=10,
+    pool_pre_ping=True,
+)</code></pre>
+      <p>Connection pooling memungkinkan handling 20 koneksi simultan tanpa membuat koneksi baru setiap request — krusial untuk performa IoT backend.</p>
+      <h2>Batch Insert untuk Sensor Data</h2>
+      <p>Daripada menyimpan satu data sensor per request, <strong>batch insert</strong> yang menerima array data meningkatkan throughput 5-8x lipat.</p>
+      <h2>WebSocket untuk Real-Time Dashboard</h2>
+      <p>Dashboard monitoring terhubung via WebSocket dan menerima update data sensor setiap kali data baru masuk — tanpa polling yang boros bandwidth.</p>
+      <blockquote><p>"Batch operations untuk high-frequency data bukan premature optimization, itu fundamental."</p></blockquote>
+      <h2>Hasil Benchmark</h2>
+      <p>Dengan Uvicorn 4 worker + Gunicorn di VPS 2 core, sistem berhasil menangani <strong>1.200 req/s</strong> dengan rata-rata latensi 18ms.</p>
     `,
     thumbnail:
-      "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&q=80",
-    category: "Tips & Tricks",
+      "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=800&q=80",
+    category: "Tutorial",
     author: {
       name: "Agung Kurniawan",
       email: "agung@dev.com",
       type: "developer",
     },
-    publishedAt: "2026-02-10T10:00:00.000Z",
-    readingTime: 4,
-    tags: ["Tailwind CSS", "CSS", "Frontend"],
+    publishedAt: "2026-02-03T10:00:00.000Z",
+    readingTime: 8,
+    tags: ["FastAPI", "PostgreSQL", "Backend", "IoT", "Python"],
   },
   {
-    id: "dev-004",
-    title: "From Figma to Code: My Workflow for Pixel-Perfect UIs",
+    id: "blog-004",
+    title: "Machine Learning di Edge: Menjalankan Model AI di Mikrokontroler ESP32",
     excerpt:
-      "How I bridge the gap between design and development — the tools, naming conventions, and processes that keep my workflow fast and consistent.",
+      "TensorFlow Lite Micro memungkinkan model ML berjalan di ESP32 tanpa koneksi internet. Eksplorasi menjalankan model klasifikasi suara pada mikrokontroler dengan RAM hanya 520KB.",
     content: `
-      <h2>Start with a Design System</h2>
-      <p>Before writing a single line of code, I establish the design tokens: <strong>colors</strong>, <strong>spacing scale</strong>, <strong>typography</strong>, and <strong>shadows</strong>. These map 1:1 to my Tailwind config.</p>
-      <h2>Figma Variables → CSS Custom Properties</h2>
-      <p>Figma Variables (now stable) let you define the same tokens in design that you'll use in code. I export them and paste directly into <code>:root</code> and <code>.dark</code> selectors.</p>
-      <h2>Component-Driven Development</h2>
-      <p>I build in isolation — smallest components first, compose them upward. This prevents "global style creep" where a change in one place breaks three others.</p>
-      <h2>The 8pt Grid</h2>
-      <p>All spacing and sizing decisions are multiples of 8 (or 4 for micro-spacing). Tailwind's default spacing scale is already based on 4, making this effortless.</p>
+      <h2>Apa itu Edge AI?</h2>
+      <p>Edge AI adalah paradigma menjalankan inferensi model machine learning langsung di perangkat edge tanpa bergantung pada cloud. Manfaatnya: <strong>latensi hampir nol</strong>, <strong>privasi data terjaga</strong>, dan <strong>operasi offline</strong>.</p>
+      <h2>Tantangan: Keterbatasan Hardware</h2>
+      <p>ESP32 hanya punya 520KB SRAM dan 4MB flash. Pipeline kompresi yang digunakan:</p>
       <ul>
-        <li>Figma Auto Layout → Tailwind Flexbox/Grid</li>
-        <li>Figma Effects → Tailwind box-shadow utilities</li>
-        <li>Figma Text Styles → Tailwind typography plugin</li>
+        <li><strong>Pruning:</strong> menghapus bobot mendekati nol (~40% parameter)</li>
+        <li><strong>Quantization:</strong> float32 → int8 (4x ukuran lebih kecil)</li>
+        <li><strong>Knowledge Distillation:</strong> melatih model kecil meniru model besar</li>
       </ul>
+      <h2>TensorFlow Lite Micro</h2>
+      <pre><code>constexpr int kTensorArenaSize = 50 * 1024;
+uint8_t tensor_arena[kTensorArenaSize];
+
+tflite::MicroInterpreter interpreter(
+    model, resolver, tensor_arena,
+    kTensorArenaSize, &error_reporter);</code></pre>
+      <h2>Studi Kasus: Wake Word Detection</h2>
+      <p>Model untuk mendeteksi wake word "hey kopi" di greenhouse. Model akhir berukuran <strong>18KB</strong> dan berjalan dengan akurasi 91% pada ESP32 dengan inferensi 23ms.</p>
+      <blockquote><p>"AI tidak harus besar untuk berdampak. Sebuah model 18KB yang berjalan on-device bisa mengubah cara manusia berinteraksi dengan lingkungan fisiknya."</p></blockquote>
     `,
     thumbnail:
-      "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80",
-    category: "Design",
+      "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&q=80",
+    category: "Technology",
     author: {
       name: "Agung Kurniawan",
       email: "agung@dev.com",
       type: "developer",
     },
-    publishedAt: "2026-02-25T08:30:00.000Z",
-    readingTime: 6,
-    tags: ["Figma", "UI/UX", "Design System"],
+    publishedAt: "2026-02-20T08:30:00.000Z",
+    readingTime: 11,
+    tags: ["Machine Learning", "IoT", "ESP32", "TensorFlow Lite", "Edge AI"],
   },
 ]

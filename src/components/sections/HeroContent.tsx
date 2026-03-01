@@ -62,9 +62,9 @@ export default function HeroContent() {
       </div>
 
       <div className="w-[300px] md:w-[370px] relative z-30 text-center text-sm dark:bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-black dark:text-transparent bg-clip-text">
-        Seorang pengembang Software yang penuh semangat dan detail, dengan
-        kemampuan untuk menciptakan antarmuka web yang menarik dan ramah
-        pengguna.
+        Seorang Backend Engineer yang penuh semangat dan berorientasi pada
+        performa, dengan keahlian membangun sistem server-side yang robust,
+        scalable, dan efisien.
       </div>
 
       <div className="bio-animation dark:bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-black dark:text-transparent bg-clip-text text-md md:text-lg text-center md:text-left">

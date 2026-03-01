@@ -590,20 +590,6 @@ export default function ContactPage() {
         </div>
 
         <div className="relative max-w-[1100px] mx-auto px-6 lg:px-[5%] pt-32 pb-20 flex flex-col">
-          {/* Back button */}
-          <div className="mb-10">
-            <Link
-              href="/"
-              className="back-btn inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-accentColor dark:hover:text-accentColor transition-colors group"
-            >
-              <FaArrowLeft
-                size={12}
-                className="transition-transform group-hover:-translate-x-1"
-              />
-              Kembali ke Beranda
-            </Link>
-          </div>
-
           {/* Badge */}
           <div className="mb-6">
             <div className="hero-badge inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-accentColor/30 bg-accentColor/10 text-accentColor text-xs font-semibold">

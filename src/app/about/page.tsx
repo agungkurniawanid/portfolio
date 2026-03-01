@@ -18,7 +18,7 @@ import {
   SiPython, SiPhp, SiTensorflow, SiKeras, SiPytorch, SiScikitlearn,
   SiOpencv, SiFlutter, SiDocker, SiGit, SiGithub, SiLinux, SiVercel,
   SiMongodb, SiMysql, SiPostgresql, SiFirebase, SiRedux, SiOpenai,
-  SiCplusplus,
+  SiCplusplus, SiDjango, SiFlask, SiNestjs, SiExpress,
 } from "react-icons/si";
 import { FaBrain, FaMicrochip } from "react-icons/fa";
 import ProfileImg from "@/assets/SAVE_20221213_123032 (1).jpg";
@@ -54,14 +54,14 @@ const stats = [
 
 const timeline = [
   {
-    year: "2021",
+    year: "2022",
     title: "Lulus SMK & Mulai Coding",
     description: "Baru lulus SMK dan mulai serius belajar pemrograman dari nol. Memulai perjalanan dengan algoritma dan logika dasar.",
     icon: <GraduationCap size={18} />,
     color: "from-blue-500 to-cyan-500",
   },
   {
-    year: "2021",
+    year: "2022",
     title: "Belajar C++ Pertama Kali",
     description: "Teknologi pertama yang dipelajari adalah C++. Belajar fundamental pemrograman: variabel, loop, fungsi, dan OOP dasar.",
     icon: <SiCplusplus size={18} />,
@@ -95,26 +95,76 @@ const timeline = [
     icon: <Star size={18} />,
     color: "from-yellow-500 to-orange-500",
   },
+  {
+    year: "2025",
+    title: "MBKM TEFA – Web Developer",
+    description: "Mengikuti program MBKM TEFA (Teaching Factory) di Jurusan Teknologi Informasi sebagai Web Developer. Mengerjakan proyek nyata berbasis web dalam lingkungan akademik industri.",
+    icon: <Globe size={18} />,
+    color: "from-orange-500 to-red-500",
+  },
+  {
+    year: "2026",
+    title: "Magang di PT BISI International & Charoen Pokphand",
+    description: "Magang karyawan di PT BISI International Tbk dan Charoen Pokphand Group sebagai Mobile App Developer. Mengembangkan aplikasi mobile berbasis Flutter untuk mendukung operasional perusahaan enterprise.",
+    icon: <Briefcase size={18} />,
+    color: "from-red-500 to-pink-500",
+  },
 ];
 
 const experiences = [
   {
-    company: "Soko Financial",
-    position: "Full Stack Developer (Magang)",
-    period: "2023 – 2023",
-    location: "Yogyakarta (Remote)",
-    description: "Mengembangkan fitur-fitur aplikasi keuangan sebagai Full Stack Developer. Berkolaborasi dengan tim remote untuk membangun solusi fintech yang scalable dan secure.",
-    stack: ["React", "Node.js", "Laravel", "MySQL", "Docker"],
+    company: "Charoen Pokphand Indonesia",
+    position: "Information Communication Technology",
+    period: "Oct 2025 – Present",
+    location: "Kediri, East Java, Indonesia · On-site",
+    description: "As an ICT Intern specialized in Mobile Development at Charoen Pokphand Indonesia, I am actively involved in the design, development, and maintenance of mobile applications that support the company's operational efficiency. I collaborate closely with the software engineering team to build user-friendly interfaces, write clean and maintainable code, and ensure seamless application performance across different devices.",
+    stack: ["Flutter", "Firebase"],
     type: "Internship",
   },
   {
-    company: "Freelance / Self-Employed",
-    position: "Backend Engineer",
-    period: "2024 – Sekarang",
-    location: "Banyuwangi (Remote)",
-    description: "Mengerjakan berbagai project backend untuk klien dari berbagai industri. Spesialisasi di API development, database optimization, dan sistem yang scalable.",
-    stack: ["FastAPI", "Node.js", "PostgreSQL", "Docker", "Python"],
-    type: "Full-time",
+    company: "PT. BISI International, Tbk",
+    position: "Mobile Developer",
+    period: "Oct 2025 – Present",
+    location: "Kediri, East Java, Indonesia · On-site",
+    description: "As a Mobile Developer Intern at PT. BISI International, Tbk in Kediri, I contribute to the development of mobile applications designed to streamline agricultural operations and enhance business efficiency. I work closely with the engineering team to build scalable features, optimize application performance, and ensure a seamless user experience for field staff and internal users.",
+    stack: ["Flutter", "Firebase"],
+    type: "Internship",
+  },
+  {
+    company: "CV Dharma Adi Putra",
+    position: "Network Technician",
+    period: "Apr 2020 – Present",
+    location: "Kabupaten Banyuwangi, East Java, Indonesia · Hybrid",
+    description: "As a Network Technician at CV Dharma Adi Putra, I am responsible for the comprehensive maintenance of server and network infrastructure across both office and field environments. I oversee the installation of new network systems tailored to client needs while expertly troubleshooting connectivity issues to ensure stable service. Working within a hybrid system, I manage both on-site operations and remote monitoring.",
+    stack: ["Network Installation", "Network Troubleshooting", "Network Services"],
+    type: "Part-time",
+  },
+  {
+    company: "CV Dharma Adi Putra",
+    position: "Full Stack Developer",
+    period: "Apr 2020 – Oct 2025",
+    location: "Banyuwangi, East Java, Indonesia · Remote",
+    description: "As a Full Stack Developer at CV Dharma Adi Putra, I engineer web and mobile applications that are seamlessly integrated with Mikrotik network infrastructure. I focus on developing specialized solutions for financial management, including automated transaction processing and billing systems.",
+    stack: ["Flutter", "Next.js", "PostgreSQL"],
+    type: "Part-time",
+  },
+  {
+    company: "JTI Innovation Center",
+    position: "Web Developer",
+    period: "Feb 2025 – Jul 2025",
+    location: "Jember, East Java, Indonesia · On-site",
+    description: "As a Web Developer at JTI Innovation Center, I play a key role in developing web-based applications that strictly adhere to client requirements and functional standards. I ensure comprehensive feature implementation across both frontend and backend layers. Leveraging the Laravel framework, I construct efficient, structured, and scalable systems.",
+    stack: ["Laravel", "Next.js"],
+    type: "Contract",
+  },
+  {
+    company: "SOKO FINANCIAL",
+    position: "Full Stack Developer",
+    period: "Jun 2024 – Sep 2024",
+    location: "Yogyakarta, Indonesia · Remote",
+    description: "As a Full Stack Developer Intern at SOKO FINANCIAL, I contributed to the end-to-end development of the company's financial web platform. I was responsible for translating high-fidelity designs from the UI team into functional frontend code while managing complex backend logic on the client side.",
+    stack: ["Laravel", "Tailwind CSS", "JavaScript"],
+    type: "Internship",
   },
 ];
 
@@ -142,6 +192,10 @@ const techStackGroups = [
       { name: "Laravel", icon: <SiLaravel className="text-red-500" />, level: 80 },
       { name: "Python", icon: <SiPython className="text-yellow-400" />, level: 88 },
       { name: "PHP", icon: <SiPhp className="text-indigo-400" />, level: 75 },
+      { name: "Django", icon: <SiDjango className="text-green-700" />, level: 74 },
+      { name: "Flask", icon: <SiFlask className="text-gray-300" />, level: 72 },
+      { name: "NestJS", icon: <SiNestjs className="text-red-500" />, level: 70 },
+      { name: "Express", icon: <SiExpress className="text-gray-400" />, level: 78 },
     ],
   },
   {
@@ -350,17 +404,6 @@ export default function AboutPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white pt-[4.5rem]">
-      {/* ── Back Button ── */}
-      <div className="px-[5%] pt-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-accentColor dark:hover:text-accentColor transition-colors group"
-        >
-          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-          Kembali ke Home
-        </Link>
-      </div>
-
       {/* ══════════════════════════════════════════════ */}
       {/* SECTION 1 — HERO PROFILE                      */}
       {/* ══════════════════════════════════════════════ */}
@@ -596,6 +639,10 @@ export default function AboutPage() {
                       "text-xs font-medium px-2.5 py-0.5 rounded-full",
                       exp.type === "Internship"
                         ? "bg-blue-500/10 text-blue-500 border border-blue-500/20"
+                        : exp.type === "Contract"
+                        ? "bg-purple-500/10 text-purple-500 border border-purple-500/20"
+                        : exp.type === "Part-time"
+                        ? "bg-orange-500/10 text-orange-500 border border-orange-500/20"
                         : "bg-green-500/10 text-green-500 border border-green-500/20"
                     )}>
                       {exp.type}

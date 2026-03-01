@@ -57,7 +57,7 @@ export default function AboutSection() {
           tl.fromTo(q(".text-animation"), { y: 100 }, { y: 0 });
 
           tl.to(q(".experience-count"), {
-            innerText: 4,
+            innerText: 5,
             duration: 0.5,
             snap: {
               innerText: 1,
@@ -67,7 +67,7 @@ export default function AboutSection() {
           tl.to(
             q(".project-count"),
             {
-              innerText: 27,
+              innerText: 49,
               duration: 0.5,
               snap: {
                 innerText: 1,
@@ -79,7 +79,7 @@ export default function AboutSection() {
           tl.to(
             q(".user-count"),
             {
-              innerText: 18,
+              innerText: 24,
               duration: 0.5,
               snap: {
                 innerText: 1,
@@ -169,9 +169,11 @@ export default function AboutSection() {
                 </div>
                 <div className="overflow-hidden">
                   <div className="dark:text-white text-animation">
-                    Bergabung kedalam study informatika dimana mempelajari
-                    berbagai pengembangan software, implementasi jaringan
-                    internet, dan pembuatan project di setiap akhir semester.
+                    Menempuh pendidikan D4 Teknik Informatika yang mencakup
+                    pengembangan Web Apps, Mobile Apps, IoT, AI & Machine
+                    Learning, Deep Learning, serta Jaringan — semuanya
+                    diintegrasikan menjadi satu kesatuan sistem yang utuh
+                    di setiap project akhir semester.
                   </div>
                 </div>
               </div>

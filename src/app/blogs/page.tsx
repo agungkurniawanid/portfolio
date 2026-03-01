@@ -77,14 +77,6 @@ export default function BlogsPage() {
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-accentColor/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
 
         <div className="relative max-w-[1100px] mx-auto">
-          {/* Back link */}
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-accentColor mb-6 transition-colors"
-          >
-            <ArrowLeft size={15} /> Kembali ke Home
-          </Link>
-
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <div className="flex items-center gap-2 mb-3">

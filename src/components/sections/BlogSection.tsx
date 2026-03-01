@@ -3,14 +3,11 @@
 import { useEffect, useRef } from "react"
 import useOnScreen from "@/hooks/UseOnScreen"
 import useScrollActive from "@/hooks/UseScrollActive"
-import ComingSoon1 from "@/assets/blog/2.jpeg"
-import ComingSoon2 from "@/assets/blog/3.jpeg"
-import SpaceCat from "@/assets/blog/1.jpeg"
 import { useSectionStore } from "@/stores/Section"
+import { useBlogStore } from "@/stores/BlogStore"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
 import { ArrowRight } from "iconsax-react"
-import { StaticImageData } from "next/image"
 import Link from "next/link"
 import { RoughNotation } from "react-rough-notation"
 import BlogCard from "../BlogCard"
@@ -21,6 +18,7 @@ export default function BlogSection() {
   // Fix: Properly type the refs
   const sectionRef = useRef<HTMLElement>(null);
   const elementRef = useRef<HTMLDivElement>(null);
+  const { blogs: storeBlogList } = useBlogStore();
   
   // Fix: Type assertion for useOnScreen
   const isOnScreen = useOnScreen(elementRef as React.RefObject<HTMLElement>);
@@ -87,16 +85,16 @@ export default function BlogSection() {
           </RoughNotation>
           <div ref={elementRef} className="overflow-hidden flex flex-col gap-1">
             <div className="qoutes-animation mx-auto text-center text-sm dark:text-white flex flex-col items-center font-normal">
-            Saya mendokumentasikan perjalanan saya dengan menulis postingan blog tentang proyek dan pengalaman saya.
+            Saya mendokumentasikan perjalanan sebagai Backend Engineer — mulai dari arsitektur sistem, optimasi API, hingga eksplorasi AI dan teknologi baru.
             </div>
             <div className="qoutes-animation mx-auto text-center text-sm dark:text-white flex flex-col items-center font-normal">
-              <div>Beberapa blog yang saya buat masih progress. 🚀</div>
+              <div>Beberapa artikel masih dalam proses penulisan. Nantikan tulisan berikutnya! 🚀</div>
             </div>
           </div>
         </div>
 
         <div className="md:w-full pt-4 pb-10 flex flex-col items-start gap-6">
-          {blogs.map((blog) => (
+          {storeBlogList.slice(0, 3).map((blog) => (
             <BlogCard key={blog.id} item={blog} />
           ))}
         </div>
@@ -117,42 +115,3 @@ export default function BlogSection() {
     </section>
   )
 }
-
-export interface Blog {
-  id: number
-  title: string
-  description: string
-  image: StaticImageData
-  publishAt: string
-  link: string
-}
-
-const blogs: Blog[] = [
-  {
-    id: 1,
-    title: "Mengupas Tuntas Teknologi Blockchain: Lebih dari Sekadar Cryptocurrency",
-    description:
-      "Blockchain sering kali dikaitkan dengan cryptocurrency seperti Bitcoin atau Ethereum. Namun, tahukah Anda bahwa teknologi ini memiliki potensi besar di luar dunia keuangan? Dalam artikel ini, kita akan membahas berbagai aplikasi blockchain di dunia nyata, seperti keamanan data, supply chain, hingga voting elektronik.",
-    image: SpaceCat,
-    publishAt: "2025, Januari 22",
-    link: "/maintenance",
-  },
-  {
-    id: 2,
-    title: "Kecerdasan Buatan dalam Kehidupan Sehari-hari: Peluang dan Tantangan",
-    description:
-      "Kecerdasan buatan (AI) bukan lagi sekadar konsep di film fiksi ilmiah. Dari asisten virtual seperti Siri dan Alexa hingga algoritma rekomendasi di Netflix, AI telah menjadi bagian tak terpisahkan dari kehidupan kita. Artikel ini mengeksplorasi bagaimana AI membantu mempermudah aktivitas sehari-hari dan tantangan yang mungkin timbul di masa depan.",
-    image: ComingSoon1,
-    publishAt: "2025, Januari 22",
-    link: "/maintenance",
-  },
-  {
-    id: 2,
-    title: "Masa Depan Internet: Apa itu Web 3.0 dan Bagaimana Ini Akan Mengubah Dunia Digital?",
-    description:
-      "Web 3.0 adalah evolusi internet yang menjanjikan lebih banyak desentralisasi, keamanan, dan kebebasan bagi penggunanya. Dalam artikel ini, Anda akan mempelajari apa itu Web 3.0, perbedaannya dengan Web 2.0, serta teknologi di baliknya seperti blockchain dan decentralized apps (dApps).",
-    image: ComingSoon2,
-    publishAt: "2025, Januari 22",
-    link: "/maintenance",
-  },
-]

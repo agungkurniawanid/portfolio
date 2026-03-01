@@ -8,6 +8,7 @@ import BlogPageCardSkeleton from "@/components/blog/BlogPageCardSkeleton"
 import ArticleModal from "@/components/blog/ArticleModal"
 import { Search, PenSquare, LayoutGrid, List, Rss, ChevronLeft, ChevronRight, AlertTriangle, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/Utils"
+import { useTranslations } from "next-intl"
 
 const CATEGORIES: (BlogCategory | "All")[] = [
   "All",
@@ -24,6 +25,7 @@ const CATEGORIES: (BlogCategory | "All")[] = [
 const ITEMS_PER_PAGE = 9
 
 export default function BlogsPage() {
+  const t = useTranslations("blogsPage")
   const { blogs, fetchBlogs } = useBlogStore()
   const [search, setSearch] = useState("")
   const [activeCategory, setActiveCategory] = useState<BlogCategory | "All">("All")
@@ -71,15 +73,15 @@ export default function BlogsPage() {
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <Rss size={18} className="text-accentColor" />
-                  <span className="text-accentColor text-sm font-medium">Blog & Artikel</span>
+                  <span className="text-accentColor text-sm font-medium">{t("label")}</span>
                 </div>
                 <h1 className="text-4xl md:text-5xl font-bold dark:text-white leading-tight">
-                  Pikiran,{" "}
-                  <span className="text-accentColor">Pengalaman</span>
-                  <br />& Ide Seputar Tech
+                  {t("title1")}{" "}
+                  <span className="text-accentColor">{t("title_accent")}</span>
+                  <br />{t("title2")}
                 </h1>
                 <p className="mt-4 text-gray-600 dark:text-gray-400 max-w-xl leading-relaxed">
-                  Temukan artikel tentang pengembangan web, tips programming, tutorial, dan cerita dari developer maupun pengunjung komunitas ini.
+                  {t("description")}
                 </p>
                 {/* Stat placeholders */}
                 <div className="flex items-center gap-4 mt-4">
@@ -93,7 +95,7 @@ export default function BlogsPage() {
                 className="flex items-center gap-2 px-5 py-2.5 bg-accentColor/50 text-white rounded-xl font-medium shrink-0 self-start md:self-auto cursor-not-allowed"
               >
                 <PenSquare size={16} />
-                Tulis Artikel
+                {t("write_article")}
               </button>
             </div>
             {/* Search placeholder */}
@@ -137,20 +139,20 @@ export default function BlogsPage() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Rss size={18} className="text-accentColor" />
-                <span className="text-accentColor text-sm font-medium">Blog & Artikel</span>
+                <span className="text-accentColor text-sm font-medium">{t("label")}</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-bold dark:text-white leading-tight">
-                Pikiran,{" "}
-                <span className="text-accentColor">Pengalaman</span>
-                <br />& Ide Seputar Tech
+                {t("title1")}{" "}
+                <span className="text-accentColor">{t("title_accent")}</span>
+                <br />{t("title2")}
               </h1>
               <p className="mt-4 text-gray-600 dark:text-gray-400 max-w-xl leading-relaxed">
-                Temukan artikel tentang pengembangan web, tips programming, tutorial, dan cerita dari developer maupun pengunjung komunitas ini.
+                {t("description")}
               </p>
               <div className="flex items-center gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
-                <span>{blogs.length} artikel</span>
+                <span>{blogs.length} {t("articles_count")}</span>
                 <span className="w-1 h-1 bg-gray-400 rounded-full" />
-                <span>{blogs.filter((b) => b.author.type === "visitor").length} dari komunitas</span>
+                <span>{blogs.filter((b) => b.author.type === "visitor").length} {t("community_count")}</span>
               </div>
             </div>
 
@@ -159,7 +161,7 @@ export default function BlogsPage() {
               className="flex items-center gap-2 px-5 py-2.5 bg-accentColor text-white rounded-xl font-medium hover:brightness-[0.85] transition-all hover:shadow-lg hover:shadow-accentColor/20 shrink-0 self-start md:self-auto"
             >
               <PenSquare size={16} />
-              Tulis Artikel
+              {t("write_article")}
             </button>
           </div>
 
@@ -170,7 +172,7 @@ export default function BlogsPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari artikel berdasarkan judul, konten, atau penulis..."
+              placeholder={t("search_placeholder")}
               className="w-full pl-11 pr-4 py-3 text-sm rounded-xl border border-gray-200 dark:border-gray-700/60 bg-white dark:bg-gray-800/50 dark:text-white outline-none focus:border-accentColor shadow-sm transition-colors"
             />
             {search && (
@@ -194,14 +196,14 @@ export default function BlogsPage() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1 flex items-center gap-2 flex-wrap">
-              Blog Komunitas Terbuka
+              {t("banner_title")}
               <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-700/60 text-amber-800 dark:text-amber-200">
                 <ShieldCheck className="w-3 h-3" />
-                Disclaimer
+                {t("banner_disclaimer")}
               </span>
             </p>
             <p className="text-xs text-amber-700/90 dark:text-amber-400/90 leading-relaxed">
-              Artikel di halaman ini <span className="font-semibold">dapat ditulis oleh siapa saja</span>, termasuk pengunjung. Jika kamu menemukan konten yang mengandung unsur pornografi, kekerasan, atau hal-hal yang tidak pantas — itu <span className="font-semibold">bukan</span> dari Developer (<span className="font-semibold">Agung Kurniawan</span>). Sarkas, meme, dan humor ringan diperbolehkan selama tidak berbau pornografi atau menyinggung SARA. Bijaklah dalam menulis. 🙏
+              {t("banner_p1")} <span className="font-semibold">{t("banner_p1_bold")}</span>{t("banner_p2")} <span className="font-semibold">{t("banner_p2_bold")}</span> {t("banner_p3")}<span className="font-semibold">Agung Kurniawan</span>{t("banner_p4")}
             </p>
           </div>
         </div>
@@ -256,15 +258,15 @@ export default function BlogsPage() {
         {/* Results count */}
         {search || activeCategory !== "All" ? (
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-            {filtered.length} artikel ditemukan
+            {filtered.length} {t("results_found")}
             {search && (
               <span>
-                {" "}untuk &quot;<strong className="text-gray-700 dark:text-gray-300">{search}</strong>&quot;
+                {" "}{t("results_for")} &quot;<strong className="text-gray-700 dark:text-gray-300">{search}</strong>&quot;
               </span>
             )}
             {activeCategory !== "All" && (
               <span>
-                {" "}dalam kategori{" "}
+                {" "}{t("results_in_category")}{" "}
                 <strong className="text-accentColor">{activeCategory}</strong>
               </span>
             )}
@@ -275,15 +277,15 @@ export default function BlogsPage() {
         {paginated.length === 0 ? (
           <div className="flex flex-col items-center py-20 text-center">
             <div className="text-5xl mb-4">📭</div>
-            <h3 className="text-lg font-semibold dark:text-white mb-2">Tidak ada artikel ditemukan</h3>
+            <h3 className="text-lg font-semibold dark:text-white mb-2">{t("no_articles_title")}</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Coba ubah kata kunci atau kategori pencarian
+              {t("no_articles_desc")}
             </p>
             <button
               onClick={() => { setSearch(""); setActiveCategory("All") }}
               className="mt-4 px-4 py-2 text-sm text-accentColor border border-accentColor rounded-lg hover:bg-accentColor/10 transition-colors"
             >
-              Reset Filter
+              {t("reset_filter")}
             </button>
           </div>
         ) : view === "grid" ? (

@@ -13,10 +13,12 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
 import Image from "next/image";
 import SplitType from "split-type";
 import { useTranslations } from "next-intl";
+import { useLanguageStore } from "@/stores/LanguageStore";
 
 export default function AboutSection() {
   gsap.registerPlugin(ScrollTrigger);
   const t = useTranslations("about");
+  const { locale } = useLanguageStore();
 
   // Menginisialisasi sectionRef dengan tipe HTMLElement dan memberi tahu TypeScript bahwa ini tidak akan null
   const sectionRef = useRef<HTMLElement>(null!);
@@ -24,13 +26,15 @@ export default function AboutSection() {
   useEffect(() => {
     const q = gsap.utils.selector(sectionRef);
 
-    // Tidak perlu lagi memeriksa null karena kita memberi tahu TypeScript bahwa ini tidak akan null
-    new SplitType(q(".title"), {
-      types: "chars",
-      tagName: "span",
+    // Re-split title text whenever locale changes
+    const splitInstances = q(".title").map((el: HTMLElement) => {
+      return new SplitType(el, {
+        types: "chars",
+        tagName: "span",
+      });
     });
 
-    gsap.from(q(".title .char"), {
+    const titleTrigger = gsap.from(q(".title .char"), {
       opacity: 0.3,
       duration: 0.5,
       ease: "power1.out",
@@ -92,7 +96,12 @@ export default function AboutSection() {
         },
       },
     });
-  }, []);
+
+    return () => {
+      titleTrigger.scrollTrigger?.kill();
+      splitInstances.forEach((instance: SplitType) => instance.revert());
+    };
+  }, [locale]);
 
   // Set Active Session
   const aboutSectionOnView = useScrollActive(sectionRef);
@@ -113,7 +122,7 @@ export default function AboutSection() {
       className="relative h-full bg-gray-100 dark:bg-[#161D1F] overflow-hidden py-14 px-10 lg:px-[5%]"
     >
       <div className="w-full max-w-[1100px] h-full m-auto flex flex-col items-center gap-24">
-        <div className="relative title text-xl md:text-4xl tracking-tight font-medium w-fit dark:text-white">
+        <div key={locale} className="relative title text-xl md:text-4xl tracking-tight font-medium w-fit dark:text-white">
           {t("quote")}
           <div className="absolute -right-[10px] top-2">
             <Image

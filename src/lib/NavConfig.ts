@@ -28,7 +28,7 @@ const navlinks: NavLink[] = [
     icon: MoreHorizontal,
     subMenu: [
       { title: "Gallery", href: "/gallery", icon: ImageIcon, description: "Koleksi foto & media" },
-      { title: "Contact & Media", href: "/contact", icon: Mail, description: "Hubungi & media sosial" },
+      { title: "Media Social", href: "/contact", icon: Mail, description: "Hubungi & media sosial" },
       { title: "Certificate", href: "/certificate", icon: Award, description: "Sertifikat & pencapaian" },
       { title: "Entertainment", href: "/entertainment", icon: Gamepad2, description: "Movie, Game, Hiburan" },
       { title: "Timeline", href: "/timeline", icon: History, description: "Perjalanan karir & pendidikan" },

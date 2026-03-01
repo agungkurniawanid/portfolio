@@ -22,6 +22,8 @@ import {
 } from "react-icons/si";
 import ProfileImg from "@/assets/SAVE_20221213_123032 (1).jpg";
 import { cn } from "@/lib/Utils";
+import { useTranslations } from "next-intl";
+import { useLanguageStore } from "@/stores/LanguageStore";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -44,70 +46,23 @@ function useInView(threshold = 0.15) {
 
 /* ─────────────────────────── data ─────────────────────────── */
 
-const stats = [
-  { label: "Projects Selesai", value: 50, suffix: "+", icon: <Code2 size={22} /> },
-  { label: "Tahun Coding", value: 4, suffix: "+", icon: <Calendar size={22} /> },
-  { label: "Teknologi Dikuasai", value: 30, suffix: "+", icon: <Cpu size={22} /> },
-  { label: "Sertifikat", value: 8, suffix: "+", icon: <Award size={22} /> },
+/* Static scaffold — labels are injected with t() inside the component */
+const STATS_STATIC = [
+  { value: 50, suffix: "+", icon: <Code2 size={22} /> },
+  { value: 4,  suffix: "+", icon: <Calendar size={22} /> },
+  { value: 30, suffix: "+", icon: <Cpu size={22} /> },
+  { value: 8,  suffix: "+", icon: <Award size={22} /> },
 ];
 
-const timeline = [
-  {
-    year: "2022",
-    title: "Lulus SMK & Mulai Coding",
-    description: "Baru lulus SMK dan mulai serius belajar pemrograman dari nol. Memulai perjalanan dengan algoritma dan logika dasar.",
-    icon: <GraduationCap size={18} />,
-    color: "from-blue-500 to-cyan-500",
-  },
-  {
-    year: "2022",
-    title: "Belajar C++ Pertama Kali",
-    description: "Teknologi pertama yang dipelajari adalah C++. Belajar fundamental pemrograman: variabel, loop, fungsi, dan OOP dasar.",
-    icon: <SiCplusplus size={18} />,
-    color: "from-cyan-500 to-teal-500",
-  },
-  {
-    year: "2022",
-    title: "Project Pertama: Aplikasi Kasir Laundry",
-    description: "Berhasil membuat aplikasi kasir untuk laundry sebagai project pertama yang nyata. Pengalaman pertama membuat software yang berguna.",
-    icon: <Code2 size={18} />,
-    color: "from-teal-500 to-green-500",
-  },
-  {
-    year: "2022",
-    title: "Bootcamp Decoding",
-    description: "Mengikuti bootcamp intensif di Decoding. Memperdalam web development modern, belajar ekosistem JavaScript secara menyeluruh.",
-    icon: <Rocket size={18} />,
-    color: "from-green-500 to-emerald-500",
-  },
-  {
-    year: "2023",
-    title: "Magang di Soko Financial Jogja",
-    description: "Magang sebagai Full Stack Developer Remote di Soko Financial, Yogyakarta. Pengalaman profesional pertama di startup fintech.",
-    icon: <Briefcase size={18} />,
-    color: "from-emerald-500 to-accentColor",
-  },
-  {
-    year: "2024",
-    title: "Juara 3 Web Design Nasional",
-    description: "Memenangkan Juara 3 Lomba Web Design Nasional yang diadakan oleh UKM Linux Universitas Jember. Pencapaian kompetitif yang membanggakan.",
-    icon: <Star size={18} />,
-    color: "from-yellow-500 to-orange-500",
-  },
-  {
-    year: "2025",
-    title: "MBKM TEFA – Web Developer",
-    description: "Mengikuti program MBKM TEFA (Teaching Factory) di Jurusan Teknologi Informasi sebagai Web Developer. Mengerjakan proyek nyata berbasis web dalam lingkungan akademik industri.",
-    icon: <Globe size={18} />,
-    color: "from-orange-500 to-red-500",
-  },
-  {
-    year: "2026",
-    title: "Magang di PT BISI International & Charoen Pokphand",
-    description: "Magang karyawan di PT BISI International Tbk dan Charoen Pokphand Group sebagai Mobile App Developer. Mengembangkan aplikasi mobile berbasis Flutter untuk mendukung operasional perusahaan enterprise.",
-    icon: <Briefcase size={18} />,
-    color: "from-red-500 to-pink-500",
-  },
+const TIMELINE_STATIC = [
+  { year: "2022", icon: <GraduationCap size={18} />, color: "from-blue-500 to-cyan-500" },
+  { year: "2022", icon: <SiCplusplus size={18} />,  color: "from-cyan-500 to-teal-500" },
+  { year: "2022", icon: <Code2 size={18} />,        color: "from-teal-500 to-green-500" },
+  { year: "2022", icon: <Rocket size={18} />,       color: "from-green-500 to-emerald-500" },
+  { year: "2023", icon: <Briefcase size={18} />,    color: "from-emerald-500 to-accentColor" },
+  { year: "2024", icon: <Star size={18} />,         color: "from-yellow-500 to-orange-500" },
+  { year: "2025", icon: <Globe size={18} />,        color: "from-orange-500 to-red-500" },
+  { year: "2026", icon: <Briefcase size={18} />,    color: "from-red-500 to-pink-500" },
 ];
 
 const experiences = [
@@ -233,74 +188,35 @@ const techStackGroups = [
   },
 ];
 
-const softSkills = [
-  { icon: <Brain size={28} />, label: "Problem Solving", desc: "Mengurai masalah kompleks menjadi solusi yang efisien dan terstruktur.", color: "from-blue-500 to-cyan-500" },
-  { icon: <Users size={28} />, label: "Team Collaboration", desc: "Bekerja efektif dalam tim, menghargai setiap kontribusi dan sudut pandang.", color: "from-green-500 to-emerald-500" },
-  { icon: <Zap size={28} />, label: "Fast Learner", desc: "Cepat beradaptasi dengan teknologi dan konsep baru yang terus berkembang.", color: "from-yellow-500 to-orange-500" },
-  { icon: <MessageSquare size={28} />, label: "Communication", desc: "Menyampaikan ide teknis dengan jelas kepada tim maupun stakeholder non-teknis.", color: "from-purple-500 to-pink-500" },
-  { icon: <Palette size={28} />, label: "Creative Thinking", desc: "Menciptakan solusi inovatif dengan pendekatan kreatif di luar kebiasaan.", color: "from-pink-500 to-rose-500" },
-  { icon: <Clock size={28} />, label: "Time Management", desc: "Mengelola waktu dan prioritas dengan baik untuk memenuhi deadline dengan kualitas terjaga.", color: "from-teal-500 to-cyan-500" },
+const SOFT_SKILLS_STATIC = [
+  { icon: <Brain size={28} />,        label: "Problem Solving",    color: "from-blue-500 to-cyan-500" },
+  { icon: <Users size={28} />,        label: "Team Collaboration", color: "from-green-500 to-emerald-500" },
+  { icon: <Zap size={28} />,          label: "Fast Learner",       color: "from-yellow-500 to-orange-500" },
+  { icon: <MessageSquare size={28} />,label: "Communication",      color: "from-purple-500 to-pink-500" },
+  { icon: <Palette size={28} />,      label: "Creative Thinking",  color: "from-pink-500 to-rose-500" },
+  { icon: <Clock size={28} />,        label: "Time Management",    color: "from-teal-500 to-cyan-500" },
 ];
 
-const goals = [
-  {
-    type: "short",
-    title: "Tujuan Jangka Pendek (1 Tahun)",
-    icon: <Target size={22} />,
-    color: "from-blue-500 to-cyan-500",
-    items: [
-      "Menguasai Bahasa Inggris hingga level conversational yang lancar",
-      "Memperdalam Bahasa Jerman hingga level B1",
-      "Mendapatkan sertifikasi internasional di bidang backend atau cloud",
-      "Berkontribusi aktif di project open-source",
-    ],
-  },
-  {
-    type: "long",
-    title: "Tujuan Jangka Panjang (3–5 Tahun)",
-    icon: <Rocket size={22} />,
-    color: "from-emerald-500 to-teal-500",
-    items: [
-      "Bekerja di luar negeri (Jerman, Jepang, Australia, Switzerland, atau Kuwait)",
-      "Menjadi Senior Engineer yang diakui secara global",
-      "Membangun startup atau produk digital yang berdampak nyata",
-      "Menguasai bidang Mechanical Engineering sebagai lintas disiplin",
-    ],
-  },
-  {
-    type: "vision",
-    title: "Visi Karir",
-    icon: <Lightbulb size={22} />,
-    color: "from-yellow-500 to-orange-500",
-    items: [
-      "Menjadi engineer yang bisa menjembatani dunia software dan hardware",
-      "Mengeksplorasi transisi dari IT Engineer ke Mechanical Engineer",
-      "Berkontribusi pada teknologi yang membantu kehidupan manusia",
-      "Menginspirasi generasi developer muda dari Indonesia",
-    ],
-  },
+const GOALS_STATIC = [
+  { type: "short",  icon: <Target size={22} />,   color: "from-blue-500 to-cyan-500" },
+  { type: "long",   icon: <Rocket size={22} />,   color: "from-emerald-500 to-teal-500" },
+  { type: "vision", icon: <Lightbulb size={22} />, color: "from-yellow-500 to-orange-500" },
 ];
 
-const hobbies = [
-  { icon: <Gamepad2 size={32} />, label: "Gaming", desc: "Menghabiskan waktu senggang dengan game strategi dan RPG.", color: "from-purple-500 to-indigo-500" },
-  { icon: <Music size={32} />, label: "Music", desc: "Mendengarkan berbagai genre musik, dari lo-fi hingga metal.", color: "from-pink-500 to-rose-500" },
-  { icon: <Cat size={32} />, label: "Cats", desc: "Pecinta kucing sejati, selalu menyapa kucing yang ditemui.", color: "from-orange-400 to-yellow-400" },
-  { icon: <Camera size={32} />, label: "Photography", desc: "Mengabadikan momen istimewa dan estetika alam sekitar.", color: "from-teal-500 to-cyan-500" },
-  { icon: <Code2 size={32} />, label: "Coding", desc: "Hobi sekaligus pekerjaan, coding tetap menyenangkan di waktu luang.", color: "from-green-500 to-emerald-500" },
-  { icon: <Coffee size={32} />, label: "Coffee", desc: "Ritual pagi dengan kopi, energi utama sebelum mulai ngoding.", color: "from-amber-600 to-yellow-500" },
-  { icon: <BookOpen size={32} />, label: "Reading", desc: "Membaca buku teknologi, psikologi, dan pengembangan diri.", color: "from-blue-500 to-violet-500" },
-  { icon: <Brain size={32} />, label: "Explore Tech", desc: "Selalu eksplor teknologi baru dan tren industri terkini.", color: "from-cyan-500 to-blue-500" },
+const HOBBIES_STATIC = [
+  { icon: <Gamepad2 size={32} />, label: "Gaming",       color: "from-purple-500 to-indigo-500" },
+  { icon: <Music size={32} />,    label: "Music",        color: "from-pink-500 to-rose-500" },
+  { icon: <Cat size={32} />,      label: "Cats",         color: "from-orange-400 to-yellow-400" },
+  { icon: <Camera size={32} />,   label: "Photography",  color: "from-teal-500 to-cyan-500" },
+  { icon: <Code2 size={32} />,    label: "Coding",       color: "from-green-500 to-emerald-500" },
+  { icon: <Coffee size={32} />,   label: "Coffee",       color: "from-amber-600 to-yellow-500" },
+  { icon: <BookOpen size={32} />, label: "Reading",      color: "from-blue-500 to-violet-500" },
+  { icon: <Brain size={32} />,    label: "Explore Tech", color: "from-cyan-500 to-blue-500" },
 ];
 
-const funFacts = [
-  { num: "01", fact: "Saya bisa coding sambil dengerin musik 6 jam non-stop tanpa sadar waktu berlalu." },
-  { num: "02", fact: "Bahasa pertama yang dipelajari adalah C++, bukan HTML/CSS seperti kebanyakan orang." },
-  { num: "03", fact: "Saya sering debug sambil ngobrol dengan kucing peliharaan — surprisingly efektif!" },
-  { num: "04", fact: "Punya target untuk bisa tinggal dan kerja di minimal 2 negara berbeda sebelum umur 30." },
-  { num: "05", fact: "Terminal gelap dan font monospace adalah setup coding favorit — keindahan tersendiri." },
-  { num: "06", fact: "Ingin belajar Mechanical Engineering sebagai second skill — dari software ke hardware." },
-  { num: "07", fact: "Kopi hitam tanpa gula adalah teman setia setiap sesi coding marathon." },
-  { num: "08", fact: "Masih ingat betul perasaan excited saat program pertama berhasil dijalankan di terminal." },
+const FUNFACTS_STATIC = [
+  { num: "01" }, { num: "02" }, { num: "03" }, { num: "04" },
+  { num: "05" }, { num: "06" }, { num: "07" }, { num: "08" },
 ];
 
 const quotes = [
@@ -375,20 +291,66 @@ function AnimatedCounter({ target, suffix }: { target: number; suffix: string })
 /* ─────────────────────────── page ─────────────────────────── */
 
 export default function AboutPage() {
+  const t = useTranslations("aboutPage");
+  const { locale } = useLanguageStore();
+
+  // Build translated data inside component so they update with locale
+  const stats = STATS_STATIC.map((s, i) => ({ ...s, label: t(`stat_${i}` as never) }));
+
+  const timeline = TIMELINE_STATIC.map((item, i) => ({
+    ...item,
+    title: t(`journey_${i}_title` as never),
+    description: t(`journey_${i}_desc` as never),
+  }));
+
+  const softSkills = SOFT_SKILLS_STATIC.map((s, i) => ({
+    ...s,
+    desc: t(`soft_${i}_desc` as never),
+  }));
+
+  const goals = [
+    {
+      ...GOALS_STATIC[0],
+      title: t("goal_short_title"),
+      items: [t("goal_short_0"), t("goal_short_1"), t("goal_short_2"), t("goal_short_3")],
+    },
+    {
+      ...GOALS_STATIC[1],
+      title: t("goal_long_title"),
+      items: [t("goal_long_0"), t("goal_long_1"), t("goal_long_2"), t("goal_long_3")],
+    },
+    {
+      ...GOALS_STATIC[2],
+      title: t("goal_vision_title"),
+      items: [t("goal_vision_0"), t("goal_vision_1"), t("goal_vision_2"), t("goal_vision_3")],
+    },
+  ];
+
+  const hobbies = HOBBIES_STATIC.map((h, i) => ({
+    ...h,
+    desc: t(`hobby_${i}_desc` as never),
+  }));
+
+  const funFacts = FUNFACTS_STATIC.map((f, i) => ({
+    ...f,
+    fact: t(`fact_${i}` as never),
+  }));
+
   const heroRef = useRef<HTMLDivElement>(null);
   const [typedText, setTypedText] = useState("");
-  const tagline = "Full Stack Developer & Backend Engineer";
 
-  // Typing animation
+  // Typing animation — resets on locale change
   useEffect(() => {
+    setTypedText("");
     let i = 0;
+    const taglineStr = t("tagline");
     const interval = setInterval(() => {
-      setTypedText(tagline.slice(0, i + 1));
+      setTypedText(taglineStr.slice(0, i + 1));
       i++;
-      if (i >= tagline.length) clearInterval(interval);
+      if (i >= taglineStr.length) clearInterval(interval);
     }, 50);
     return () => clearInterval(interval);
-  }, []);
+  }, [locale]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Hero entrance animation
   useEffect(() => {
@@ -428,7 +390,7 @@ export default function AboutPage() {
                 {/* Online badge */}
                 <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-white dark:bg-gray-900 text-xs font-medium px-3 py-1.5 rounded-full shadow-lg border border-gray-200 dark:border-gray-700">
                   <span className="w-2 h-2 rounded-full bg-accentColor animate-pulse" />
-                  <span className="text-gray-700 dark:text-gray-300">Open to Collaboration</span>
+                  <span className="text-gray-700 dark:text-gray-300">{t("badge_open")}</span>
                 </div>
               </div>
             </div>
@@ -437,7 +399,7 @@ export default function AboutPage() {
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left gap-4 flex-1">
               <div className="hero-el">
                 <span className="text-xs font-semibold tracking-widest uppercase text-accentColor bg-accentColor/10 px-4 py-1.5 rounded-full">
-                  👋 Hello, I&apos;m
+                  {t("hello")}
                 </span>
               </div>
               <h1 className="hero-el text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight">
@@ -453,23 +415,22 @@ export default function AboutPage() {
                 </p>
               </div>
               <p className="hero-el text-gray-500 dark:text-gray-400 max-w-lg leading-relaxed">
-                Seorang developer muda dari Banyuwangi yang passionate di dunia teknologi. 
-                Spesialisasi di backend engineering dengan keingintahuan yang besar terhadap berbagai aspek teknologi modern.
+                {t("hero_bio")}
               </p>
 
               {/* Status badges */}
               <div className="hero-el flex flex-wrap gap-2 justify-center lg:justify-start">
                 <span className="flex items-center gap-1.5 text-xs font-medium bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 px-3 py-1.5 rounded-full">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                  Backend Engineer
+                  {t("badge_role")}
                 </span>
                 <span className="flex items-center gap-1.5 text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 px-3 py-1.5 rounded-full">
                   <MapPin size={11} />
-                  Banyuwangi, Jawa Timur
+                  {t("badge_location")}
                 </span>
                 <span className="flex items-center gap-1.5 text-xs font-medium bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 px-3 py-1.5 rounded-full">
                   <GraduationCap size={11} />
-                  D4 Teknik Informatika
+                  {t("badge_edu")}
                 </span>
               </div>
 
@@ -481,14 +442,14 @@ export default function AboutPage() {
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accentColor text-white font-semibold text-sm shadow-[0_0_20px_rgba(14,189,122,0.4)] hover:shadow-[0_0_30px_rgba(14,189,122,0.6)] hover:scale-105 transition-all duration-200"
                 >
                   <Download size={16} />
-                  Download CV
+                  {t("btn_cv")}
                 </a>
                 <Link
                   href="/contact"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-accentColor/40 text-accentColor font-semibold text-sm hover:bg-accentColor/10 transition-all duration-200 hover:scale-105"
                 >
                   <Mail size={16} />
-                  Contact Me
+                  {t("btn_contact")}
                 </Link>
               </div>
             </div>
@@ -501,46 +462,32 @@ export default function AboutPage() {
       {/* ══════════════════════════════════════════════ */}
       <SectionWrapper id="bio">
         <SectionTitle
-          label="Tentang Saya"
-          title="Bio & Info Personal"
-          subtitle="Mengenal lebih dekat siapa saya, background, dan apa yang mendorong saya terus berkembang."
+          label={t("bio_label")}
+          title={t("bio_title")}
+          subtitle={t("bio_subtitle")}
         />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Bio narrative */}
           <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800 shadow-sm">
-            <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Siapa Saya?</h3>
+            <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">{t("who_title")}</h3>
             <div className="space-y-4 text-gray-600 dark:text-gray-400 leading-relaxed">
-              <p>
-                Saya adalah seorang <span className="text-accentColor font-semibold">Backend Engineer</span> muda 
-                yang lahir dan besar di Banyuwangi, Jawa Timur. Perjalanan saya di dunia coding dimulai 
-                setelah lulus SMK, ketika rasa penasaran terhadap teknologi mengantarkan saya ke dunia pemrograman.
-              </p>
-              <p>
-                Dengan background pendidikan <span className="text-accentColor font-semibold">D4 Teknik Informatika</span>, 
-                saya telah mengembangkan keahlian di berbagai lini teknologi — dari frontend hingga backend, 
-                bahkan AI & Machine Learning. Namun passion terbesar saya tetap berada di backend engineering.
-              </p>
-              <p>
-                Saya percaya bahwa teknologi adalah bahasa universal, dan saya sedang aktif belajar Bahasa 
-                Inggris dan Jerman untuk memperluas cakrawala dan membuka peluang karir internasional.
-              </p>
-              <p>
-                Yang membuat saya unik? Saya memiliki ketertarikan lintas disiplin — ingin menjembatani 
-                dunia software engineering dengan mechanical engineering di masa depan.
-              </p>
+              <p>{t("bio_p1")}</p>
+              <p>{t("bio_p2")}</p>
+              <p>{t("bio_p3")}</p>
+              <p>{t("bio_p4")}</p>
             </div>
           </div>
 
           {/* Personal info */}
           <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800 shadow-sm">
-            <h3 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">Info Detail</h3>
+            <h3 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">{t("info_title")}</h3>
             <ul className="space-y-4">
               {[
-                { icon: <Calendar size={18} className="text-accentColor" />, label: "Tanggal Lahir", value: "4 April 2004" },
-                { icon: <MapPin size={18} className="text-accentColor" />, label: "Asal Daerah", value: "Banyuwangi, Jawa Timur" },
-                { icon: <GraduationCap size={18} className="text-accentColor" />, label: "Pendidikan", value: "D4 Teknik Informatika" },
-                { icon: <Briefcase size={18} className="text-accentColor" />, label: "Pekerjaan", value: "Backend Engineer" },
-                { icon: <Globe size={18} className="text-accentColor" />, label: "Bahasa", value: "Indonesia (Native) • English (Learning) • Deutsch (Learning)" },
+                { icon: <Calendar size={18} className="text-accentColor" />, label: t("field_dob"), value: t("val_dob") },
+                { icon: <MapPin size={18} className="text-accentColor" />, label: t("field_origin"), value: t("val_origin") },
+                { icon: <GraduationCap size={18} className="text-accentColor" />, label: t("field_edu"), value: t("val_edu") },
+                { icon: <Briefcase size={18} className="text-accentColor" />, label: t("field_work"), value: t("val_work") },
+                { icon: <Globe size={18} className="text-accentColor" />, label: t("field_lang"), value: t("val_lang") },
               ].map((item) => (
                 <li key={item.label} className="flex items-start gap-4">
                   <span className="mt-0.5 p-2 rounded-lg bg-accentColor/10 shrink-0">{item.icon}</span>
@@ -559,7 +506,7 @@ export default function AboutPage() {
       {/* SECTION 3 — STATS                             */}
       {/* ══════════════════════════════════════════════ */}
       <SectionWrapper id="stats" className="bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-900/50 dark:to-gray-950">
-        <SectionTitle label="Angka Bicara" title="Stats & Pencapaian" />
+        <SectionTitle label={t("stats_label")} title={t("stats_title")} />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat) => (
             <div
@@ -581,9 +528,9 @@ export default function AboutPage() {
       {/* ══════════════════════════════════════════════ */}
       <SectionWrapper id="journey">
         <SectionTitle
-          label="Perjalanan"
-          title="Perjalanan Belajar Coding"
-          subtitle="Dari nol hingga sekarang — setiap milestone adalah batu loncatan menuju versi yang lebih baik."
+          label={t("journey_label")}
+          title={t("journey_title")}
+          subtitle={t("journey_subtitle")}
         />
         <div className="relative max-w-3xl mx-auto">
           {/* Vertical line */}
@@ -616,9 +563,9 @@ export default function AboutPage() {
       {/* ══════════════════════════════════════════════ */}
       <SectionWrapper id="experience" className="bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-900/50 dark:to-gray-950">
         <SectionTitle
-          label="Karir"
-          title="Pengalaman Kerja & Magang"
-          subtitle="Jejak profesional yang membentuk keahlian dan cara pandang saya terhadap teknologi."
+          label={t("exp_label")}
+          title={t("exp_title")}
+          subtitle={t("exp_subtitle")}
         />
         <div className="space-y-6 max-w-4xl mx-auto">
           {experiences.map((exp, idx) => (
@@ -672,9 +619,9 @@ export default function AboutPage() {
       {/* ══════════════════════════════════════════════ */}
       <SectionWrapper id="techstack">
         <SectionTitle
-          label="Tech Stack"
-          title="Teknologi & Tools Favorit"
-          subtitle="Arsenal teknologi yang saya gunakan untuk membangun produk digital berkualitas tinggi."
+          label={t("tech_label")}
+          title={t("tech_title")}
+          subtitle={t("tech_subtitle")}
         />
         <div className="space-y-8">
           {techStackGroups.map((group) => (
@@ -710,9 +657,9 @@ export default function AboutPage() {
       {/* ══════════════════════════════════════════════ */}
       <SectionWrapper id="softskills" className="bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-900/50 dark:to-gray-950">
         <SectionTitle
-          label="Karakter"
-          title="Soft Skills & Kepribadian"
-          subtitle="Kemampuan interpersonal yang melengkapi keahlian teknis dalam setiap kolaborasi dan problem-solving."
+          label={t("soft_label")}
+          title={t("soft_title")}
+          subtitle={t("soft_subtitle")}
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {softSkills.map((skill) => (
@@ -735,9 +682,9 @@ export default function AboutPage() {
       {/* ══════════════════════════════════════════════ */}
       <SectionWrapper id="goals">
         <SectionTitle
-          label="Ambisi"
-          title="Goals & Visi ke Depan"
-          subtitle="Setiap langkah hari ini adalah investasi untuk masa depan yang ingin saya wujudkan."
+          label={t("goals_label")}
+          title={t("goals_title")}
+          subtitle={t("goals_subtitle")}
         />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {goals.map((g) => (
@@ -767,9 +714,9 @@ export default function AboutPage() {
       {/* ══════════════════════════════════════════════ */}
       <SectionWrapper id="hobbies" className="bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-900/50 dark:to-gray-950">
         <SectionTitle
-          label="Di Luar Koding"
-          title="Hobi & Interest"
-          subtitle="Kehidupan di luar layar yang memberi energi dan inspirasi baru setiap harinya."
+          label={t("hobbies_label")}
+          title={t("hobbies_title")}
+          subtitle={t("hobbies_subtitle")}
         />
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
           {hobbies.map((h) => (
@@ -792,9 +739,9 @@ export default function AboutPage() {
       {/* ══════════════════════════════════════════════ */}
       <SectionWrapper id="funfacts">
         <SectionTitle
-          label="Fun Facts"
-          title="Fakta Unik Tentang Saya"
-          subtitle="Beberapa hal yang mungkin membuat kamu berkata 'oh, interesting!'"
+          label={t("facts_label")}
+          title={t("facts_title")}
+          subtitle={t("facts_subtitle")}
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {funFacts.map((f) => (
@@ -816,9 +763,9 @@ export default function AboutPage() {
       {/* ══════════════════════════════════════════════ */}
       <SectionWrapper id="quotes" className="bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-900/50 dark:to-gray-950">
         <SectionTitle
-          label="Inspirasi"
-          title="Quotes Favorit"
-          subtitle="Kata-kata yang selalu menginspirasi saya untuk terus maju dan berkembang."
+          label={t("quotes_label")}
+          title={t("quotes_title")}
+          subtitle={t("quotes_subtitle")}
         />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {quotes.map((q, i) => (
@@ -850,10 +797,10 @@ export default function AboutPage() {
       <section className="py-16 px-[5%] text-center">
         <div className="max-w-xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-            Mari Berkolaborasi! 🚀
+            {t("cta_title")}
           </h2>
           <p className="text-gray-500 dark:text-gray-400 mb-6">
-            Tertarik untuk bekerja sama atau sekadar ngobrol tentang teknologi? Saya selalu terbuka untuk diskusi.
+            {t("cta_desc")}
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link
@@ -861,14 +808,14 @@ export default function AboutPage() {
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accentColor text-white font-semibold text-sm shadow-[0_0_20px_rgba(14,189,122,0.4)] hover:shadow-[0_0_30px_rgba(14,189,122,0.6)] hover:scale-105 transition-all duration-200"
             >
               <Mail size={16} />
-              Hubungi Saya
+              {t("btn_reach")}
             </Link>
             <Link
               href="/projects"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold text-sm hover:border-accentColor/50 hover:text-accentColor hover:scale-105 transition-all duration-200"
             >
               <ExternalLink size={16} />
-              Lihat Project
+              {t("btn_projects")}
             </Link>
           </div>
         </div>

@@ -4,13 +4,14 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   SiReact, SiNextdotjs, SiTypescript, SiJavascript, SiTailwindcss,
   SiHtml5, SiCss3, SiFramer, SiNodedotjs, SiFastapi, SiLaravel,
   SiPython, SiPhp, SiTensorflow, SiKeras, SiPytorch, SiScikitlearn,
   SiOpencv, SiFlutter, SiDocker, SiGit, SiGithub, SiLinux, SiVercel,
   SiMongodb, SiMysql, SiPostgresql, SiFirebase, SiAmazon, SiGooglecloud,
-  SiRedux, SiOpenai,
+  SiRedux, SiOpenai, SiGo, SiFlask, SiDjango, SiExpress, SiNestjs,
 } from "react-icons/si";
 import { FaMicrochip, FaBrain } from "react-icons/fa";
 import { ReactNode } from "react";
@@ -29,113 +30,117 @@ type Category = {
   skills: Skill[];
 };
 
-const categories: Category[] = [
-  {
-    id: "frontend",
-    title: "Frontend",
-    description: "Crafting pixel-perfect, performant user interfaces",
-    gradient: "from-blue-500/20 to-cyan-500/10",
-    icon: <SiReact className="text-blue-400" size={22} />,
-    skills: [
-      { name: "React", icon: <SiReact className="text-blue-400" />, level: 92 },
-      { name: "Next.js", icon: <SiNextdotjs className="text-black dark:text-white" />, level: 90 },
-      { name: "TypeScript", icon: <SiTypescript className="text-blue-600" />, level: 85 },
-      { name: "JavaScript", icon: <SiJavascript className="text-yellow-400" />, level: 90 },
-      { name: "TailwindCSS", icon: <SiTailwindcss className="text-sky-400" />, level: 93 },
-      { name: "HTML5", icon: <SiHtml5 className="text-orange-500" />, level: 95 },
-      { name: "CSS3", icon: <SiCss3 className="text-blue-500" />, level: 90 },
-      { name: "Framer Motion", icon: <SiFramer className="text-pink-400" />, level: 76 },
-      { name: "Redux", icon: <SiRedux className="text-purple-500" />, level: 78 },
-    ],
-  },
-  {
-    id: "backend",
-    title: "Backend",
-    description: "Building robust APIs and server-side applications",
-    gradient: "from-green-500/20 to-emerald-500/10",
-    icon: <SiNodedotjs className="text-green-500" size={22} />,
-    skills: [
-      { name: "Node.js", icon: <SiNodedotjs className="text-green-500" />, level: 83 },
-      { name: "FastAPI", icon: <SiFastapi className="text-teal-400" />, level: 82 },
-      { name: "Laravel", icon: <SiLaravel className="text-red-500" />, level: 80 },
-      { name: "Python", icon: <SiPython className="text-yellow-400" />, level: 88 },
-      { name: "PHP", icon: <SiPhp className="text-indigo-400" />, level: 75 },
-    ],
-  },
-  {
-    id: "ai-ml",
-    title: "AI / Machine Learning",
-    description: "Designing intelligent models and data pipelines",
-    gradient: "from-purple-500/20 to-pink-500/10",
-    icon: <FaBrain className="text-purple-400" size={22} />,
-    skills: [
-      { name: "TensorFlow", icon: <SiTensorflow className="text-orange-500" />, level: 80 },
-      { name: "Keras", icon: <SiKeras className="text-red-400" />, level: 80 },
-      { name: "PyTorch", icon: <SiPytorch className="text-orange-500" />, level: 72 },
-      { name: "Scikit-Learn", icon: <SiScikitlearn className="text-yellow-500" />, level: 82 },
-      { name: "OpenCV", icon: <SiOpencv className="text-cyan-400" />, level: 75 },
-      { name: "OpenAI API", icon: <SiOpenai className="text-gray-400" />, level: 78 },
-      { name: "Deep Learning", icon: <FaMicrochip className="text-indigo-400" />, level: 74 },
-    ],
-  },
-  {
-    id: "mobile",
-    title: "Mobile",
-    description: "Delivering smooth cross-platform mobile experiences",
-    gradient: "from-teal-500/20 to-cyan-500/10",
-    icon: <SiFlutter className="text-blue-400" size={22} />,
-    skills: [
-      { name: "Flutter", icon: <SiFlutter className="text-blue-400" />, level: 78 },
-    ],
-  },
-  {
-    id: "devops",
-    title: "DevOps & Tools",
-    description: "Streamlining workflows and deployment pipelines",
-    gradient: "from-orange-500/20 to-yellow-500/10",
-    icon: <SiDocker className="text-blue-500" size={22} />,
-    skills: [
-      { name: "Docker", icon: <SiDocker className="text-blue-500" />, level: 78 },
-      { name: "Git", icon: <SiGit className="text-orange-500" />, level: 90 },
-      { name: "GitHub", icon: <SiGithub className="text-black dark:text-white" />, level: 90 },
-      { name: "Linux", icon: <SiLinux className="text-black dark:text-white" />, level: 76 },
-      { name: "Vercel", icon: <SiVercel className="text-black dark:text-white" />, level: 88 },
-    ],
-  },
-  {
-    id: "database",
-    title: "Database",
-    description: "Structuring and optimising data storage solutions",
-    gradient: "from-red-500/20 to-pink-500/10",
-    icon: <SiPostgresql className="text-blue-400" size={22} />,
-    skills: [
-      { name: "MongoDB", icon: <SiMongodb className="text-green-500" />, level: 80 },
-      { name: "MySQL", icon: <SiMysql className="text-blue-500" />, level: 82 },
-      { name: "PostgreSQL", icon: <SiPostgresql className="text-blue-400" />, level: 78 },
-      { name: "Firebase", icon: <SiFirebase className="text-yellow-500" />, level: 80 },
-    ],
-  },
-  {
-    id: "cloud",
-    title: "Cloud & Platforms",
-    description: "Scaling applications on cloud infrastructure",
-    gradient: "from-sky-500/20 to-blue-500/10",
-    icon: <SiGooglecloud className="text-blue-400" size={22} />,
-    skills: [
-      { name: "AWS", icon: <SiAmazon className="text-orange-400" />, level: 68 },
-      { name: "GCP", icon: <SiGooglecloud className="text-blue-400" />, level: 70 },
-      { name: "Firebase", icon: <SiFirebase className="text-yellow-500" />, level: 80 },
-      { name: "Vercel", icon: <SiVercel className="text-black dark:text-white" />, level: 88 },
-    ],
-  },
-];
+function useCategories() {
+  const t = useTranslations("skillsPage");
 
-const getLevelLabel = (level: number) => {
-  if (level >= 90) return "Expert";
-  if (level >= 80) return "Advanced";
-  if (level >= 70) return "Proficient";
-  return "Familiar";
-};
+  const categories: Category[] = [
+    {
+      id: "frontend",
+      title: t("cat_frontend_title"),
+      description: t("cat_frontend_desc"),
+      gradient: "from-blue-500/20 to-cyan-500/10",
+      icon: <SiReact className="text-blue-400" size={22} />,
+      skills: [
+        { name: "React", icon: <SiReact className="text-blue-400" />, level: 92 },
+        { name: "Next.js", icon: <SiNextdotjs className="text-black dark:text-white" />, level: 90 },
+        { name: "TypeScript", icon: <SiTypescript className="text-blue-600" />, level: 85 },
+        { name: "JavaScript", icon: <SiJavascript className="text-yellow-400" />, level: 90 },
+        { name: "TailwindCSS", icon: <SiTailwindcss className="text-sky-400" />, level: 93 },
+        { name: "HTML5", icon: <SiHtml5 className="text-orange-500" />, level: 95 },
+        { name: "CSS3", icon: <SiCss3 className="text-blue-500" />, level: 90 },
+        { name: "Framer Motion", icon: <SiFramer className="text-pink-400" />, level: 76 },
+        { name: "Redux", icon: <SiRedux className="text-purple-500" />, level: 78 },
+      ],
+    },
+    {
+      id: "backend",
+      title: t("cat_backend_title"),
+      description: t("cat_backend_desc"),
+      gradient: "from-green-500/20 to-emerald-500/10",
+      icon: <SiNodedotjs className="text-green-500" size={22} />,
+      skills: [
+        { name: "Node.js", icon: <SiNodedotjs className="text-green-500" />, level: 83 },
+        { name: "Express", icon: <SiExpress className="text-gray-600 dark:text-gray-300" />, level: 82 },
+        { name: "NestJS", icon: <SiNestjs className="text-red-500" />, level: 75 },
+        { name: "FastAPI", icon: <SiFastapi className="text-teal-400" />, level: 82 },
+        { name: "Flask", icon: <SiFlask className="text-gray-600 dark:text-gray-300" />, level: 78 },
+        { name: "Django", icon: <SiDjango className="text-green-700" />, level: 74 },
+        { name: "Golang", icon: <SiGo className="text-sky-500" />, level: 70 },
+        { name: "Laravel", icon: <SiLaravel className="text-red-500" />, level: 80 },
+        { name: "Python", icon: <SiPython className="text-yellow-400" />, level: 88 },
+        { name: "PHP", icon: <SiPhp className="text-indigo-400" />, level: 75 },
+      ],
+    },
+    {
+      id: "ai-ml",
+      title: t("cat_aiml_title"),
+      description: t("cat_aiml_desc"),
+      gradient: "from-purple-500/20 to-pink-500/10",
+      icon: <FaBrain className="text-purple-400" size={22} />,
+      skills: [
+        { name: "TensorFlow", icon: <SiTensorflow className="text-orange-500" />, level: 80 },
+        { name: "Keras", icon: <SiKeras className="text-red-400" />, level: 80 },
+        { name: "PyTorch", icon: <SiPytorch className="text-orange-500" />, level: 72 },
+        { name: "Scikit-Learn", icon: <SiScikitlearn className="text-yellow-500" />, level: 82 },
+        { name: "OpenCV", icon: <SiOpencv className="text-cyan-400" />, level: 75 },
+        { name: "OpenAI API", icon: <SiOpenai className="text-gray-400" />, level: 78 },
+        { name: "Deep Learning", icon: <FaMicrochip className="text-indigo-400" />, level: 74 },
+      ],
+    },
+    {
+      id: "mobile",
+      title: t("cat_mobile_title"),
+      description: t("cat_mobile_desc"),
+      gradient: "from-teal-500/20 to-cyan-500/10",
+      icon: <SiFlutter className="text-blue-400" size={22} />,
+      skills: [
+        { name: "Flutter", icon: <SiFlutter className="text-blue-400" />, level: 78 },
+      ],
+    },
+    {
+      id: "devops",
+      title: t("cat_devops_title"),
+      description: t("cat_devops_desc"),
+      gradient: "from-orange-500/20 to-yellow-500/10",
+      icon: <SiDocker className="text-blue-500" size={22} />,
+      skills: [
+        { name: "Docker", icon: <SiDocker className="text-blue-500" />, level: 78 },
+        { name: "Git", icon: <SiGit className="text-orange-500" />, level: 90 },
+        { name: "GitHub", icon: <SiGithub className="text-black dark:text-white" />, level: 90 },
+        { name: "Linux", icon: <SiLinux className="text-black dark:text-white" />, level: 76 },
+        { name: "Vercel", icon: <SiVercel className="text-black dark:text-white" />, level: 88 },
+      ],
+    },
+    {
+      id: "database",
+      title: t("cat_database_title"),
+      description: t("cat_database_desc"),
+      gradient: "from-red-500/20 to-pink-500/10",
+      icon: <SiPostgresql className="text-blue-400" size={22} />,
+      skills: [
+        { name: "MongoDB", icon: <SiMongodb className="text-green-500" />, level: 80 },
+        { name: "MySQL", icon: <SiMysql className="text-blue-500" />, level: 82 },
+        { name: "PostgreSQL", icon: <SiPostgresql className="text-blue-400" />, level: 78 },
+        { name: "Firebase", icon: <SiFirebase className="text-yellow-500" />, level: 80 },
+      ],
+    },
+    {
+      id: "cloud",
+      title: t("cat_cloud_title"),
+      description: t("cat_cloud_desc"),
+      gradient: "from-sky-500/20 to-blue-500/10",
+      icon: <SiGooglecloud className="text-blue-400" size={22} />,
+      skills: [
+        { name: "AWS", icon: <SiAmazon className="text-orange-400" />, level: 68 },
+        { name: "GCP", icon: <SiGooglecloud className="text-blue-400" />, level: 70 },
+        { name: "Firebase", icon: <SiFirebase className="text-yellow-500" />, level: 80 },
+        { name: "Vercel", icon: <SiVercel className="text-black dark:text-white" />, level: 88 },
+      ],
+    },
+  ];
+
+  return categories;
+}
 
 const getLevelColor = (level: number) => {
   if (level >= 90) return "text-[#0acf83]";
@@ -179,7 +184,7 @@ function SkillBar({ level, delay }: { level: number; delay: number }) {
   );
 }
 
-function SkillCard({ skill, index }: { skill: Skill; index: number }) {
+function SkillCard({ skill, index, levelLabel }: { skill: Skill; index: number; levelLabel: string }) {
   return (
     <div
       className="skill-card group flex flex-col gap-3 p-4 rounded-xl
@@ -197,7 +202,7 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
           </span>
         </div>
         <span className={`text-[11px] font-semibold ${getLevelColor(skill.level)}`}>
-          {getLevelLabel(skill.level)}
+          {levelLabel}
         </span>
       </div>
       <SkillBar level={skill.level} delay={index * 0.05} />
@@ -208,7 +213,7 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
   );
 }
 
-function CategorySection({ cat }: { cat: Category; index?: number }) {
+function CategorySection({ cat, getLevelLabel }: { cat: Category; getLevelLabel: (level: number) => string; index?: number }) {
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -254,7 +259,7 @@ function CategorySection({ cat }: { cat: Category; index?: number }) {
       {/* Skill cards grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {cat.skills.map((skill, i) => (
-          <SkillCard key={skill.name} skill={skill} index={i} />
+          <SkillCard key={skill.name} skill={skill} index={i} levelLabel={getLevelLabel(skill.level)} />
         ))}
       </div>
     </div>
@@ -264,8 +269,17 @@ function CategorySection({ cat }: { cat: Category; index?: number }) {
 /* ─────────────────────────── page ───────────────────────────── */
 
 export default function SkillsPage() {
+  const t = useTranslations("skillsPage");
+  const categories = useCategories();
   const heroRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
+
+  const getLevelLabel = (level: number) => {
+    if (level >= 90) return t("level_expert");
+    if (level >= 80) return t("level_advanced");
+    if (level >= 70) return t("level_proficient");
+    return t("level_familiar");
+  };
 
   useEffect(() => {
     // Hero entrance
@@ -325,16 +339,14 @@ export default function SkillsPage() {
         <div className="relative max-w-[1100px] mx-auto px-[5%] py-16">
           {/* title */}
           <div className="hero-title overflow-hidden flex flex-wrap gap-x-3 text-4xl md:text-5xl lg:text-[3.4rem] font-semibold tracking-tight text-gray-900 dark:text-white leading-tight mb-5">
-            <span className="inline-block">My</span>
-            <span className="inline-block text-[#0acf83]">Skills</span>
-            <span className="inline-block">&amp;</span>
-            <span className="inline-block">Expertise</span>
+            <span className="inline-block">{t("hero_title_1")}</span>
+            <span className="inline-block text-[#0acf83]">{t("hero_title_2")}</span>
+            <span className="inline-block">{t("hero_title_3")}</span>
+            <span className="inline-block">{t("hero_title_4")}</span>
           </div>
 
           <p className="hero-sub max-w-xl text-gray-500 dark:text-white/50 text-base md:text-lg leading-relaxed mb-10">
-            A curated overview of the technologies and tools I use to design,
-            build, and ship high-quality software — from pixel-perfect UIs to
-            intelligent ML pipelines.
+            {t("hero_sub")}
           </p>
 
           {/* quick stats */}
@@ -343,10 +355,10 @@ export default function SkillsPage() {
             className="flex flex-wrap gap-6 sm:gap-10"
           >
             {[
-              { label: "Technologies", value: totalSkills },
-              { label: "Skill Categories", value: categories.length },
-              { label: "Expert Level", value: expertCount },
-              { label: "Years Experience", value: 4 },
+              { label: t("stat_technologies"), value: totalSkills },
+              { label: t("stat_categories"), value: categories.length },
+              { label: t("stat_expert"), value: expertCount },
+              { label: t("stat_experience"), value: 4 },
             ].map((stat) => (
               <div key={stat.label} className="flex flex-col">
                 <span className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -371,10 +383,10 @@ export default function SkillsPage() {
       <div className="max-w-[1100px] mx-auto px-[5%] pt-10 pb-2">
         <div className="flex flex-wrap gap-4">
           {[
-            { label: "Expert", color: "bg-[#0acf83]", min: "90%+" },
-            { label: "Advanced", color: "bg-blue-400", min: "80%+" },
-            { label: "Proficient", color: "bg-yellow-400", min: "70%+" },
-            { label: "Familiar", color: "bg-gray-400", min: "<70%" },
+            { label: t("level_expert"), color: "bg-[#0acf83]", min: "90%+" },
+            { label: t("level_advanced"), color: "bg-blue-400", min: "80%+" },
+            { label: t("level_proficient"), color: "bg-yellow-400", min: "70%+" },
+            { label: t("level_familiar"), color: "bg-gray-400", min: "<70%" },
           ].map((item) => (
             <div
               key={item.label}
@@ -396,7 +408,7 @@ export default function SkillsPage() {
       {/* ── Category sections ── */}
       <div className="max-w-[1100px] mx-auto px-[5%] py-12 flex flex-col gap-14">
         {categories.map((cat, i) => (
-          <CategorySection key={cat.id} cat={cat} index={i} />
+          <CategorySection key={cat.id} cat={cat} index={i} getLevelLabel={getLevelLabel} />
         ))}
       </div>
 
@@ -405,10 +417,10 @@ export default function SkillsPage() {
         <div className="max-w-[1100px] mx-auto px-[5%] py-12 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Interested in working together?
+              {t("cta_title")}
             </h3>
             <p className="text-sm text-gray-500 dark:text-white/50 mt-1">
-              Let&apos;s build something great — reach out anytime.
+              {t("cta_desc")}
             </p>
           </div>
           <Link
@@ -416,7 +428,7 @@ export default function SkillsPage() {
             className="contact_me_btn relative px-7 py-3 text-white text-sm font-semibold rounded-md shrink-0"
           >
             <div className="contact_me_btn_overlay" />
-            <span className="relative z-10">Contact Me</span>
+            <span className="relative z-10">{t("cta_btn")}</span>
           </Link>
         </div>
       </div>

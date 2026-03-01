@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
    FaStar, FaCodeBranch, FaExternalLinkAlt, FaGithub,
   FaLock, FaBriefcase, FaGraduationCap, FaRocket, FaMobileAlt,
@@ -209,51 +210,46 @@ const classifyRepo = (repo: GitHubRepo): Category => {
   return "web";
 };
 
-const CATEGORY_META: Record<
+const CATEGORY_META_COLORS: Record<
   Exclude<Category, "all">,
-  { label: string; icon: React.ReactNode; color: string; desc: string }
+  { icon: React.ReactNode; color: string }
 > = {
-  academic: {
-    label: "Academic / Thesis",
-    icon: <FaGraduationCap size={14} />,
-    color: "text-violet-400",
-    desc: "Research & final thesis projects",
-  },
-  freelance: {
-    label: "Freelance",
-    icon: <FaBriefcase size={14} />,
-    color: "text-yellow-400",
-    desc: "Client & paid projects",
-  },
-  web: {
-    label: "Web Projects",
-    icon: <FaGlobe size={14} />,
-    color: "text-blue-400",
-    desc: "Frontend, backend & full-stack web",
-  },
-  mobile: {
-    label: "Mobile Apps",
-    icon: <FaMobileAlt size={14} />,
-    color: "text-teal-400",
-    desc: "Flutter & cross-platform apps",
-  },
-  aiml: {
-    label: "AI / ML",
-    icon: <FaBrain size={14} />,
-    color: "text-pink-400",
-    desc: "Machine learning, IoT & deep learning",
-  },
-  company: {
-    label: "Company",
-    icon: <FaBuilding size={14} />,
-    color: "text-green-400",
-    desc: "Professional / enterprise work",
-  },
+  academic: { icon: <FaGraduationCap size={14} />, color: "text-violet-400" },
+  freelance: { icon: <FaBriefcase size={14} />, color: "text-yellow-400" },
+  web:       { icon: <FaGlobe size={14} />, color: "text-blue-400" },
+  mobile:    { icon: <FaMobileAlt size={14} />, color: "text-teal-400" },
+  aiml:      { icon: <FaBrain size={14} />, color: "text-pink-400" },
+  company:   { icon: <FaBuilding size={14} />, color: "text-green-400" },
 };
+
+function buildCategoryMeta(t: ReturnType<typeof useTranslations<"projectsPage">>) {
+  return {
+    academic: { ...CATEGORY_META_COLORS.academic, label: t("cat_academic_label"), desc: t("cat_academic_desc") },
+    freelance: { ...CATEGORY_META_COLORS.freelance, label: t("cat_freelance_label"), desc: t("cat_freelance_desc") },
+    web:       { ...CATEGORY_META_COLORS.web,       label: t("cat_web_label"),      desc: t("cat_web_desc") },
+    mobile:    { ...CATEGORY_META_COLORS.mobile,    label: t("cat_mobile_label"),   desc: t("cat_mobile_desc") },
+    aiml:      { ...CATEGORY_META_COLORS.aiml,      label: t("cat_aiml_label"),     desc: t("cat_aiml_desc") },
+    company:   { ...CATEGORY_META_COLORS.company,   label: t("cat_company_label"),  desc: t("cat_company_desc") },
+  } as Record<Exclude<Category, "all">, { label: string; icon: React.ReactNode; color: string; desc: string }>;
+}
+
+function buildCategoryTabs(t: ReturnType<typeof useTranslations<"projectsPage">>) {
+  return [
+    { id: "all" as Category,      label: t("tab_all"),      icon: <FaRocket size={12} /> },
+    { id: "academic" as Category, label: t("tab_academic"), icon: <FaGraduationCap size={12} /> },
+    { id: "freelance" as Category,label: t("tab_freelance"),icon: <FaBriefcase size={12} /> },
+    { id: "web" as Category,      label: t("tab_web"),      icon: <FaGlobe size={12} /> },
+    { id: "mobile" as Category,   label: t("tab_mobile"),   icon: <FaMobileAlt size={12} /> },
+    { id: "aiml" as Category,     label: t("tab_aiml"),     icon: <FaBrain size={12} /> },
+    { id: "company" as Category,  label: t("tab_company"),  icon: <FaBuilding size={12} /> },
+  ];
+}
 
 /* ─────────────────────────── sub-components ─────────────────── */
 
-function RepoCard({ repo }: { repo: GitHubRepo }) {
+type CategoryMeta = Record<Exclude<Category, "all">, { label: string; icon: React.ReactNode; color: string; desc: string }>;
+
+function RepoCard({ repo, categoryMeta }: { repo: GitHubRepo; categoryMeta: CategoryMeta }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -276,7 +272,8 @@ function RepoCard({ repo }: { repo: GitHubRepo }) {
   }, []);
 
   const cat = classifyRepo(repo);
-  const meta = cat !== "all" ? CATEGORY_META[cat] : null;
+  const meta = cat !== "all" ? categoryMeta[cat] : null;
+  const t = useTranslations("projectsPage");
   const updated = new Date(repo.updated_at).toLocaleDateString("id-ID", {
     year: "numeric",
     month: "short",
@@ -354,7 +351,7 @@ function RepoCard({ repo }: { repo: GitHubRepo }) {
 
       {/* description */}
       <p className="text-xs text-gray-500 dark:text-white/50 line-clamp-2 flex-1">
-        {repo.description ?? "No description provided."}
+        {repo.description ?? t("no_description")}
       </p>
 
       {/* topics */}
@@ -411,6 +408,7 @@ function RepoCard({ repo }: { repo: GitHubRepo }) {
 
 function ManualProjectCard({ project }: { project: ManualProject }) {
   const ref = useRef<HTMLDivElement>(null);
+  const t = useTranslations("projectsPage");
 
   useEffect(() => {
     if (!ref.current) return;
@@ -470,11 +468,11 @@ function ManualProjectCard({ project }: { project: ManualProject }) {
           >
             {project.confidential ? (
               <>
-                <FaLock size={9} /> Confidential
+                <FaLock size={9} /> {t("badge_confidential")}
               </>
             ) : (
               <>
-                <FaBriefcase size={9} /> Freelance
+                <FaBriefcase size={9} /> {t("badge_freelance")}
               </>
             )}
           </span>
@@ -548,22 +546,10 @@ function SkeletonCard() {
 
 /* ─────────────────────────── page ───────────────────────────── */
 
-const CATEGORY_TABS: { id: Category; label: string; icon: React.ReactNode }[] =
-  [
-    { id: "all", label: "All Projects", icon: <FaRocket size={12} /> },
-    {
-      id: "academic",
-      label: "Academic",
-      icon: <FaGraduationCap size={12} />,
-    },
-    { id: "freelance", label: "Freelance", icon: <FaBriefcase size={12} /> },
-    { id: "web", label: "Web", icon: <FaGlobe size={12} /> },
-    { id: "mobile", label: "Mobile", icon: <FaMobileAlt size={12} /> },
-    { id: "aiml", label: "AI / ML", icon: <FaBrain size={12} /> },
-    { id: "company", label: "Company", icon: <FaBuilding size={12} /> },
-  ];
-
 export default function ProjectsPage() {
+  const t = useTranslations("projectsPage");
+  const categoryMeta = buildCategoryMeta(t);
+  const CATEGORY_TABS = buildCategoryTabs(t);
   const heroRef = useRef<HTMLDivElement>(null);
   const [repos, setRepos] = useState<GitHubRepo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -684,7 +670,7 @@ export default function ProjectsPage() {
 
         <div className="relative max-w-[1100px] mx-auto px-[5%] py-16">
           <div className="overflow-hidden flex flex-wrap gap-x-3 text-4xl md:text-5xl lg:text-[3.4rem] font-semibold tracking-tight text-gray-900 dark:text-white leading-tight mb-5">
-            {["All", "My", "Projects"].map((w, i) => (
+            {[t("hero_title_1"), t("hero_title_2"), t("hero_title_3")].map((w, i) => (
               <span
                 key={i}
                 className={`hero-word inline-block ${
@@ -697,17 +683,16 @@ export default function ProjectsPage() {
           </div>
 
           <p className="hero-sub max-w-xl text-gray-500 dark:text-white/50 text-base md:text-lg leading-relaxed mb-8">
-            A comprehensive list of everything I&apos;ve built — from open-source GitHub
-            repositories to freelance client work, company projects, and academic research.
+            {t("hero_sub")}
           </p>
 
           {/* stats row */}
           <div className="hero-sub flex flex-wrap gap-8">
             {[
-              { v: classifiedRepos.length, l: "GitHub Repos" },
-              { v: COMPANY_PROJECTS.length, l: "Company Projects" },
-              { v: OTHER_FREELANCE.length + classifiedRepos.filter(r => r.topics.includes("paid-project")).length, l: "Freelance Projects" },
-              { v: classifiedRepos.filter(r => classifyRepo(r) === "aiml").length, l: "AI/ML Projects" },
+              { v: classifiedRepos.length, l: t("stat_repos") },
+              { v: COMPANY_PROJECTS.length, l: t("stat_company") },
+              { v: OTHER_FREELANCE.length + classifiedRepos.filter(r => r.topics.includes("paid-project")).length, l: t("stat_freelance") },
+              { v: classifiedRepos.filter(r => classifyRepo(r) === "aiml").length, l: t("stat_aiml") },
             ].map((s) => (
               <div key={s.l} className="flex flex-col">
                 <span className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -764,7 +749,7 @@ export default function ProjectsPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, language, or topic…"
+              placeholder={t("search_placeholder")}
               className="w-full max-w-md text-sm px-4 py-2 rounded-lg
                 bg-white dark:bg-white/5
                 border border-gray-200 dark:border-white/10
@@ -785,9 +770,9 @@ export default function ProjectsPage() {
           <div>
             <SectionHeader
               icon={<SiGithub size={18} />}
-              title="GitHub Open Source"
+              title={t("section_github_title")}
               count={filteredRepos.length}
-              description="Public repositories from my GitHub profile"
+              description={t("section_github_desc")}
               colorClass="text-gray-900 dark:text-white"
             />
             {loading ? (
@@ -801,7 +786,7 @@ export default function ProjectsPage() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredRepos.map((repo) => (
-                  <RepoCard key={repo.id} repo={repo} />
+                  <RepoCard key={repo.id} repo={repo} categoryMeta={categoryMeta} />
                 ))}
               </div>
             )}
@@ -813,11 +798,11 @@ export default function ProjectsPage() {
           <div>
             <SectionHeader
               icon={<FaBuilding size={16} />}
-              title="Company Projects"
+              title={t("section_company_title")}
               count={filteredCompany.length}
-              description="Professional enterprise work — confidential & not published on GitHub"
+              description={t("section_company_desc")}
               colorClass="text-green-500 dark:text-green-400"
-              badge={{ label: "Confidential", color: "bg-red-50 dark:bg-red-900/20 text-red-400" }}
+              badge={{ label: t("section_company_badge"), color: "bg-red-50 dark:bg-red-900/20 text-red-400" }}
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredCompany.map((p) => (
@@ -832,11 +817,11 @@ export default function ProjectsPage() {
           <div>
             <SectionHeader
               icon={<FaBriefcase size={16} />}
-              title="Freelance Projects"
+              title={t("section_freelance_title")}
               count={filteredFreelance.length}
-              description="Client work & paid projects not published on GitHub"
+              description={t("section_freelance_desc")}
               colorClass="text-yellow-500 dark:text-yellow-400"
-              badge={{ label: "Paid Work", color: "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-500" }}
+              badge={{ label: t("section_freelance_badge"), color: "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-500" }}
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredFreelance.map((p) => (
@@ -855,10 +840,10 @@ export default function ProjectsPage() {
         <div className="max-w-[1100px] mx-auto px-[5%] py-12 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Want to collaborate on a project?
+              {t("cta_title")}
             </h3>
             <p className="text-sm text-gray-500 dark:text-white/50 mt-1">
-              I&apos;m open to freelance work and new opportunities.
+              {t("cta_desc")}
             </p>
           </div>
           <Link
@@ -866,7 +851,7 @@ export default function ProjectsPage() {
             className="contact_me_btn relative px-7 py-3 text-white text-sm font-semibold rounded-md shrink-0"
           >
             <div className="contact_me_btn_overlay" />
-            <span className="relative z-10">Let&apos;s Talk</span>
+            <span className="relative z-10">{t("cta_btn")}</span>
           </Link>
         </div>
       </div>
@@ -910,11 +895,12 @@ function SectionHeader({
 }
 
 function EmptyState() {
+  const t = useTranslations("projectsPage");
   return (
     <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
       <SiGithub size={32} className="text-gray-200 dark:text-white/10" />
       <p className="text-gray-400 dark:text-white/30 text-sm">
-        No projects found for this filter.
+        {t("empty")}
       </p>
     </div>
   );

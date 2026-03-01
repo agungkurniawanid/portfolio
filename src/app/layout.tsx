@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     siteName: "Portfolio website",
     images: [
       {
-        url: "https://i.ibb.co/m5bYtw6/responsive-showcase.png",
+        url: "https://agungkurniawandev.netlify.app/thumbnail-url-share.jpeg",
       },
     ],
   },

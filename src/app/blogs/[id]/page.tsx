@@ -28,13 +28,12 @@ function formatDate(iso: string) {
 
 export default function BlogDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const { blogs, getBlogById } = useBlogStore()
+  const { blogs, getBlogById, fetchBlogs } = useBlogStore()
   const [mounted, setMounted] = useState(false)
   const [copySuccess, setCopySuccess] = useState(false)
 
   useEffect(() => {
-    useBlogStore.persist.rehydrate()
-    setMounted(true)
+    fetchBlogs().then(() => setMounted(true))
   }, [])
 
   const blog = useMemo(() => getBlogById(id), [id, getBlogById])

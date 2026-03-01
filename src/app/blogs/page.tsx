@@ -23,7 +23,7 @@ const CATEGORIES: (BlogCategory | "All")[] = [
 const ITEMS_PER_PAGE = 9
 
 export default function BlogsPage() {
-  const { blogs } = useBlogStore()
+  const { blogs, fetchBlogs } = useBlogStore()
   const [search, setSearch] = useState("")
   const [activeCategory, setActiveCategory] = useState<BlogCategory | "All">("All")
   const [view, setView] = useState<"grid" | "list">("grid")
@@ -32,8 +32,7 @@ export default function BlogsPage() {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    useBlogStore.persist.rehydrate()
-    setMounted(true)
+    fetchBlogs().then(() => setMounted(true))
   }, [])
 
   // Reset page when filters change

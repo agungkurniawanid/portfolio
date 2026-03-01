@@ -18,10 +18,15 @@ export default function BlogSection() {
   // Fix: Properly type the refs
   const sectionRef = useRef<HTMLElement>(null);
   const elementRef = useRef<HTMLDivElement>(null);
-  const { blogs: storeBlogList } = useBlogStore();
+  const { blogs: storeBlogList, fetchBlogs } = useBlogStore();
   
   // Fix: Type assertion for useOnScreen
   const isOnScreen = useOnScreen(elementRef as React.RefObject<HTMLElement>);
+
+  useEffect(() => {
+    fetchBlogs()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     if (!sectionRef.current) return;

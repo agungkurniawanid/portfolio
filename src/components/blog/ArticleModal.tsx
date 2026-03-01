@@ -2,8 +2,9 @@
 
 import { useState, useRef } from "react"
 import { X, Upload, Eye, Send, AlertCircle, User, Mail, Phone, FileText, Tag, Image as ImageIcon } from "lucide-react"
-import { Blog, BlogCategory } from "@/types/blog"
+import { BlogCategory } from "@/types/blog"
 import { useBlogStore } from "@/stores/BlogStore"
+import { supabase } from "@/lib/supabase"
 import { cn } from "@/lib/Utils"
 import dynamic from "next/dynamic"
 
@@ -38,7 +39,7 @@ function estimateReadingTime(html: string): number {
 type Step = "form" | "preview"
 
 export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
-  const { addBlog } = useBlogStore()
+  const { fetchBlogs } = useBlogStore()
   const [step, setStep] = useState<Step>("form")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -50,7 +51,10 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
   const [category, setCategory] = useState<BlogCategory>("General")
   const [content, setContent] = useState("")
   const [thumbnail, setThumbnail] = useState("")
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
+  const [thumbnailPreview, setThumbnailPreview] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [submitError, setSubmitError] = useState("")
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -69,9 +73,9 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = (ev) => setThumbnail(ev.target?.result as string)
-    reader.readAsDataURL(file)
+    setThumbnailFile(file)
+    setThumbnailPreview(URL.createObjectURL(file))
+    setThumbnail("") // clear URL input when file is selected
   }
 
   const handlePreview = () => {
@@ -81,36 +85,62 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
   const handleSubmit = async () => {
     if (!validate()) return
     setIsSubmitting(true)
-    await new Promise((r) => setTimeout(r, 600))
+    setSubmitError("")
 
-    const blog: Blog = {
-      id: generateId(),
-      title: title.trim(),
-      excerpt: content.replace(/<[^>]+>/g, " ").trim().slice(0, 180) + "...",
-      content,
-      thumbnail:
-        thumbnail ||
-        `https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80`,
-      category,
-      author: {
-        name: authorName.trim(),
-        email: authorEmail.trim(),
-        phone: authorPhone.trim() || undefined,
-        type: "visitor",
-      },
-      publishedAt: new Date().toISOString(),
-      readingTime: estimateReadingTime(content),
+    try {
+      // 1. Upload thumbnail to Supabase Storage if a file was selected
+      let finalThumbnailUrl =
+        thumbnail.trim() ||
+        `https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80`
+
+      if (thumbnailFile) {
+        const ext = thumbnailFile.name.split(".").pop()
+        const filePath = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`
+        const { error: uploadError } = await supabase.storage
+          .from("blog-thumbnails")
+          .upload(filePath, thumbnailFile, { cacheControl: "3600", upsert: false })
+        if (uploadError) throw new Error(uploadError.message)
+        const { data: urlData } = supabase.storage
+          .from("blog-thumbnails")
+          .getPublicUrl(filePath)
+        finalThumbnailUrl = urlData.publicUrl
+      }
+
+      // 2. Insert blog to Supabase
+      const id = generateId()
+      const excerpt = content.replace(/<[^>]+>/g, " ").trim().slice(0, 180) + "..."
+      const { error: insertError } = await supabase.from("blogs").insert({
+        id,
+        title: title.trim(),
+        excerpt,
+        content,
+        thumbnail: finalThumbnailUrl,
+        category,
+        author_name: authorName.trim(),
+        author_email: authorEmail.trim(),
+        author_phone: authorPhone.trim() || null,
+        author_type: "visitor",
+        published_at: new Date().toISOString(),
+        reading_time: estimateReadingTime(content),
+        tags: [],
+      })
+      if (insertError) throw new Error(insertError.message)
+
+      // 3. Refresh blog list
+      await fetchBlogs()
+
+      setIsSubmitting(false)
+      setSuccess(true)
+      setTimeout(() => {
+        setSuccess(false)
+        onClose()
+        resetForm()
+      }, 2000)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Terjadi kesalahan, coba lagi."
+      setSubmitError(msg)
+      setIsSubmitting(false)
     }
-
-    addBlog(blog)
-    setIsSubmitting(false)
-    setSuccess(true)
-
-    setTimeout(() => {
-      setSuccess(false)
-      onClose()
-      resetForm()
-    }, 2000)
   }
 
   const resetForm = () => {
@@ -121,7 +151,10 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
     setCategory("General")
     setContent("")
     setThumbnail("")
+    setThumbnailFile(null)
+    setThumbnailPreview("")
     setErrors({})
+    setSubmitError("")
     setStep("form")
   }
 
@@ -296,10 +329,10 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                       onClick={() => fileInputRef.current?.click()}
                       className="w-full border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-4 flex flex-col items-center gap-2 cursor-pointer hover:border-accentColor transition-colors"
                     >
-                      {thumbnail ? (
+                      {thumbnailPreview || thumbnail ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={thumbnail}
+                          src={thumbnailPreview || thumbnail}
                           alt="thumbnail preview"
                           className="w-full h-32 object-cover rounded-lg"
                         />
@@ -325,8 +358,12 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                       Atau masukkan URL gambar:{" "}
                       <input
                         type="url"
-                        value={thumbnail.startsWith("data:") ? "" : thumbnail}
-                        onChange={(e) => setThumbnail(e.target.value)}
+                        value={thumbnail}
+                        onChange={(e) => {
+                          setThumbnail(e.target.value)
+                          setThumbnailFile(null)
+                          setThumbnailPreview("")
+                        }}
                         placeholder="https://example.com/image.jpg"
                         className="ml-1 px-2 py-0.5 text-xs border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-800 dark:text-white outline-none focus:border-accentColor"
                         onClick={(e) => e.stopPropagation()}
@@ -389,7 +426,13 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700/60 bg-gray-50 dark:bg-[#0d1616] shrink-0">
+        <div className="flex flex-col px-6 py-4 border-t border-gray-200 dark:border-gray-700/60 bg-gray-50 dark:bg-[#0d1616] shrink-0 gap-3">
+          {submitError && (
+            <p className="text-xs text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/40 px-3 py-2 rounded-lg">
+              ⚠️ {submitError}
+            </p>
+          )}
+          <div className="flex items-center justify-between">
           <div className="flex gap-2">
             {step === "preview" && (
               <button
@@ -445,6 +488,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                 )}
               </button>
             )}
+          </div>
           </div>
         </div>
       </div>

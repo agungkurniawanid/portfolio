@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useCallback } from "react"
+import { use, useMemo, useState, useCallback } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -24,11 +24,11 @@ const masonryBreakpoints = {
 }
 
 interface PageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export default function AlbumDetailPage({ params }: PageProps) {
-  const { slug } = params
+  const { slug } = use(params)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   const album = galleryAlbums.find((a) => a.slug === slug)

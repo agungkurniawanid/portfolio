@@ -14,9 +14,9 @@ import {
 } from "lucide-react";
 import {
   SiReact, SiNextdotjs, SiTypescript, SiJavascript, SiTailwindcss,
-  SiCss3, SiFramer, SiNodedotjs, SiFastapi, SiLaravel,
-  SiPython, SiPhp, SiTensorflow, SiKeras, SiPytorch, SiScikitlearn,
-  SiOpencv, SiFlutter, SiDocker, SiGit, SiGithub, SiLinux, SiVercel,
+  SiFramer, SiNodedotjs, SiFastapi, SiLaravel,
+  SiPython, SiPhp, SiTensorflow, SiPytorch, SiScikitlearn,
+  SiDocker, SiGit, SiGithub, SiLinux, SiVercel,
   SiMongodb, SiMysql, SiPostgresql, SiFirebase, SiRedux, SiOpenai,
   SiCplusplus, SiDjango, SiFlask, SiNestjs, SiExpress,
 } from "react-icons/si";

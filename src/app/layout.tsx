@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Jost } from "next/font/google"
 import Header from "@/components/layouts/Header" 
+import GuestbookBanner from "@/components/GuestbookBanner"
 import "./globals.css"
 import { ThemeProvider } from "@/providers/ThemeProvider"
 import WelcomePopup from "@/components/WelcomePopup"
@@ -52,6 +53,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <GuestbookBanner />
           <Header />
           <WelcomePopup />
           {children}

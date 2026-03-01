@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import emailjs from "@emailjs/browser";
 import { FaTimes, FaStar, FaPaperPlane, FaEyeSlash } from "react-icons/fa";
@@ -83,6 +83,7 @@ export default function WelcomePopup() {
   const timerRef     = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef(false);
   const pathname     = usePathname();
+  const router       = useRouter();
 
   const [form, setForm] = useState({
     name: "",
@@ -205,10 +206,10 @@ export default function WelcomePopup() {
     try {
       await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_PUBLIC_KEY);
       setStatus("sent");
-      setToast({ message: "Pesan berhasil dikirim! Terima kasih 🙏", type: "success" });
+      setToast({ message: "Terima kasih! Mengalihkan ke Buku Tamu... 🙏", type: "success" });
       setForm({ name: "", email: "", phone: "", purpose: "", rating: 0, source: "", message: "" });
       localStorage.setItem(LS_KEY, "true");
-      setTimeout(() => animateOut(), 1800);
+      setTimeout(() => animateOut(() => router.push("/guestbook")), 1800);
     } catch {
       setStatus("idle");
       setToast({ message: "Gagal mengirim, coba lagi.", type: "error" });

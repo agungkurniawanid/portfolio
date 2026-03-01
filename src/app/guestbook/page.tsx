@@ -14,6 +14,8 @@ import {
   CheckCircle2,
   ChevronDown,
   X,
+  Pencil,
+  Sparkles,
 } from "lucide-react"
 import { cn } from "@/lib/Utils"
 import { supabase } from "@/lib/supabase"
@@ -117,6 +119,50 @@ function AnimatedStat({
         </div>
       )}
       <div className="text-xs text-gray-400 dark:text-gray-500 text-center">{label}</div>
+    </div>
+  )
+}
+
+// ─── Not-Submitted Callout ───────────────────────────────────────────────────
+
+function NotSubmittedCallout({ onOpen }: { onOpen: () => void }) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-amber-200 dark:border-amber-500/30 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/10 px-5 py-4">
+      {/* Decorative blob */}
+      <div className="absolute -right-8 -top-8 w-32 h-32 bg-amber-300/20 dark:bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+
+      <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
+        {/* Left: icon + text */}
+        <div className="flex items-start gap-3 flex-1">
+          {/* Pulsing dot */}
+          <div className="relative mt-0.5 shrink-0">
+            <span className="flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500" />
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+              <Sparkles size={13} className="shrink-0" />
+              Kamu belum mengisi buku tamu!
+            </p>
+            <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed">
+              Luangkan 1 menit untuk meninggalkan jejak kamu di sini.
+              Nama kamu akan tampil di antara tamu-tamu lainnya 👇
+            </p>
+          </div>
+        </div>
+
+        {/* Right: CTA */}
+        <button
+          onClick={onOpen}
+          className="group shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-400 text-white text-xs font-semibold transition-all duration-200 shadow-sm hover:shadow-amber-400/30 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 self-start sm:self-center"
+        >
+          <Pencil size={13} className="transition-transform group-hover:rotate-12" />
+          Isi Sekarang
+        </button>
+      </div>
     </div>
   )
 }
@@ -395,6 +441,13 @@ export default function GuestbookPage() {
           )}
         </div>
       </section>
+
+      {/* ─────────────── NOT-SUBMITTED CALLOUT ──────────────────────── */}
+      {!loading && !hasSubmitted && (
+        <section className="max-w-7xl mx-auto px-4 pb-4">
+          <NotSubmittedCallout onOpen={() => setIsModalOpen(true)} />
+        </section>
+      )}
 
       {/* ───────────────────── SEARCH & FILTER ─────────────────────── */}
       <section ref={gridRef} className="max-w-7xl mx-auto px-4 pb-6">

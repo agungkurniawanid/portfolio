@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import navlinks from "@/lib/NavConfig"
 import { useSectionStore } from "@/stores/Section"
+import { useBannerStore, BANNER_HEIGHT } from "@/stores/BannerStore"
 import gsap from "gsap"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -16,14 +17,32 @@ export default function Header() {
   const headerRef = useRef<HTMLElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const { visible: bannerVisible } = useBannerStore()
+  const bannerAnimMounted = useRef(false)
 
+  // Slide-in intro animation — target top accounts for banner
   useEffect(() => {
+    const { visible } = useBannerStore.getState()
     gsap.fromTo(
       headerRef.current,
       { top: -120 },
-      { top: 0, duration: 0.7, delay: 0.2, ease: "Power0.easeNone" }
+      { top: visible ? BANNER_HEIGHT : 0, duration: 0.7, delay: 0.2, ease: "Power0.easeNone" }
     )
   }, [])
+
+  // Smoothly move header when banner is dismissed
+  useEffect(() => {
+    if (!bannerAnimMounted.current) {
+      bannerAnimMounted.current = true
+      return
+    }
+    if (!headerRef.current) return
+    gsap.to(headerRef.current, {
+      top: bannerVisible ? BANNER_HEIGHT : 0,
+      duration: 0.35,
+      ease: "power2.out",
+    })
+  }, [bannerVisible])
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -101,7 +120,7 @@ export default function Header() {
                     {/* Dropdown */}
                     <div
                       className={cn(
-                        "absolute top-full right-0 mt-2 w-72 origin-top-right",
+                        "absolute top-full right-0 mt-2 w-[480px] origin-top-right",
                         "bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700/60",
                         "transition-all duration-200",
                         dropdownOpen
@@ -109,7 +128,7 @@ export default function Header() {
                           : "opacity-0 scale-95 pointer-events-none"
                       )}
                     >
-                      <div className="p-2 grid grid-cols-2 gap-1">
+                      <div className="p-2 grid grid-cols-3 gap-1">
                         {link.subMenu.map((sub) => {
                           const SubIcon = sub.icon
                           return (

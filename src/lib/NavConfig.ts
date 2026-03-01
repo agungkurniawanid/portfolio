@@ -28,11 +28,11 @@ const navlinks: NavLink[] = [
     icon: MoreHorizontal,
     subMenu: [
       { title: "Gallery", href: "/gallery", icon: ImageIcon, description: "Koleksi foto & media" },
+      { title: "Guestbook", href: "/guestbook", icon: BookOpen, description: "Buku tamu pengunjung" },
       { title: "Certificate", href: "/certificate", icon: Award, description: "Sertifikat & pencapaian" },
       { title: "Entertainment", href: "/entertainment", icon: Gamepad2, description: "Movie, Game, Hiburan" },
       { title: "Timeline", href: "/timeline", icon: History, description: "Perjalanan karir & pendidikan" },
       { title: "Tools & Stack", href: "/tech-stack", icon: Wrench, description: "Tech stack favorit" },
-      { title: "Guestbook", href: "/guestbook", icon: BookOpen, description: "Buku tamu pengunjung" },
     ],
   },
 ]

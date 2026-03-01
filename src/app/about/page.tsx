@@ -7,14 +7,14 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import {
   Download, Mail, MapPin, GraduationCap, Briefcase, Globe,
-  Calendar, ChevronRight, Star, Target, Rocket, Lightbulb,
+  Calendar, Star, Target, Rocket, Lightbulb,
   Code2, Zap, Users, MessageSquare, Clock, Brain, Palette,
   Music, Gamepad2, Camera, Coffee, BookOpen, Cat,
-  Quote, ArrowLeft, ExternalLink, Award, CheckCircle2, Cpu,
+  Quote, ExternalLink, Award, CheckCircle2, Cpu,
 } from "lucide-react";
 import {
   SiReact, SiNextdotjs, SiTypescript, SiJavascript, SiTailwindcss,
-  SiHtml5, SiCss3, SiFramer, SiNodedotjs, SiFastapi, SiLaravel,
+  SiCss3, SiFramer, SiNodedotjs, SiFastapi, SiLaravel,
   SiPython, SiPhp, SiTensorflow, SiKeras, SiPytorch, SiScikitlearn,
   SiOpencv, SiFlutter, SiDocker, SiGit, SiGithub, SiLinux, SiVercel,
   SiMongodb, SiMysql, SiPostgresql, SiFirebase, SiRedux, SiOpenai,

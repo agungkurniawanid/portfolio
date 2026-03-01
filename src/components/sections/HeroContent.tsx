@@ -3,10 +3,12 @@ import { ArrowRightIcon } from "@radix-ui/react-icons";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function HeroContent() {
   const sectionRef = useRef(null);
   const q = gsap.utils.selector(sectionRef);
+  const t = useTranslations("hero");
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -45,30 +47,28 @@ export default function HeroContent() {
     >
       <div className="overflow-hidden text-center md:text-left">
         <div className="text-animation  dark:bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-black dark:text-transparent bg-clip-text leading-none text-4xl md:text-6xl font-semibold">
-          Saya Agung Kurniawan
+          {t("greeting")}
         </div>
       </div>
 
       <div className="overflow-hidden">
         <div className="text-animation text-2xl md:text-4xl font-semibold">
           <span className="bg-gradient-to-b from-black to-gray-600 dark:from-white dark:to-gray-400 inline-block text-transparent bg-clip-text">
-            Seorang
+            {t("role_prefix")}
           </span>{" "}
-          <span className="text-accentColor">Backend</span>{" "}
+          <span className="text-accentColor">{t("role")}</span>{" "}
           <span className="bg-gradient-to-b from-black to-gray-600 dark:from-white dark:to-gray-400 inline-block text-transparent bg-clip-text">
-            Engineer
+            {t("role_suffix")}
           </span>
         </div>
       </div>
 
       <div className="w-[300px] md:w-[370px] relative z-30 text-center text-sm dark:bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-black dark:text-transparent bg-clip-text">
-        Seorang Backend Engineer yang penuh semangat dan berorientasi pada
-        performa, dengan keahlian membangun sistem server-side yang robust,
-        scalable, dan efisien.
+        {t("bio")}
       </div>
 
       <div className="bio-animation dark:bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-black dark:text-transparent bg-clip-text text-md md:text-lg text-center md:text-left">
-        Tempat di mana kreativitas bertemu dengan fungsionalitas.
+        {t("tagline")}
       </div>
 
       <Link
@@ -78,7 +78,7 @@ export default function HeroContent() {
         className="contact_me_btn px-4 py-[6px] shadow-md mt-10 md:mt-3 group flex items-center gap-2"
       >
         <div className="dark:text-black relative z-[3] text-sm">
-          Contact Saya
+          {t("cta")}
         </div>
         <div className="sr-only">Contact Me</div>
         <div className="contact_me_btn_overlay group-hover:opacity-100" />

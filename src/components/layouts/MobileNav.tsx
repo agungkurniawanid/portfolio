@@ -7,6 +7,44 @@ import { usePathname, useRouter } from "next/navigation"
 import { Menu, X, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/Utils"
 import { useSectionStore } from "@/stores/Section"
+import { useLanguageStore, type Locale } from "@/stores/LanguageStore"
+
+const LANGUAGES: { code: Locale; label: string; flag: string; short: string }[] = [
+  { code: "id", label: "Indonesia", flag: "🇮🇩", short: "ID" },
+  { code: "en", label: "English",   flag: "🇬🇧", short: "EN" },
+  { code: "de", label: "Deutsch",   flag: "🇩🇪", short: "DE" },
+]
+
+function LanguagePicker() {
+  const { locale, setLocale } = useLanguageStore()
+  return (
+    <div className="px-2">
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 px-1">
+        Language / Bahasa
+      </p>
+      <div className="flex gap-1.5">
+        {LANGUAGES.map((lang) => {
+          const isActive = locale === lang.code
+          return (
+            <button
+              key={lang.code}
+              onClick={() => setLocale(lang.code)}
+              className={cn(
+                "flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-xl border transition-all duration-150",
+                isActive
+                  ? "border-accentColor bg-accentColor/10 text-accentColor"
+                  : "border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-accentColor/40 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5"
+              )}
+            >
+              <span className="text-xl leading-none select-none">{lang.flag}</span>
+              <span className="text-[10px] font-semibold tracking-wide">{lang.short}</span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 export default function MobileNav() {
   const [isOpen, setIsOpen] = useState(false)
@@ -219,6 +257,11 @@ export default function MobileNav() {
           {/* Bottom spacer */}
           <div className="mt-auto pt-6 pb-4 px-2">
             <div className="h-px bg-gray-100 dark:bg-gray-800 mb-4" />
+
+            {/* Language Switcher */}
+            <LanguagePicker />
+
+            <div className="h-px bg-gray-100 dark:bg-gray-800 my-3" />
             <p className="text-xs text-gray-400 dark:text-gray-600 text-center">
               AgungKurniawan<span className="text-accentColor">.dev</span>
             </p>

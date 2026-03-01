@@ -1,0 +1,44 @@
+{
+  "hero": {
+    "greeting": "Ich bin Agung Kurniawan",
+    "role_prefix": "Ein",
+    "role": "Backend",
+    "role_suffix": "Engineer",
+    "bio": "Ein leidenschaftlicher, leistungsorientierter Backend Engineer mit Expertise im Aufbau robuster, skalierbarer und effizienter serverseitiger Systeme.",
+    "tagline": "Wo Kreativität auf Funktionalität trifft.",
+    "cta": "Kontakt"
+  },
+  "about": {
+    "quote": "Einfachheit ist die Seele der Effizienz.",
+    "title": "Über mich",
+    "paragraph1": "Mit über 4 Jahren Programmiererfahrung bin ich auf Backend Engineering spezialisiert und baue leidenschaftlich robuste, skalierbare und effiziente serverseitige Systeme. Ich entwerfe API-Architekturen, optimiere Datenbankleistung und arbeite in dynamischen, kollaborativen Umgebungen.",
+    "edu_label": "Mein Bildungshintergrund.",
+    "edu_school": "S1/D4 Politeknik Negeri Jember",
+    "edu_desc": "Studium der Informatik (D4) mit Schwerpunkten in Web-Apps, Mobile-Apps, IoT, KI & Machine Learning, Deep Learning und Netzwerken — alles in einem integrierten Gesamtsystem für jedes Semesterprojekt.",
+    "experience_label": "Jahre Erfahrung",
+    "projects_label": "Abgeschlossene Projekte",
+    "clients_label": "Beiträge"
+  },
+  "projects": {
+    "title": "Beliebte Projekte",
+    "quote_line1": "„Guter Code lässt sich leicht lesen. Großartiger Code braucht keine Erklärung.",
+    "quote_line2": "Ein Backend ist nicht nur ein Server \u2014 es ist das Fundament von allem.",
+    "see_more": "Weitere Projekte auf"
+  },
+  "blog": {
+    "title": "Blog",
+    "desc": "Ich dokumentiere meine Reise als Backend Engineer — von Systemarchitektur und API-Optimierung bis zur Erkundung von KI und neuen Technologien.",
+    "wip": "Einige Artikel sind noch in Bearbeitung. Bleib dran! 🚀",
+    "follow": "Folge mir auf TikTok"
+  },
+  "contact": {
+    "collaborate": "Zusammenarbeiten?",
+    "title": "Kontakt!",
+    "desc": "Ich freue mich immer darüber, mit Gleichgesinnten und potenziellen Kollaborateuren in Kontakt zu treten. Ob du ein Projekt besprechen möchtest, Hilfe benötigst oder einfach Hallo sagen willst — zögere nicht, mich zu kontaktieren!",
+    "tagline": "Make your happy ❤️ Today.",
+    "role": "Designer, Entwickler & Liebhaber"
+  },
+  "nav": {
+    "language": "Sprache"
+  }
+}

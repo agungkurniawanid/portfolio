@@ -12,9 +12,11 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
 import Image from "next/image";
 import SplitType from "split-type";
+import { useTranslations } from "next-intl";
 
 export default function AboutSection() {
   gsap.registerPlugin(ScrollTrigger);
+  const t = useTranslations("about");
 
   // Menginisialisasi sectionRef dengan tipe HTMLElement dan memberi tahu TypeScript bahwa ini tidak akan null
   const sectionRef = useRef<HTMLElement>(null!);
@@ -112,7 +114,7 @@ export default function AboutSection() {
     >
       <div className="w-full max-w-[1100px] h-full m-auto flex flex-col items-center gap-24">
         <div className="relative title text-xl md:text-4xl tracking-tight font-medium w-fit dark:text-white">
-          Kesederhanaan adalah jiwa dari efisiensi.
+          {t("quote")}
           <div className="absolute -right-[10px] top-2">
             <Image
               className="w-14 pointer-events-none select-none"
@@ -126,7 +128,7 @@ export default function AboutSection() {
             <div className="relative">
               <div className="overflow-hidden">
                 <div className="text-animation dark:text-accentColor text-3xl md:text-4xl font-medium">
-                  Tentang Saya
+                  {t("title")}
                 </div>
               </div>
 
@@ -149,31 +151,22 @@ export default function AboutSection() {
             <div className="flex flex-col items-start gap-4">
               <div className="overflow-hidden">
                 <div className="dark:text-white text-animation">
-                  Dengan pengalaman lebih dari 4 tahun di dunia pemrograman,
-                  saya mengkhususkan diri sebagai Backend Engineer yang
-                  passionate dalam membangun sistem server-side yang robust,
-                  scalable, dan efisien. Saya menikmati merancang arsitektur
-                  API, mengoptimalkan performa database, dan bekerja di
-                  lingkungan kolaboratif yang dinamis.
+                  {t("paragraph1")}
                 </div>
               </div>
 
               <div className="overflow-hidden">
                 <div className="dark:text-white text-animation">
-                  Background Edukasi Saya.
+                  {t("edu_label")}
                 </div>
               </div>
               <div className="flex gap-1 flex-col items-start">
                 <div className="text-accentColor">
-                  S1/D4 Politeknik Negeri Jember
+                  {t("edu_school")}
                 </div>
                 <div className="overflow-hidden">
                   <div className="dark:text-white text-animation">
-                    Menempuh pendidikan D4 Teknik Informatika yang mencakup
-                    pengembangan Web Apps, Mobile Apps, IoT, AI & Machine
-                    Learning, Deep Learning, serta Jaringan — semuanya
-                    diintegrasikan menjadi satu kesatuan sistem yang utuh
-                    di setiap project akhir semester.
+                    {t("edu_desc")}
                   </div>
                 </div>
               </div>
@@ -185,7 +178,7 @@ export default function AboutSection() {
                   <span className="experience-count">0</span>{" "}
                   <span className="text-accentColor">+</span>
                 </div>
-                <div className="dark:text-white text-sm">Experiences</div>
+                <div className="dark:text-white text-sm">{t("experience_label")}</div>
               </div>
 
               <div className="flex flex-col font-medium items-center">
@@ -194,7 +187,7 @@ export default function AboutSection() {
                   <span className="text-accentColor">+</span>
                 </div>
                 <div className="dark:text-white text-sm">
-                  Completed Projects
+                  {t("projects_label")}
                 </div>
               </div>
 
@@ -203,7 +196,7 @@ export default function AboutSection() {
                   <span className="user-count">0</span>{" "}
                   <span className="text-accentColor">+</span>
                 </div>
-                <div className="dark:text-white text-sm">Contributions</div>
+                <div className="dark:text-white text-sm">{t("clients_label")}</div>
               </div>
             </div>
           </div>

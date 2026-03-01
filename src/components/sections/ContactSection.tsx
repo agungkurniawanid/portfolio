@@ -6,9 +6,11 @@ import { useSectionStore } from "@/stores/Section"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 export default function ContactSection() {
   gsap.registerPlugin(ScrollTrigger);
+  const t = useTranslations("contact");
 
   // Fix: Properly type the ref
   const sectionRef = useRef<HTMLElement>(null);
@@ -77,12 +79,12 @@ export default function ContactSection() {
         <div className="flex flex-col items-center gap-2">
           <div className="overflow-hidden">
             <div className="title-animation dark:text-white text-lg">
-              Mau Kolaborasi?
+              {t("collaborate")}
             </div>
           </div>
           <div className="overflow-hidden">
             <div className="title-animation text-5xl navlink text-accentColor">
-              Contact Saya!
+              {t("title")}
             </div>
           </div>
         </div>
@@ -163,16 +165,16 @@ export default function ContactSection() {
               Agung Kurniawan
             </div>
             <div className="dark:text-white text-sm">
-              Designer, Developer & Lover
+              {t("role")}
             </div>
           </div>
           <div className="overflow-hidden flex justify-center items-center">
             <div className="title-animation w-full md:max-w-[80%] text-center dark:text-gray-400">
-            Saya selalu senang untuk terhubung dengan para profesional yang memiliki pemikiran serupa dan calon kolaborator. Apakah Anda memiliki proyek yang ingin didiskusikan, membutuhkan bantuan, atau sekadar ingin menyapa, jangan ragu untuk menghubungi saya!
+            {t("desc")}
             </div>
           </div>
           <div className="end-title dark:text-white text-md">
-            Make your happy ❤️ Today.
+            {t("tagline")}
             <br />
             <br />
             <br />

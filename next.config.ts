@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
       // Spotify
       { protocol: "https", hostname: "i.scdn.co" },
       { protocol: "https", hostname: "mosaic.scdn.co" },
+      // Flag CDN
+      { protocol: "https", hostname: "flagcdn.com" },
     ],
   },
 

@@ -52,6 +52,7 @@ export interface FormData {
   name: string
   city: string
   profession: string
+  contact: string
   referral_source: string
   mood: string
   rating: number
@@ -66,6 +67,7 @@ const INITIAL_FORM: FormData = {
   name: "",
   city: "",
   profession: "",
+  contact: "",
   referral_source: "",
   mood: "",
   rating: 0,
@@ -237,6 +239,7 @@ function PreviewCard({ form }: { form: FormData }) {
     card_color: form.card_color,
     avatar_url: form.avatarPreview,
     referral_source: form.referral_source || "Google Search",
+    contact: form.contact || null,
     is_approved: true,
     created_at: new Date().toISOString(),
   }
@@ -365,6 +368,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
           card_color: form.card_color,
           avatar_url: avatarUrl,
           referral_source: form.referral_source,
+          contact: form.contact.trim() || null,
         })
         .select()
         .single()
@@ -486,7 +490,26 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
-                    👤 Nama Lengkap <span className="text-red-500">*</span>
+                    � Instagram / WhatsApp <span className="text-gray-400 font-normal">(opsional)</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={form.contact}
+                      onChange={(e) => update("contact", e.target.value)}
+                      placeholder="@username atau 08xxxxxxxxxx"
+                      maxLength={60}
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 outline-none transition-all border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-accentColor/30 focus:border-accentColor"
+                    />
+                  </div>
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    Ketik <span className="font-semibold">@username</span> untuk Instagram atau nomor HP untuk WhatsApp
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    �👤 Nama Lengkap <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"

@@ -10,6 +10,7 @@ import { StaticImageData } from "next/image";
 import Link from "next/link";
 import { RoughNotation } from "react-rough-notation";
 import ProjectCard from "../ProjectCard";
+import { useTranslations } from "next-intl";
 import ThumbGreenhouse from "@/assets/thumbnails/Intelligence-Quality-Air-Control-System-Greenhouse-Kopi-Nrsery-App.jpeg";
 import ThumbEmotional from "@/assets/thumbnails/Emotional-Faces-Classification.jpeg";
 import ThumbKampSewa from "@/assets/thumbnails/Marketplace-KampSewa_-Jual-Beli,-Sewa-dan-Menyewakan-Alat-Kamping-App.jpeg";
@@ -22,6 +23,7 @@ import ThumbHandyCraft from "@/assets/thumbnails/HandyCraft-App.jpeg";
 
 export default function ProjectSection() {
   gsap.registerPlugin(ScrollTrigger);
+  const t = useTranslations("projects");
 
   const sectionRef = useRef<HTMLElement>(null);
   const elementRef = useRef<HTMLDivElement>(null);
@@ -77,16 +79,13 @@ export default function ProjectSection() {
             show={isOnScreen}
           >
             <div className="text-xl md:text-4xl tracking-tight font-medium w-fit text-black">
-              Popular Projects
+              {t("title")}
             </div>
           </RoughNotation>
           <div ref={elementRef} className="overflow-hidden ">
             <div className="qoutes-animation md:w-full text-center font-medium flex flex-col items-center text-black">
-              <div>
-                &quot;Kode yang baik itu mudah dibaca. Kode yang hebat itu
-                tidak perlu dijelaskan.
-              </div>
-              <div>Backend bukan sekadar server — ia adalah fondasi dari segalanya.&quot;</div>
+              <div>{t("quote_line1")}</div>
+              <div>{t("quote_line2")}</div>
             </div>
           </div>
         </div>
@@ -97,7 +96,7 @@ export default function ProjectSection() {
         </div>
 
         <div className="font-medium text-black">
-          Lihat project lainnya di{" "}
+          {t("see_more")}{" "}
           <Link
             href="https://github.com/agungkurniawanid"
             target="_blank"

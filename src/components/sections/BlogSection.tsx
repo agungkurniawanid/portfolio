@@ -11,9 +11,11 @@ import { ArrowRight } from "iconsax-react"
 import Link from "next/link"
 import { RoughNotation } from "react-rough-notation"
 import BlogCard from "../BlogCard"
+import { useTranslations } from "next-intl"
 
 export default function BlogSection() {
   gsap.registerPlugin(ScrollTrigger);
+  const t = useTranslations("blog");
 
   // Fix: Properly type the refs
   const sectionRef = useRef<HTMLElement>(null);
@@ -85,15 +87,15 @@ export default function BlogSection() {
             show={isOnScreen}
           >
             <div className="text-xl md:text-4xl tracking-tight font-medium w-fit dark:text-accentColor">
-              Blog
+              {t("title")}
             </div>
           </RoughNotation>
           <div ref={elementRef} className="overflow-hidden flex flex-col gap-1">
             <div className="qoutes-animation mx-auto text-center text-sm dark:text-white flex flex-col items-center font-normal">
-            Saya mendokumentasikan perjalanan sebagai Backend Engineer — mulai dari arsitektur sistem, optimasi API, hingga eksplorasi AI dan teknologi baru.
+            {t("desc")}
             </div>
             <div className="qoutes-animation mx-auto text-center text-sm dark:text-white flex flex-col items-center font-normal">
-              <div>Beberapa artikel masih dalam proses penulisan. Nantikan tulisan berikutnya! 🚀</div>
+              <div>{t("wip")}</div>
             </div>
           </div>
         </div>
@@ -112,7 +114,7 @@ export default function BlogSection() {
           className="flex items-center gap-2"
         >
           <div className="text-accentColor navlink text-sm italic">
-            Follow saya di TikTok
+            {t("follow")}
           </div>
           <ArrowRight color="white" size={15} />
         </Link>

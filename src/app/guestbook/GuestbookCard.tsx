@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow } from "date-fns"
 import { id as localeId } from "date-fns/locale"
-import { MapPin, Briefcase, Star, ExternalLink, Clock } from "lucide-react"
+import { MapPin, Briefcase, Star, ExternalLink, Clock, Instagram, Phone } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useRef } from "react"
 
@@ -17,6 +17,7 @@ export interface GuestbookEntry {
   card_color: string
   avatar_url: string | null
   referral_source: string
+  contact: string | null
   is_approved: boolean
   created_at: string
 }
@@ -218,6 +219,18 @@ export default function GuestbookCard({ entry, isNew = false }: Props) {
           {entry.message}
         </p>
       </blockquote>
+
+      {/* Contact */}
+      {entry.contact && (
+        <div className="flex items-center gap-1.5 text-xs" style={{ color: entry.card_color }}>
+          {entry.contact.startsWith("@") ? (
+            <Instagram size={11} className="shrink-0" />
+          ) : (
+            <Phone size={11} className="shrink-0" />
+          )}
+          <span className="truncate font-medium">{entry.contact}</span>
+        </div>
+      )}
 
       {/* Footer */}
       <div className="flex items-center justify-between flex-wrap gap-2 pt-1 border-t border-gray-100 dark:border-gray-700/50">

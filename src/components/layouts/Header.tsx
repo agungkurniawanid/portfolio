@@ -9,6 +9,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import ResumeBtn from "../ResumeButton"
 import ThemeSwitch from "../ThemeSwitch"
+import LanguageSwitcher from "../LanguageSwitcher"
 import MobileNav from "./MobileNav"
 import { cn } from "@/lib/Utils"
 import { ChevronDown } from "lucide-react"
@@ -191,7 +192,8 @@ export default function Header() {
           </nav>
 
           {/* Right side */}
-          <div className="flex items-center justify-end gap-2 md:gap-4 shrink-0">
+          <div className="flex items-center justify-end gap-1.5 md:gap-2 shrink-0">
+            <LanguageSwitcher />
             <ResumeBtn />
             <ThemeSwitch />
             <MobileNav />

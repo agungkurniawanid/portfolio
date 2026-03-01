@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS guestbook (
   rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
   card_color VARCHAR(20) NOT NULL DEFAULT '#6366f1',
   avatar_url VARCHAR(500) NULL,
+  contact VARCHAR(100) NULL,
   referral_source VARCHAR(50) NOT NULL,
   is_approved BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -78,7 +79,19 @@ BEGIN
   END IF;
 END $$;
 
--- Storage bucket untuk avatar (jalankan di Supabase Dashboard jika belum ada)
--- INSERT INTO storage.buckets (id, name, public) VALUES ('guestbook-avatars', 'guestbook-avatars', true);
--- CREATE POLICY "Public read avatar" ON storage.objects FOR SELECT USING (bucket_id = 'guestbook-avatars');
--- CREATE POLICY "Anyone can upload avatar" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'guestbook-avatars');
+-- Storage bucket untuk avatar
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('guestbook-avatars', 'guestbook-avatars', true)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "Public read guestbook avatar"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'guestbook-avatars');
+
+CREATE POLICY "Anyone can upload guestbook avatar"
+  ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'guestbook-avatars');
+
+CREATE POLICY "Anyone can delete own guestbook avatar"
+  ON storage.objects FOR DELETE
+  USING (bucket_id = 'guestbook-avatars');

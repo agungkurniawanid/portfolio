@@ -4,6 +4,7 @@ import Header from "@/components/layouts/Header"
 import GuestbookBanner from "@/components/GuestbookBanner"
 import "./globals.css"
 import { ThemeProvider } from "@/providers/ThemeProvider"
+import IntlProvider from "@/providers/IntlProvider"
 import WelcomePopup from "@/components/WelcomePopup"
 
 const jost = Jost({ subsets: ["latin"] })
@@ -47,17 +48,19 @@ export default function RootLayout({
         {/* <Loader /> */}
         {/* Loading animation (0–12 counter) — uncomment to re-enable */}
 
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <GuestbookBanner />
-          <Header />
-          <WelcomePopup />
-          {children}
-        </ThemeProvider>
+        <IntlProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <GuestbookBanner />
+            <Header />
+            <WelcomePopup />
+            {children}
+          </ThemeProvider>
+        </IntlProvider>
       </body>
     </html>
   )

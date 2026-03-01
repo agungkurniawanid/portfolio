@@ -17,10 +17,9 @@ import {
   SiFramer, SiNodedotjs, SiFastapi, SiLaravel,
   SiPython, SiPhp, SiTensorflow, SiPytorch, SiScikitlearn,
   SiDocker, SiGit, SiGithub, SiLinux, SiVercel,
-  SiMongodb, SiMysql, SiPostgresql, SiFirebase, SiRedux, SiOpenai,
+  SiMongodb, SiMysql, SiPostgresql, SiFirebase, SiOpenai,
   SiCplusplus, SiDjango, SiFlask, SiNestjs, SiExpress,
 } from "react-icons/si";
-import { FaBrain, FaMicrochip } from "react-icons/fa";
 import ProfileImg from "@/assets/SAVE_20221213_123032 (1).jpg";
 import { cn } from "@/lib/Utils";
 

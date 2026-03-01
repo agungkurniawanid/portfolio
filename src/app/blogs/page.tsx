@@ -5,8 +5,7 @@ import { useBlogStore } from "@/stores/BlogStore"
 import { BlogCategory } from "@/types/blog"
 import BlogPageCard from "@/components/blog/BlogPageCard"
 import ArticleModal from "@/components/blog/ArticleModal"
-import Link from "next/link"
-import { Search, PenSquare, LayoutGrid, List, ArrowLeft, Rss, ChevronLeft, ChevronRight } from "lucide-react"
+import { Search, PenSquare, LayoutGrid, List, Rss, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/Utils"
 
 const CATEGORIES: (BlogCategory | "All")[] = [

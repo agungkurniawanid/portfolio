@@ -13,14 +13,14 @@ export const metadata: Metadata = {
   applicationName: "Portfolio",
   openGraph: {
     type: "website",
-    url: "https://agungkurniawandev.netlify.app/",
+    url: "https://gungzzleefy.vercel.app/",
     title: "AgungKurniawan.dev",
     description:
       "Portfolio website developed with NextJS, TypeScript, ShadcnUI & GSAP.",
     siteName: "Portfolio website",
     images: [
       {
-        url: "https://agungkurniawandev.netlify.app/thumbnail-url-share.jpeg",
+        url: "https://gungzzleefy.vercel.app/thumbnail-url-share.jpeg",
       },
     ],
   },

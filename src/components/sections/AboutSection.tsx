@@ -149,11 +149,12 @@ export default function AboutSection() {
             <div className="flex flex-col items-start gap-4">
               <div className="overflow-hidden">
                 <div className="dark:text-white text-animation">
-                  Dengan pengalaman lebih dari 2 tahun sebagai pengembang
-                  Software, saya mengkhususkan diri dalam membuat aplikasi web
-                  yang responsif dan ramah pengguna. Saya ahli dalam menciptakan
-                  antarmuka yang intuitif dan menikmati bekerja di lingkungan
-                  kolaboratif yang gesit.
+                  Dengan pengalaman lebih dari 4 tahun di dunia pemrograman,
+                  saya mengkhususkan diri sebagai Backend Engineer yang
+                  passionate dalam membangun sistem server-side yang robust,
+                  scalable, dan efisien. Saya menikmati merancang arsitektur
+                  API, mengoptimalkan performa database, dan bekerja di
+                  lingkungan kolaboratif yang dinamis.
                 </div>
               </div>
 

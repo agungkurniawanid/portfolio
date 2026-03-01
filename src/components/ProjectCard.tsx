@@ -54,7 +54,7 @@ export default function ProjectCard({ item }: Props) {
         className="relative col-span-1 w-full flex flex-col shadow-shadow0 border rounded-2xl overflow-hidden bg-white hover:shadow-lg transition-shadow duration-300"
       >
         {/* Thumbnail */}
-        <div className="relative w-full h-36 overflow-hidden">
+        <div className="relative w-full aspect-video overflow-hidden">
           <Image
             priority
             alt={item.title}

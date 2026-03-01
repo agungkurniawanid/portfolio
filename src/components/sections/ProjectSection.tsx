@@ -10,7 +10,15 @@ import { StaticImageData } from "next/image";
 import Link from "next/link";
 import { RoughNotation } from "react-rough-notation";
 import ProjectCard from "../ProjectCard";
-import ImageOne from "@/assets/projects/thumbnail_in_progress2.png";
+import ThumbGreenhouse from "@/assets/thumbnails/Intelligence-Quality-Air-Control-System-Greenhouse-Kopi-Nrsery-App.jpeg";
+import ThumbEmotional from "@/assets/thumbnails/Emotional-Faces-Classification.jpeg";
+import ThumbKampSewa from "@/assets/thumbnails/Marketplace-KampSewa_-Jual-Beli,-Sewa-dan-Menyewakan-Alat-Kamping-App.jpeg";
+import ThumbSpeech from "@/assets/thumbnails/Speech-to-Speech-With-AI-ElevenLabs-App.jpeg";
+import ThumbDapnetwork from "@/assets/thumbnails/Dapnetwork-(Old-Version)-App.jpeg";
+import ThumbClock from "@/assets/thumbnails/Clock-App.jpeg";
+import ThumbElectroMart from "@/assets/thumbnails/Electro-Mart-App.jpeg";
+import ThumbQRCode from "@/assets/thumbnails/QR-Code-Reader-App.jpeg";
+import ThumbHandyCraft from "@/assets/thumbnails/HandyCraft-App.jpeg";
 
 export default function ProjectSection() {
   gsap.registerPlugin(ScrollTrigger);
@@ -126,7 +134,7 @@ const projects: Project[] = [
     description:
       "Menggabungkan Situs Web, Aplikasi Seluler, dan IoT. Proyek ini merupakan sistem kontrol kualitas udara berbasis kecerdasan buatan yang dirancang khusus untuk pembibitan kopi. Sistem ini bertujuan untuk memantau, menganalisis, dan mengontrol udara serta mendiagnosis penyakit kopi melalui aplikasi seluler dengan deep learning CNN.",
     platformApp: ["Web App", "Mobile App", "IoT Device"],
-    image: ImageOne,
+    image: ThumbGreenhouse,
     githubURL: {
       web: "https://github.com/agungkurniawanid/kopi_greenhouse_aircontrol_web",
       mobile:
@@ -153,7 +161,7 @@ const projects: Project[] = [
     description:
       "Sebuah aplikasi yang dibuat untuk memberikan kesimpulan pada foto yang diupload dengan beberapa ekspresi yang akan didapatkan seperti marah, sedih dan lain-lain. Aplikasi ini dibuat dengan Flutter untuk App, Nextjs dan Fast API untuk backend, dan metode deep learning yaitu Convolutional Neural Network.",
     platformApp: ["Web App", "Mobile App"],
-    image: ImageOne,
+    image: ThumbEmotional,
     githubURL: {
       web: "https://github.com/agungkurniawanid/emotional_faces_classification_web",
       mobile:
@@ -180,7 +188,7 @@ const projects: Project[] = [
     description:
       "Aplikasi yang menyediakan penyewaan & penyewaan peralatan berkemah ke seluruh wilayah yang memungkinkan pengguna untuk saling menyewakan dan menyewakan peralatan berkemah mereka.",
     platformApp: ["Web App", "Mobile App"],
-    image: ImageOne,
+    image: ThumbKampSewa,
     githubURL: {
       web: "https://github.com/agungkurniawanid/marketplace_kampsewa_web",
       mobile: "https://github.com/agungkurniawanid/marketplace_kampsewa_app",
@@ -195,7 +203,7 @@ const projects: Project[] = [
     description:
       "Sebuah aplikasi di mana pengguna dapat melakukan percakapan dua arah dengan AI, speech to speech dalam aplikasi ini dilakukan secara Real-Time. Dibangun dengan API Gemini dan ElevenLabs AI.",
     platformApp: ["Mobile App"],
-    image: ImageOne,
+    image: ThumbSpeech,
     githubURL: {
       mobile:
         "https://github.com/agungkurniawanid/speech_to_speech_ai_evenlabs_app",
@@ -210,7 +218,7 @@ const projects: Project[] = [
     description:
       "Aplikasi DAPNetwork, yang dikembangkan oleh DAPNetwork, membuat manajemen jaringan internet menjadi mudah. Aplikasi ini mencakup platform seluler bagi staf untuk menangani penagihan dan pemasangan pelanggan baru, dan situs web bagi admin untuk mengelola operasi melalui dasbor yang komprehensif.",
     platformApp: ["Web App", "Mobile App"],
-    image: ImageOne,
+    image: ThumbDapnetwork,
     githubURL: {
       webs: "https://github.com/agungkurniawanid/dapnetwork_web",
       mobile: "https://github.com/agungkurniawanid/dapnetwork_old_app",
@@ -225,7 +233,7 @@ const projects: Project[] = [
     description:
       "Clock App adalah aplikasi canggih yang dirancang untuk memberikan pengalaman pengguna terbaik dalam mengelola waktu.",
     platformApp: ["Mobile App"],
-    image: ImageOne,
+    image: ThumbClock,
     githubURL: {
       mobile: "https://github.com/agungkurniawanid/clock_app",
     },
@@ -239,7 +247,7 @@ const projects: Project[] = [
     description:
       "Aplikasi E-Commerce untuk menjual peralatan elektronik seperti Laptop, Komputer, TV dan lain-lain. Dibuat dengan Flutter untuk aplikasi mobile dan Nextjs untuk aplikasi website.",
     platformApp: ["Web App", "Mobile App"],
-    image: ImageOne,
+    image: ThumbElectroMart,
     githubURL: {
       web: "https://github.com/agungkurniawanid/electro_mart_web",
       mobile: "https://github.com/agungkurniawanid/electro_mart_app",
@@ -254,7 +262,7 @@ const projects: Project[] = [
     description:
       "QRCode Reader adalah aplikasi yang memungkinkan pengguna untuk memindai dan membaca kode QR dengan cepat dan efisien. Aplikasi ini mendukung berbagai jenis konten yang dikodekan dalam QR, seperti URL, teks, kontak, dan informasi lainnya.",
     platformApp: ["Mobile App"],
-    image: ImageOne,
+    image: ThumbQRCode,
     githubURL: {
       mobile: "https://github.com/agungkurniawanid/qrcode_reader_app",
     },
@@ -268,7 +276,7 @@ const projects: Project[] = [
     description:
       "Aplikasi untuk UMKM yang bergerak di bidang usaha kerajinan dan perkakas, aplikasi ini berisi sistem yang dapat mengatur transaksi, keuangan seperti pemasukan dan pengeluaran serta pemasukan dari supplier. Dan integrasi Firebase",
     platformApp: ["Mobile App"],
-    image: ImageOne,
+    image: ThumbHandyCraft,
     githubURL: {
       mobile: "https://github.com/agungkurniawanid/handycraft_app",
     },

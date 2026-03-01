@@ -21,7 +21,7 @@ import {
   SiCplusplus,
 } from "react-icons/si";
 import { FaBrain, FaMicrochip } from "react-icons/fa";
-import ProfileImg from "@/assets/me-5.jpg";
+import ProfileImg from "@/assets/SAVE_20221213_123032 (1).jpg";
 import { cn } from "@/lib/Utils";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -386,7 +386,7 @@ export default function AboutPage() {
                 {/* Online badge */}
                 <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-white dark:bg-gray-900 text-xs font-medium px-3 py-1.5 rounded-full shadow-lg border border-gray-200 dark:border-gray-700">
                   <span className="w-2 h-2 rounded-full bg-accentColor animate-pulse" />
-                  <span className="text-gray-700 dark:text-gray-300">Open to Work</span>
+                  <span className="text-gray-700 dark:text-gray-300">Open to Collaboration</span>
                 </div>
               </div>
             </div>

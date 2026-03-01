@@ -39,7 +39,7 @@ export default function SocialLinks() {
 
       <div className="hidden md:block absolute bottom-4 right-4">
         <Link
-          href="/maintenance"
+          href="/projects"
           aria-label="project"
           className="flex items-center gap-2 dark:text-gray-400"
         >

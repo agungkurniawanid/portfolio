@@ -105,7 +105,7 @@ export default function ContactSection() {
             </Link>
 
             <Link
-              href="https://x.com/gungzzlee"
+              href="https://x.com/Gungzzleefy"
               aria-label="Contact me on Twitter"
               target="_blank"
               rel="noopener noreferrer"

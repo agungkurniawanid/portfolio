@@ -40,6 +40,7 @@ export default function RichTextEditor({
   placeholder = "Tulis konten artikel di sini...",
 }: RichTextEditorProps) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         codeBlock: false,

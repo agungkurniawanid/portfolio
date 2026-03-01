@@ -25,10 +25,45 @@ import {
   FaUser,
   FaComment,
   FaPaperPlane,
+  FaStar,
 } from "react-icons/fa";
 import { ReactNode } from "react";
+import emailjs from "@emailjs/browser";
 
 gsap.registerPlugin(ScrollTrigger);
+
+/* ─────────────────── EmailJS Config ─────────────────── */
+const EMAILJS_SERVICE_ID  = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID  ?? "YOUR_SERVICE_ID";
+const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_CONTACT_TEMPLATE_ID ?? process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID ?? "YOUR_TEMPLATE_ID";
+const EMAILJS_PUBLIC_KEY  = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY  ?? "YOUR_PUBLIC_KEY";
+
+/* ─────────────────── Toast ─────────────────── */
+type ToastType = "success" | "error";
+
+function Toast({ message, type, onDone }: { message: string; type: ToastType; onDone: () => void }) {
+  const toastRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!toastRef.current) return;
+    gsap.fromTo(toastRef.current, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" });
+    const t = setTimeout(() => {
+      gsap.to(toastRef.current, { y: 40, opacity: 0, duration: 0.3, ease: "power2.in", onComplete: onDone });
+    }, 3200);
+    return () => clearTimeout(t);
+  }, [onDone]);
+
+  return (
+    <div
+      ref={toastRef}
+      className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[300] flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl text-white text-sm font-semibold pointer-events-none select-none ${
+        type === "success" ? "bg-accentColor" : "bg-red-500"
+      }`}
+    >
+      <span>{type === "success" ? "✅" : "❌"}</span>
+      <span>{message}</span>
+    </div>
+  );
+}
 
 /* ─────────────────── Types ─────────────────── */
 
@@ -372,12 +407,51 @@ function SocialCard({ platform, index }: { platform: SocialPlatform; index: numb
   );
 }
 
+/* ─────────────────── Star Rating ─────────────────── */
+function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const [hover, setHover] = useState(0);
+  return (
+    <div className="flex gap-1" role="group" aria-label="Rating bintang">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          type="button"
+          key={star}
+          aria-label={`Beri ${star} bintang`}
+          onClick={() => onChange(star)}
+          onMouseEnter={() => setHover(star)}
+          onMouseLeave={() => setHover(0)}
+          className="transition-transform duration-150 hover:scale-110 focus:outline-none"
+        >
+          <FaStar
+            size={28}
+            className={`transition-colors duration-150 ${
+              star <= (hover || value) ? "text-yellow-400" : "text-gray-300 dark:text-gray-600"
+            }`}
+          />
+        </button>
+      ))}
+    </div>
+  );
+}
+
 /* ─────────────────── Contact Form Component ─────────────────── */
 
 function ContactForm() {
   const formRef = useRef<HTMLDivElement>(null);
-  const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    purpose: "",
+    rating: 0,
+    source: "",
+    message: "",
+  });
+  const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+
+  const set = (field: string, value: string | number) =>
+    setForm((prev) => ({ ...prev, [field]: value }));
 
   useEffect(() => {
     if (!formRef.current) return;
@@ -399,18 +473,40 @@ function ContactForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.rating) {
+      setToast({ message: "Pilih rating bintang terlebih dahulu.", type: "error" });
+      return;
+    }
     setStatus("sending");
-    // Simulate sending
-    await new Promise((r) => setTimeout(r, 1500));
-    setStatus("sent");
-    setFormData({ name: "", email: "", subject: "", message: "" });
-    setTimeout(() => setStatus("idle"), 4000);
+
+    const stars = "⭐".repeat(form.rating) + " " + `(${form.rating}/5)`;
+    const templateParams = {
+      from_name  : form.name,
+      from_email : form.email,
+      phone      : form.phone || "-",
+      purpose    : form.purpose,
+      rating     : stars,
+      source     : form.source || "-",
+      message    : form.message,
+    };
+
+    try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_PUBLIC_KEY);
+      setStatus("sent");
+      setToast({ message: "Pesan berhasil dikirim! Terima kasih 🙏", type: "success" });
+      setForm({ name: "", email: "", phone: "", purpose: "", rating: 0, source: "", message: "" });
+    } catch {
+      setStatus("idle");
+      setToast({ message: "Gagal mengirim pesan, coba lagi.", type: "error" });
+    }
   };
 
-  const inputClass =
-    "w-full bg-white/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-accentColor focus:ring-1 focus:ring-accentColor transition-all duration-200";
+  const inputCls =
+    "w-full bg-gray-50 dark:bg-[#1c2426] border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-accentColor focus:ring-1 focus:ring-accentColor transition-all duration-200";
+  const selectExtraCls = "[&>option]:bg-white [&>option]:text-gray-800 dark:[&>option]:bg-[#1c2426] dark:[&>option]:text-white";
 
   return (
+    <>
     <div ref={formRef} className="w-full max-w-2xl mx-auto">
       <div className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white/60 dark:bg-white/5 backdrop-blur-sm p-8 shadow-xl dark:shadow-none">
         {status === "sent" ? (
@@ -424,68 +520,124 @@ function ContactForm() {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <FaUser size={10} /> Nama
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {/* Name + Email */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Nama Lengkap <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Nama lengkap"
-                  className={inputClass}
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="John Doe"
+                  className={inputCls}
+                  value={form.name}
+                  onChange={(e) => set("name", e.target.value)}
                 />
               </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <FaEnvelope size={10} /> Email
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Email <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="email"
                   required
                   placeholder="email@example.com"
-                  className={inputClass}
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className={inputCls}
+                  value={form.email}
+                  onChange={(e) => set("email", e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                <FaComment size={10} /> Subjek
+            {/* Phone */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                No. WhatsApp / HP{" "}
+                <span className="text-gray-400 dark:text-gray-500 font-normal normal-case">(opsional)</span>
               </label>
               <input
-                type="text"
-                required
-                placeholder="Tentang apa yang ingin kamu diskusikan?"
-                className={inputClass}
-                value={formData.subject}
-                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                type="tel"
+                placeholder="+62 812 3456 7890"
+                className={inputCls}
+                value={form.phone}
+                onChange={(e) => set("phone", e.target.value)}
               />
             </div>
 
+            {/* Purpose */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Keperluan / Tujuan <span className="text-red-400">*</span>
+              </label>
+              <select
+                required
+                className={`${inputCls} ${selectExtraCls} cursor-pointer`}
+                value={form.purpose}
+                onChange={(e) => set("purpose", e.target.value)}
+              >
+                <option value="" disabled>Pilih keperluan Anda...</option>
+                <option value="Sekadar Mampir &amp; Memberi Feedback">Sekadar Mampir &amp; Memberi Feedback</option>
+                <option value="Project Collaboration">Project Collaboration</option>
+                <option value="Freelance / Hire Me">Freelance / Hire Me</option>
+                <option value="General Question">General Question</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            {/* Star rating */}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                <FaComment size={10} /> Pesan
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Rating Pengalaman Website <span className="text-red-400">*</span>
+              </label>
+              <StarRating value={form.rating} onChange={(v) => set("rating", v)} />
+              {form.rating > 0 && (
+                <p className="text-xs text-accentColor font-medium">
+                  {["", "Perlu banyak perbaikan 😅", "Cukup, tapi bisa lebih baik 🤔", "Lumayan bagus! 😊", "Bagus sekali! 😄", "Luar biasa! ⭐🔥"][form.rating]}
+                </p>
+              )}
+            </div>
+
+            {/* Source */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Dari mana tahu website ini?{" "}
+                <span className="text-gray-400 dark:text-gray-500 font-normal normal-case">(opsional)</span>
+              </label>
+              <select
+                className={`${inputCls} ${selectExtraCls} cursor-pointer`}
+                value={form.source}
+                onChange={(e) => set("source", e.target.value)}
+              >
+                <option value="">Pilih sumber...</option>
+                <option value="Google Search">Google Search</option>
+                <option value="Instagram">Instagram</option>
+                <option value="LinkedIn">LinkedIn</option>
+                <option value="Referral / Teman">Referral / Teman</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            {/* Message */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Pesan / Kesan &amp; Saran <span className="text-red-400">*</span>
               </label>
               <textarea
                 required
-                rows={5}
-                placeholder="Tuliskan pesanmu di sini..."
-                className={`${inputClass} resize-none`}
-                value={formData.message}
-                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                rows={4}
+                placeholder="Tuliskan pesan, kesan, atau saran Anda di sini..."
+                className={`${inputCls} resize-none`}
+                value={form.message}
+                onChange={(e) => set("message", e.target.value)}
               />
             </div>
 
             <button
               type="submit"
               disabled={status === "sending"}
-              className="flex items-center justify-center gap-2 py-3 px-8 rounded-xl bg-accentColor text-white font-semibold text-sm transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-accentColor/20"
+              className="flex items-center justify-center gap-2 py-3 px-8 rounded-xl bg-accentColor text-white font-semibold text-sm transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-accentColor/25"
             >
               {status === "sending" ? (
                 <>
@@ -503,6 +655,10 @@ function ContactForm() {
         )}
       </div>
     </div>
+    {toast && (
+      <Toast message={toast.message} type={toast.type} onDone={() => setToast(null)} />
+    )}
+    </>
   );
 }
 

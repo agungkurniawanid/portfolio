@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Link from "next/link";
 import {
-  FaArrowLeft, FaStar, FaCodeBranch, FaExternalLinkAlt, FaGithub,
+   FaStar, FaCodeBranch, FaExternalLinkAlt, FaGithub,
   FaLock, FaBriefcase, FaGraduationCap, FaRocket, FaMobileAlt,
   FaGlobe, FaBrain, FaBuilding,
 } from "react-icons/fa";

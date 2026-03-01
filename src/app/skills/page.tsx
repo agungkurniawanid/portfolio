@@ -12,7 +12,7 @@ import {
   SiMongodb, SiMysql, SiPostgresql, SiFirebase, SiAmazon, SiGooglecloud,
   SiRedux, SiOpenai,
 } from "react-icons/si";
-import { FaMicrochip, FaBrain, FaArrowLeft } from "react-icons/fa";
+import { FaMicrochip, FaBrain } from "react-icons/fa";
 import { ReactNode } from "react";
 
 gsap.registerPlugin(ScrollTrigger);

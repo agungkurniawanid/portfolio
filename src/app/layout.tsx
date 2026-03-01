@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import { Jost } from "next/font/google"
 import Header from "@/components/layouts/Header" 
 import "./globals.css"
-import Loader from "@/components/Loader"
 import { ThemeProvider } from "@/providers/ThemeProvider"
 import WelcomePopup from "@/components/WelcomePopup"
 

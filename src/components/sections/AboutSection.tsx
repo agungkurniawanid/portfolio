@@ -8,8 +8,8 @@ import Star from "@/assets/about/star.svg";
 import Triangle from "@/assets/about/triangle.svg";
 import ShinThantImage from "@/assets/IMG_20221112_005922.jpg";
 import { useSectionStore } from "@/stores/Section";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import { gsap } from 'gsap';
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
 import Image from "next/image";
 import SplitType from "split-type";
 

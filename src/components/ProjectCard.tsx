@@ -2,12 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import { Project } from "./sections/ProjectSection";
-import { Code2, FileCode, Github, MonitorSmartphone } from "lucide-react";
-import { getTechIcon } from "./TechIcon";
-import { FaYoutube } from "react-icons/fa";
+import { MonitorSmartphone } from "lucide-react";
+import ProjectDetailModal from "./ProjectDetailModal";
 
 interface Props {
   item: Project;
@@ -16,6 +15,7 @@ interface Props {
 export default function ProjectCard({ item }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [starCount, setStarCount] = useState<number>(0);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -29,13 +29,8 @@ export default function ProjectCard({ item }: Props) {
 
     tl.fromTo(
       cardRef.current,
-      {
-        scale: 0,
-      },
-      {
-        scale: 1,
-        ease: "power1.inOut",
-      }
+      { scale: 0, opacity: 0 },
+      { scale: 1, opacity: 1, ease: "power1.inOut", duration: 0.4 }
     );
   }, []);
 
@@ -46,139 +41,79 @@ export default function ProjectCard({ item }: Props) {
       const response = await fetch(item.githubApi);
       const data = await response.json();
       const stargazersCount = data.stargazers_count;
-      const stargazersUrl = data.stargazers_url;
-
-      if (stargazersCount && stargazersUrl && !ignore) {
-        setStarCount(stargazersCount);
-      }
+      if (stargazersCount && !ignore) setStarCount(stargazersCount);
     }
-
     fetchData();
-    return () => {
-      ignore = true;
-    };
+    return () => { ignore = true; };
   }, [item.githubApi]);
 
   return (
-    <div
-      ref={cardRef}
-      className="relative overflow-hidden col-span-1 w-full flex flex-col shadow-shadow0 border rounded-[0.75rem]"
-    >
-      <div className="w-full aspect-video relative">
-        <Image
-          priority
-          alt={item.title}
-          src={item.image}
-          className="object-cover aspect-square"
-        />
-      </div>
+    <>
+      <div
+        ref={cardRef}
+        className="relative col-span-1 w-full flex flex-col shadow-shadow0 border rounded-2xl overflow-hidden bg-white hover:shadow-lg transition-shadow duration-300"
+      >
+        {/* Thumbnail */}
+        <div className="relative w-full h-36 overflow-hidden">
+          <Image
+            priority
+            alt={item.title}
+            src={item.image}
+            fill
+            className="object-cover"
+          />
+        </div>
 
-      <div className="flex-1 group relative p-4 flex flex-col gap-4 after:content-[''] after:rounded-full after:absolute after:z-[10] after:w-[32px] after:h-[32px] after:bg-accentColor after:scale-[1] after:bottom-[-24px] after:right-[-24px] after:origin-center after:transition-transform after:duration-500 after:ease-out hover:after:scale-[50] overflow-hidden">
-        <div className="z-20 flex flex-col gap-2">
-          <div className="flex justify-between items-center">
-            <h3 className="text-accentColor group-hover:text-white font-medium">
-              {item.title}
-            </h3>
-            <div className="flex items-center group">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="scale-[0.7] group-hover:-rotate-12"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="#000000"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" />
-              </svg>
-              <div className="font-medium text-sm">{starCount}</div>
-            </div>
-          </div>
-          <p className="text-black text-sm group-hover:text-white line-clamp-3">
+        {/* Info */}
+        <div className="flex flex-col gap-2 p-4 flex-1">
+          <h3 className="text-accentColor font-semibold text-sm leading-snug line-clamp-2">
+            {item.title}
+          </h3>
+
+          <p className="text-xs text-gray-600 line-clamp-2">
             {item.description}
           </p>
-        </div>
 
-        {/* Platform Section */}
-        <div className="z-20">
-          <div className="flex items-center gap-2 text-black group-hover:text-white text-[14px] font-medium mb-2">
-            <MonitorSmartphone size={16} />
-            <p>Platform Aplikasi :</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {item.platformApp.map((tech, index) => (
-              <div
-                key={index}
-                className={`px-2 py-[3px] whitespace-nowrap shadow-sm rounded-xl text-sm flex justify-center items-center ${
-                  index % 2 === 0
-                    ? "border border-accentColor bg-white text-black"
-                    : "bg-accentColor group-hover:border-[0.01px] text-white"
+          {/* Platform badges */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <MonitorSmartphone size={13} className="text-black shrink-0" />
+            {item.platformApp.map((p, i) => (
+              <span
+                key={i}
+                className={`px-2 py-[2px] rounded-full text-[10px] font-medium ${
+                  i % 2 === 0
+                    ? "border border-accentColor text-black"
+                    : "bg-accentColor text-white"
                 }`}
               >
-                {tech}
-              </div>
+                {p}
+              </span>
             ))}
           </div>
         </div>
 
-        {/* Tech Stack Section */}
-        <div className="z-20">
-          <div className="flex items-center gap-2 text-black group-hover:text-white text-[14px] font-medium mb-2">
-            <Code2 size={16} />
-            <p>Tag & Tech Development :</p>
+        {/* Footer */}
+        <div className="px-4 pb-4 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1 text-xs text-gray-500">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" />
+            </svg>
+            <span>{starCount}</span>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {item.technologies.map((tech, index) => (
-              <div
-                key={index}
-                className="px-2 py-[3px] whitespace-nowrap shadow-md bg-[#f1f1f1] rounded-xl text-sm flex items-center gap-1"
-              >
-                {getTechIcon(tech)}
-                <span>{tech}</span>
-              </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Visit & Code Source Button */}
-        <div className="z-20">
-          <div className="flex items-center gap-2 text-black group-hover:text-white text-[14px] font-medium mb-2">
-            <FileCode size={16} />
-            <p>Src Code & Demo App :</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <a
-              href={item.liveURL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-1 flex items-center gap-2 group-hover:bg-[#f1f1f1] bg-accentColor group-hover:text-black text-white rounded-md text-sm font-medium shadow-md hover:opacity-90 transition"
-            >
-              <FaYoutube size={16} />
-              <span>Live Demo</span>
-            </a>
-
-            {item.githubURL &&
-              Object.entries(item.githubURL).map(([key, url], index) => (
-                <a
-                  key={index}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 py-1 flex items-center gap-2 bg-black text-white rounded-md text-sm font-medium shadow-md hover:opacity-90 transition"
-                >
-                  <Github size={16} />
-                  <span>
-                    GitHub {key.charAt(0).toUpperCase() + key.slice(1)}
-                  </span>
-                </a>
-              ))}
-          </div>
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-4 py-1.5 rounded-full bg-accentColor text-white text-xs font-semibold hover:opacity-90 transition-all hover:scale-105 shadow-md"
+          >
+            Detail
+          </button>
         </div>
       </div>
-    </div>
+
+      {showModal && (
+        <ProjectDetailModal item={item} onClose={() => setShowModal(false)} />
+      )}
+    </>
   );
 }

@@ -12,7 +12,7 @@ export default function HeroContent() {
     gsap.registerPlugin(ScrollTrigger);
 
     const textAnimationTimeline = gsap.timeline({
-      defaults: { stagger: 0.2, duration: 0.3 },
+      defaults: { stagger: 0.12, duration: 0.4 },
     });
 
     textAnimationTimeline.fromTo(
@@ -22,7 +22,7 @@ export default function HeroContent() {
       },
       {
         y: 0,
-        delay: 2.2,
+        delay: 0.2,
       }
     );
     textAnimationTimeline.fromTo(
@@ -33,7 +33,7 @@ export default function HeroContent() {
       {
         scale: 1,
         ease: "back",
-        duration: 0.3,
+        duration: 0.35,
       }
     );
   }, [q]);
@@ -43,7 +43,7 @@ export default function HeroContent() {
       ref={sectionRef}
       className="absolute max-w-[55rem] m-auto w-full top-[20%] md:top-[50%] left-[50%] -translate-x-1/2 md:-translate-y-1/2 flex flex-col gap-4 justify-center items-center"
     >
-      <div className="overflow-hidden">
+      <div className="overflow-hidden text-center md:text-left">
         <div className="text-animation  dark:bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-black dark:text-transparent bg-clip-text leading-none text-4xl md:text-6xl font-semibold">
           Saya Agung Kurniawan
         </div>
@@ -54,9 +54,9 @@ export default function HeroContent() {
           <span className="bg-gradient-to-b from-black to-gray-600 dark:from-white dark:to-gray-400 inline-block text-transparent bg-clip-text">
             Seorang
           </span>{" "}
-          <span className="text-accentColor">Software</span>{" "}
+          <span className="text-accentColor">Backend</span>{" "}
           <span className="bg-gradient-to-b from-black to-gray-600 dark:from-white dark:to-gray-400 inline-block text-transparent bg-clip-text">
-            Developer
+            Engineer
           </span>
         </div>
       </div>
@@ -67,7 +67,7 @@ export default function HeroContent() {
         pengguna.
       </div>
 
-      <div className="bio-animation dark:bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-black dark:text-transparent bg-clip-text text-md md:text-lg">
+      <div className="bio-animation dark:bg-[linear-gradient(#fff,rgba(255,255,255,.6))] inline-block text-black dark:text-transparent bg-clip-text text-md md:text-lg text-center md:text-left">
         Tempat di mana kreativitas bertemu dengan fungsionalitas.
       </div>
 

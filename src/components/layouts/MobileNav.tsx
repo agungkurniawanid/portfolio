@@ -1,46 +1,233 @@
-import { useState } from "react"
+"use client"
+
+import { useState, useEffect } from "react"
+import { createPortal } from "react-dom"
 import navlinks from "@/lib/NavConfig"
-import { HambergerMenu } from "iconsax-react"
-import { useRouter } from "next/navigation"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Button } from "../ui/button"
+import { usePathname, useRouter } from "next/navigation"
+import { Menu, X, ChevronDown } from "lucide-react"
+import { cn } from "@/lib/Utils"
+import { useSectionStore } from "@/stores/Section"
 
 export default function MobileNav() {
-  const [opened, setOpened] = useState<boolean>(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const [lainnyaOpen, setLainnyaOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const pathname = usePathname()
   const router = useRouter()
+  const { section } = useSectionStore()
+
+  useEffect(() => { setMounted(true) }, [])
+
+  // Close on route change
+  useEffect(() => {
+    setIsOpen(false)
+    setLainnyaOpen(false)
+  }, [pathname])
+
+  // Prevent body scroll when open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [isOpen])
+
+  const isActive = (href: string) => {
+    if (href === "#") return false
+    if (href.startsWith("/") && !href.startsWith("/#")) {
+      return pathname === href
+    }
+    return href === section
+  }
+
+  const handleNavClick = (href: string) => {
+    router.push(href)
+    setIsOpen(false)
+  }
 
   return (
-    <Sheet open={opened} onOpenChange={(open) => setOpened(open)}>
-      <SheetTrigger asChild className="block md:hidden">
-        <Button
-          className="px-2 flex justify-center items-center text-gray-800 dark:text-white hover:text-gray-600 dark:hover:text-gray-300"
-          variant="ghost"
-          aria-label="Toggle Navbar"
+    <>
+      {/* Hamburger Button */}
+      <button
+        onClick={() => setIsOpen((prev) => !prev)}
+        aria-label="Toggle menu"
+        className={cn(
+          "block md:hidden p-2 rounded-lg transition-all duration-200",
+          "text-gray-700 dark:text-gray-300",
+          "hover:bg-gray-100 dark:hover:bg-white/10",
+          isOpen && "bg-gray-100 dark:bg-white/10"
+        )}
+      >
+        <span
+          className={cn(
+            "flex items-center justify-center transition-transform duration-300",
+            isOpen && "rotate-90"
+          )}
         >
-          <HambergerMenu 
-            className="w-6 h-6"
-            color="currentColor"
+          {isOpen ? <X size={22} /> : <Menu size={22} />}
+        </span>
+      </button>
+
+      {/* Backdrop + Panel — portaled to body to escape header stacking context */}
+      {mounted && createPortal(
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setIsOpen(false)}
+            className={cn(
+              "fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden",
+              isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            )}
+            style={{ zIndex: 9998 }}
+            aria-hidden="true"
           />
-          <span className="sr-only">Toggle Navbar</span>
-        </Button>
-      </SheetTrigger>
-      <SheetContent className="w-full h-full border-0 bg-white dark:bg-gray-900">
-        <div className="py-20 w-full flex flex-col absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 gap-10 items-center">
-          {navlinks.map((navLink) => (
-            <div
-              className="text-gray-800 dark:text-white hover:text-accentColor dark:hover:text-accentColor transition-colors duration-200"
-              key={navLink.title}
-              onClick={(e) => {
-                e.preventDefault()
-                router.push(navLink.href)
-                setOpened(false)
-              }}
-            >
-              {navLink.title}
-            </div>
-          ))}
+
+          {/* Slide-in Panel */}
+          <div
+            className={cn(
+              "fixed top-0 right-0 h-full w-[300px] md:hidden",
+              "bg-white dark:bg-gray-950 shadow-2xl",
+              "transform transition-transform duration-300 ease-in-out",
+              "border-l border-gray-200 dark:border-gray-800"
+            )}
+            style={{ zIndex: 9999, transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
+          >
+        {/* Panel header */}
+        <div className="flex items-center justify-between px-5 h-[4.5rem] border-b border-gray-100 dark:border-gray-800">
+          <span className="text-base font-semibold text-gray-800 dark:text-white tracking-tight">
+            Menu
+          </span>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+            aria-label="Close menu"
+          >
+            <X size={20} />
+          </button>
         </div>
-      </SheetContent>
-    </Sheet>
+
+        {/* Nav Items */}
+        <nav className="flex flex-col py-3 px-3 gap-0.5 overflow-y-auto h-[calc(100%-4.5rem)]">
+          {navlinks.map((link) => {
+            const Icon = link.icon
+            const active = isActive(link.href)
+
+            if (link.subMenu) {
+              return (
+                <div key={link.title}>
+                  {/* Divider before Lainnya */}
+                  <div className="h-px bg-gray-100 dark:bg-gray-800 my-2 mx-2" />
+
+                  <button
+                    onClick={() => setLainnyaOpen((prev) => !prev)}
+                    className={cn(
+                      "w-full group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left",
+                      "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white",
+                      "hover:bg-gray-100 dark:hover:bg-white/8",
+                      lainnyaOpen && "bg-gray-100 dark:bg-white/8 text-gray-900 dark:text-white"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "p-1.5 rounded-lg transition-colors",
+                        lainnyaOpen
+                          ? "bg-accentColor/20 text-accentColor"
+                          : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200"
+                      )}
+                    >
+                      <Icon size={16} />
+                    </span>
+                    <span className="flex-1 text-sm font-medium">{link.title}</span>
+                    <ChevronDown
+                      size={15}
+                      className={cn(
+                        "opacity-50 transition-transform duration-300",
+                        lainnyaOpen && "rotate-180 opacity-100"
+                      )}
+                    />
+                  </button>
+
+                  {/* Accordion sub-menu */}
+                  <div
+                    className={cn(
+                      "overflow-hidden transition-all duration-300 ease-in-out",
+                      lainnyaOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+                    )}
+                  >
+                    <div className="pt-1 pb-2 pl-5 flex flex-col gap-0.5">
+                      {link.subMenu.map((sub) => {
+                        const SubIcon = sub.icon
+                        return (
+                          <button
+                            key={sub.title}
+                            onClick={() => handleNavClick(sub.href)}
+                            className={cn(
+                              "group w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-150 text-left",
+                              "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white",
+                              "hover:bg-gray-100 dark:hover:bg-white/8"
+                            )}
+                          >
+                            <span className="p-1 rounded-md bg-gray-100 dark:bg-white/10 text-gray-400 dark:text-gray-500 group-hover:bg-accentColor/10 group-hover:text-accentColor transition-colors">
+                              <SubIcon size={13} />
+                            </span>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium leading-none">{sub.title}</span>
+                              <span className="text-xs text-gray-400 dark:text-gray-600 mt-0.5">{sub.description}</span>
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )
+            }
+
+            return (
+              <button
+                key={link.title}
+                onClick={() => handleNavClick(link.href)}
+                className={cn(
+                  "group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left",
+                  active
+                    ? "bg-accentColor/10 text-accentColor"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/8"
+                )}
+              >
+                <span
+                  className={cn(
+                    "p-1.5 rounded-lg transition-colors",
+                    active
+                      ? "bg-accentColor/20 text-accentColor"
+                      : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200"
+                  )}
+                >
+                  <Icon size={16} />
+                </span>
+                <span className="text-sm font-medium">{link.title}</span>
+                {active && (
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-accentColor" />
+                )}
+              </button>
+            )
+          })}
+
+          {/* Bottom spacer */}
+          <div className="mt-auto pt-6 pb-4 px-2">
+            <div className="h-px bg-gray-100 dark:bg-gray-800 mb-4" />
+            <p className="text-xs text-gray-400 dark:text-gray-600 text-center">
+              AgungKurniawan<span className="text-accentColor">.dev</span>
+            </p>
+          </div>
+        </nav>
+          </div>
+        </>,
+        document.body
+      )}
+    </>
   )
 }

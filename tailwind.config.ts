@@ -106,6 +106,7 @@ const config = {
     },
   },
   plugins: [
+    require("@tailwindcss/typography"),
     require("tailwindcss-animate"),
     function ({ addUtilities }: any) {
       addUtilities({

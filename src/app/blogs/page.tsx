@@ -1,0 +1,275 @@
+"use client"
+
+import { useState, useMemo, useEffect } from "react"
+import { useBlogStore } from "@/stores/BlogStore"
+import { BlogCategory } from "@/types/blog"
+import BlogPageCard from "@/components/blog/BlogPageCard"
+import ArticleModal from "@/components/blog/ArticleModal"
+import Link from "next/link"
+import { Search, PenSquare, LayoutGrid, List, ArrowLeft, Rss, ChevronLeft, ChevronRight } from "lucide-react"
+import { cn } from "@/lib/Utils"
+
+const CATEGORIES: (BlogCategory | "All")[] = [
+  "All",
+  "Technology",
+  "Tutorial",
+  "Tips & Tricks",
+  "Programming",
+  "Design",
+  "General",
+  "News",
+  "Career",
+]
+
+const ITEMS_PER_PAGE = 9
+
+export default function BlogsPage() {
+  const { blogs } = useBlogStore()
+  const [search, setSearch] = useState("")
+  const [activeCategory, setActiveCategory] = useState<BlogCategory | "All">("All")
+  const [view, setView] = useState<"grid" | "list">("grid")
+  const [page, setPage] = useState(1)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    useBlogStore.persist.rehydrate()
+    setMounted(true)
+  }, [])
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1)
+  }, [search, activeCategory])
+
+  const filtered = useMemo(() => {
+    return blogs.filter((blog) => {
+      const matchCategory =
+        activeCategory === "All" || blog.category === activeCategory
+      const q = search.toLowerCase()
+      const matchSearch =
+        !q ||
+        blog.title.toLowerCase().includes(q) ||
+        blog.excerpt.toLowerCase().includes(q) ||
+        blog.author.name.toLowerCase().includes(q) ||
+        blog.category.toLowerCase().includes(q)
+      return matchCategory && matchSearch
+    })
+  }, [blogs, search, activeCategory])
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
+  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-baseBackground flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-accentColor border-t-transparent rounded-full" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-baseBackground">
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-white via-white to-accentColor/5 dark:from-[#0a1515] dark:via-[#0d1919] dark:to-[#0a1515] pt-28 pb-16 px-[5%]">
+        {/* Decorative blobs */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-accentColor/5 dark:bg-accentColor/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-accentColor/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+
+        <div className="relative max-w-[1100px] mx-auto">
+          {/* Back link */}
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-accentColor mb-6 transition-colors"
+          >
+            <ArrowLeft size={15} /> Kembali ke Home
+          </Link>
+
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Rss size={18} className="text-accentColor" />
+                <span className="text-accentColor text-sm font-medium">Blog & Artikel</span>
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold dark:text-white leading-tight">
+                Pikiran,{" "}
+                <span className="text-accentColor">Pengalaman</span>
+                <br />& Ide Seputar Tech
+              </h1>
+              <p className="mt-4 text-gray-600 dark:text-gray-400 max-w-xl leading-relaxed">
+                Temukan artikel tentang pengembangan web, tips programming, tutorial, dan cerita dari developer maupun pengunjung komunitas ini.
+              </p>
+              <div className="flex items-center gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
+                <span>{blogs.length} artikel</span>
+                <span className="w-1 h-1 bg-gray-400 rounded-full" />
+                <span>{blogs.filter((b) => b.author.type === "visitor").length} dari komunitas</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-accentColor text-white rounded-xl font-medium hover:brightness-[0.85] transition-all hover:shadow-lg hover:shadow-accentColor/20 shrink-0 self-start md:self-auto"
+            >
+              <PenSquare size={16} />
+              Tulis Artikel
+            </button>
+          </div>
+
+          {/* Search */}
+          <div className="mt-8 relative">
+            <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Cari artikel berdasarkan judul, konten, atau penulis..."
+              className="w-full pl-11 pr-4 py-3 text-sm rounded-xl border border-gray-200 dark:border-gray-700/60 bg-white dark:bg-gray-800/50 dark:text-white outline-none focus:border-accentColor shadow-sm transition-colors"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Content */}
+      <section className="px-[5%] py-10 max-w-[1100px] mx-auto">
+        {/* Filters + View Toggle */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          {/* Category Tabs */}
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all",
+                  activeCategory === cat
+                    ? "bg-accentColor text-white shadow-sm"
+                    : "bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 text-gray-600 dark:text-gray-400 hover:border-accentColor dark:hover:border-accentColor hover:text-accentColor"
+                )}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* View Toggle */}
+          <div className="flex items-center gap-1 bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg p-1 shrink-0">
+            <button
+              onClick={() => setView("grid")}
+              className={cn(
+                "p-1.5 rounded-md transition-colors",
+                view === "grid"
+                  ? "bg-accentColor text-white"
+                  : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              )}
+            >
+              <LayoutGrid size={15} />
+            </button>
+            <button
+              onClick={() => setView("list")}
+              className={cn(
+                "p-1.5 rounded-md transition-colors",
+                view === "list"
+                  ? "bg-accentColor text-white"
+                  : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              )}
+            >
+              <List size={15} />
+            </button>
+          </div>
+        </div>
+
+        {/* Results count */}
+        {search || activeCategory !== "All" ? (
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            {filtered.length} artikel ditemukan
+            {search && (
+              <span>
+                {" "}untuk &quot;<strong className="text-gray-700 dark:text-gray-300">{search}</strong>&quot;
+              </span>
+            )}
+            {activeCategory !== "All" && (
+              <span>
+                {" "}dalam kategori{" "}
+                <strong className="text-accentColor">{activeCategory}</strong>
+              </span>
+            )}
+          </p>
+        ) : null}
+
+        {/* Grid / List */}
+        {paginated.length === 0 ? (
+          <div className="flex flex-col items-center py-20 text-center">
+            <div className="text-5xl mb-4">📭</div>
+            <h3 className="text-lg font-semibold dark:text-white mb-2">Tidak ada artikel ditemukan</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Coba ubah kata kunci atau kategori pencarian
+            </p>
+            <button
+              onClick={() => { setSearch(""); setActiveCategory("All") }}
+              className="mt-4 px-4 py-2 text-sm text-accentColor border border-accentColor rounded-lg hover:bg-accentColor/10 transition-colors"
+            >
+              Reset Filter
+            </button>
+          </div>
+        ) : view === "grid" ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {paginated.map((blog) => (
+              <BlogPageCard key={blog.id} blog={blog} view="grid" />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {paginated.map((blog) => (
+              <BlogPageCard key={blog.id} blog={blog} view="list" />
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-12">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-accentColor disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft size={16} className="dark:text-gray-300" />
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <button
+                key={p}
+                onClick={() => setPage(p)}
+                className={cn(
+                  "w-9 h-9 rounded-lg text-sm font-medium transition-all",
+                  page === p
+                    ? "bg-accentColor text-white"
+                    : "border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-accentColor"
+                )}
+              >
+                {p}
+              </button>
+            ))}
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-accentColor disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight size={16} className="dark:text-gray-300" />
+            </button>
+          </div>
+        )}
+      </section>
+
+      {/* Article Modal */}
+      <ArticleModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+    </div>
+  )
+}

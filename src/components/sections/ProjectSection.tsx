@@ -5,7 +5,7 @@ import useOnScreen from "@/hooks/UseOnScreen";
 import useScrollActive from "@/hooks/UseScrollActive";
 import { useSectionStore } from "@/stores/Section";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { StaticImageData } from "next/image";
 import Link from "next/link";
 import { RoughNotation } from "react-rough-notation";
@@ -57,7 +57,7 @@ export default function ProjectSection() {
     <section
       ref={sectionRef}
       id="projects"
-      className="relative h-full bg-gray-50 dark:bg-gray-100 overflow-hidden py-14 px-10 lg:px-[5%]"
+      className="relative h-full bg-gray-50 overflow-hidden py-14 px-10 lg:px-[5%]"
     >
       <div className="w-full max-w-[1100px] h-full m-auto flex flex-col items-center gap-14">
         <div className="w-[80%] md:w-full flex absolute left-1/2 -translate-x-1/2 flex-col gap-8 items-center">
@@ -68,12 +68,12 @@ export default function ProjectSection() {
             order={1}
             show={isOnScreen}
           >
-            <div className="text-xl md:text-4xl tracking-tight font-medium w-fit dark:text-accentColor">
+            <div className="text-xl md:text-4xl tracking-tight font-medium w-fit text-black">
               Popular Projects
             </div>
           </RoughNotation>
           <div ref={elementRef} className="overflow-hidden ">
-            <div className="qoutes-animation  md:w-full text-center font-medium flex flex-col items-center">
+            <div className="qoutes-animation md:w-full text-center font-medium flex flex-col items-center text-black">
               <div>
                 &quot;Desain yang baik itu terlihat jelas. Desain yang hebat itu
                 transparan.
@@ -88,14 +88,14 @@ export default function ProjectSection() {
           ))}
         </div>
 
-        <div className="font-medium">
+        <div className="font-medium text-black">
           Lihat project lainnya di{" "}
           <Link
             href="https://github.com/agungkurniawanid"
             target="_blank"
             aria-label="Expore more in my github profile"
             rel="noopener noreferrer"
-            className="text-accentColor navlink dark:hover:text-black"
+            className="text-accentColor navlink hover:text-accentColor"
           >
             my github profile
           </Link>

@@ -4,6 +4,7 @@ import Header from "@/components/layouts/Header"
 import "./globals.css"
 import Loader from "@/components/Loader"
 import { ThemeProvider } from "@/providers/ThemeProvider"
+import WelcomePopup from "@/components/WelcomePopup"
 
 const jost = Jost({ subsets: ["latin"] })
 
@@ -43,7 +44,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={jost.className}>
-        <Loader />
+        {/* <Loader /> */}
+        {/* Loading animation (0–12 counter) — uncomment to re-enable */}
 
         <ThemeProvider
           attribute="class"
@@ -52,6 +54,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Header />
+          <WelcomePopup />
           {children}
         </ThemeProvider>
       </body>

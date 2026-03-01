@@ -53,7 +53,7 @@ export default function ContactSection() {
     // Cleanup function
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach(t => t.kill());
+      ScrollTrigger.getAll().forEach((t: ScrollTrigger) => t.kill());
     };
   }, []);
 

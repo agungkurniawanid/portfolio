@@ -202,3 +202,37 @@
     right: 0%;
   }
 }
+
+/* Custom modal scrollbar — outside layer for full specificity */
+.modal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #0acf83 transparent;
+}
+
+.modal-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.modal-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-scroll::-webkit-scrollbar-thumb {
+  background-color: #0acf83;
+  border-radius: 999px;
+  border: none;
+}
+
+.modal-scroll::-webkit-scrollbar-button {
+  display: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  background: transparent;
+  overflow: hidden;
+}
+
+.modal-scroll::-webkit-scrollbar-button:single-button {
+  display: none !important;
+  height: 0 !important;
+  width: 0 !important;
+}

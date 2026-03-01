@@ -1,9 +1,14 @@
 -- ============================================================
--- SUPABASE MIGRATION: Blog System
+-- SUPABASE MIGRATION: Blog System (v2 — dengan author_avatar)
 -- Jalankan SQL ini di Supabase Dashboard > SQL Editor
+-- PERHATIAN: Script ini akan DROP tabel lama dan membuat ulang.
+--            Backup data terlebih dahulu jika ada data penting!
 -- ============================================================
 
--- 1. Buat tabel blogs
+-- 0. Drop tabel lama (beserta policies) dan buat ulang
+DROP TABLE IF EXISTS public.blogs CASCADE;
+
+-- 1. Buat tabel blogs (v2 — tambah kolom author_avatar)
 CREATE TABLE IF NOT EXISTS public.blogs (
   id              TEXT PRIMARY KEY,
   title           TEXT NOT NULL,
@@ -14,6 +19,7 @@ CREATE TABLE IF NOT EXISTS public.blogs (
   author_name     TEXT NOT NULL,
   author_email    TEXT,
   author_phone    TEXT,
+  author_avatar   TEXT,                        -- opsional: URL foto profil penulis
   author_type     TEXT NOT NULL DEFAULT 'visitor' CHECK (author_type IN ('developer', 'visitor')),
   published_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   reading_time    INTEGER DEFAULT 1,
@@ -24,17 +30,19 @@ CREATE TABLE IF NOT EXISTS public.blogs (
 ALTER TABLE public.blogs ENABLE ROW LEVEL SECURITY;
 
 -- 3. Policy: Semua orang bisa membaca blog
+DROP POLICY IF EXISTS "blogs_select_public" ON public.blogs;
 CREATE POLICY "blogs_select_public"
   ON public.blogs FOR SELECT
   USING (true);
 
 -- 4. Policy: Semua orang bisa insert blog (visitor submissions)
+DROP POLICY IF EXISTS "blogs_insert_public" ON public.blogs;
 CREATE POLICY "blogs_insert_public"
   ON public.blogs FOR INSERT
   WITH CHECK (true);
 
 -- ============================================================
--- SUPABASE STORAGE: Bucket untuk thumbnail gambar
+-- SUPABASE STORAGE: Bucket untuk thumbnail gambar artikel
 -- ============================================================
 
 -- 5. Buat storage bucket untuk thumbnail
@@ -43,20 +51,43 @@ VALUES ('blog-thumbnails', 'blog-thumbnails', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- 6. Policy: Semua orang bisa upload ke bucket blog-thumbnails
+DROP POLICY IF EXISTS "blog_thumbnails_insert" ON storage.objects;
 CREATE POLICY "blog_thumbnails_insert"
   ON storage.objects FOR INSERT
   WITH CHECK (bucket_id = 'blog-thumbnails');
 
--- 7. Policy: Semua orang bisa baca/akses gambar dari bucket
+-- 7. Policy: Semua orang bisa baca/akses gambar dari bucket blog-thumbnails
+DROP POLICY IF EXISTS "blog_thumbnails_select" ON storage.objects;
 CREATE POLICY "blog_thumbnails_select"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'blog-thumbnails');
 
 -- ============================================================
+-- SUPABASE STORAGE: Bucket untuk foto profil penulis (avatar)
+-- ============================================================
+
+-- 8. Buat storage bucket untuk author avatars
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('author-avatars', 'author-avatars', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- 9. Policy: Semua orang bisa upload foto profil penulis
+DROP POLICY IF EXISTS "author_avatars_insert" ON storage.objects;
+CREATE POLICY "author_avatars_insert"
+  ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'author-avatars');
+
+-- 10. Policy: Semua orang bisa akses/baca foto profil penulis
+DROP POLICY IF EXISTS "author_avatars_select" ON storage.objects;
+CREATE POLICY "author_avatars_select"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'author-avatars');
+
+-- ============================================================
 -- SEED: Developer blogs awal (opsional — hapus jika tidak perlu)
 -- ============================================================
 
-INSERT INTO public.blogs (id, title, excerpt, content, thumbnail, category, author_name, author_email, author_type, published_at, reading_time, tags)
+INSERT INTO public.blogs (id, title, excerpt, content, thumbnail, category, author_name, author_email, author_avatar, author_type, published_at, reading_time, tags)
 VALUES
   (
     'blog-001',
@@ -67,6 +98,7 @@ VALUES
     'Tutorial',
     'Agung Kurniawan',
     'agung@dev.com',
+    NULL,
     'developer',
     '2025-11-20T08:00:00.000Z',
     9,
@@ -81,6 +113,7 @@ VALUES
     'Technology',
     'Agung Kurniawan',
     'agung@dev.com',
+    NULL,
     'developer',
     '2026-01-08T09:00:00.000Z',
     10,
@@ -95,6 +128,7 @@ VALUES
     'Tutorial',
     'Agung Kurniawan',
     'agung@dev.com',
+    NULL,
     'developer',
     '2026-02-03T10:00:00.000Z',
     12,

@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react"
 import { useBlogStore } from "@/stores/BlogStore"
 import { BlogCategory } from "@/types/blog"
 import BlogPageCard from "@/components/blog/BlogPageCard"
+import BlogPageCardSkeleton from "@/components/blog/BlogPageCardSkeleton"
 import ArticleModal from "@/components/blog/ArticleModal"
 import { Search, PenSquare, LayoutGrid, List, Rss, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/Utils"
@@ -60,8 +61,65 @@ export default function BlogsPage() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-baseBackground flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-2 border-accentColor border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-baseBackground">
+        {/* Hero — same shell, stats replaced with skeletons */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-white via-white to-accentColor/5 dark:from-[#0a1515] dark:via-[#0d1919] dark:to-[#0a1515] pt-28 pb-16 px-[5%]">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-accentColor/5 dark:bg-accentColor/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-accentColor/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+          <div className="relative max-w-[1100px] mx-auto">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Rss size={18} className="text-accentColor" />
+                  <span className="text-accentColor text-sm font-medium">Blog & Artikel</span>
+                </div>
+                <h1 className="text-4xl md:text-5xl font-bold dark:text-white leading-tight">
+                  Pikiran,{" "}
+                  <span className="text-accentColor">Pengalaman</span>
+                  <br />& Ide Seputar Tech
+                </h1>
+                <p className="mt-4 text-gray-600 dark:text-gray-400 max-w-xl leading-relaxed">
+                  Temukan artikel tentang pengembangan web, tips programming, tutorial, dan cerita dari developer maupun pengunjung komunitas ini.
+                </p>
+                {/* Stat placeholders */}
+                <div className="flex items-center gap-4 mt-4">
+                  <div className="h-4 w-16 rounded bg-gray-200 dark:bg-gray-700 shimmer" />
+                  <span className="w-1 h-1 bg-gray-400 rounded-full" />
+                  <div className="h-4 w-28 rounded bg-gray-200 dark:bg-gray-700 shimmer" />
+                </div>
+              </div>
+              <button
+                disabled
+                className="flex items-center gap-2 px-5 py-2.5 bg-accentColor/50 text-white rounded-xl font-medium shrink-0 self-start md:self-auto cursor-not-allowed"
+              >
+                <PenSquare size={16} />
+                Tulis Artikel
+              </button>
+            </div>
+            {/* Search placeholder */}
+            <div className="mt-8 relative">
+              <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600" />
+              <div className="w-full h-[46px] rounded-xl border border-gray-200 dark:border-gray-700/60 bg-gray-100 dark:bg-gray-800/50 shimmer" />
+            </div>
+          </div>
+        </section>
+
+        {/* Content skeleton */}
+        <section className="px-[5%] py-10 max-w-[1100px] mx-auto">
+          {/* Filter tabs placeholder */}
+          <div className="flex flex-wrap gap-2 mb-8">
+            {CATEGORIES.slice(0, 6).map((cat) => (
+              <div key={cat} className="h-8 w-16 rounded-lg bg-gray-200 dark:bg-gray-700 shimmer" />
+            ))}
+          </div>
+
+          {/* Grid skeleton — 6 cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <BlogPageCardSkeleton key={i} view="grid" />
+            ))}
+          </div>
+        </section>
       </div>
     )
   }

@@ -23,6 +23,7 @@ function rowToBlog(row: any): Blog {
       name: row.author_name,
       email: row.author_email ?? undefined,
       phone: row.author_phone ?? undefined,
+      avatar: row.author_avatar ?? undefined,
       type: row.author_type,
     },
     publishedAt: row.published_at,

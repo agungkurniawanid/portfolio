@@ -1,0 +1,156 @@
+"use client"
+
+import { useMemo, useState, useCallback } from "react"
+import { notFound } from "next/navigation"
+import Link from "next/link"
+import Image from "next/image"
+import dynamic from "next/dynamic"
+import Masonry from "react-masonry-css"
+import { ArrowLeft, MapPin, Calendar, Images } from "lucide-react"
+import { galleryPhotos, galleryAlbums } from "@/data/galleryData"
+import { GalleryPhoto } from "@/types/gallery"
+import GalleryPhotoCard from "@/components/gallery/GalleryPhotoCard"
+
+const GalleryLightbox = dynamic(() => import("@/components/gallery/GalleryLightbox"), {
+  ssr: false,
+})
+
+const masonryBreakpoints = {
+  default: 4,
+  1280: 4,
+  1024: 3,
+  768: 2,
+  480: 1,
+}
+
+interface PageProps {
+  params: { slug: string }
+}
+
+export default function AlbumDetailPage({ params }: PageProps) {
+  const { slug } = params
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+
+  const album = galleryAlbums.find((a) => a.slug === slug)
+  const photos = useMemo(
+    () => galleryPhotos.filter((p) => p.albumSlug === slug),
+    [slug]
+  )
+
+  if (!album) notFound()
+
+  const openLightbox = useCallback(
+    (photo: GalleryPhoto) => {
+      const idx = photos.findIndex((p) => p.id === photo.id)
+      if (idx !== -1) setLightboxIndex(idx)
+    },
+    [photos]
+  )
+
+  const handleDownload = (photo: GalleryPhoto) => {
+    const a = document.createElement("a")
+    a.href = photo.imageUrl
+    a.download = photo.title.replace(/\s+/g, "-").toLowerCase()
+    a.target = "_blank"
+    a.rel = "noopener noreferrer"
+    a.click()
+  }
+
+  return (
+    <main className="min-h-screen bg-baseBackground pt-[4.5rem]">
+      {/* ── Album Hero ── */}
+      <section className="relative h-72 md:h-96 overflow-hidden">
+        <Image
+          src={album.coverUrl}
+          alt={album.name}
+          fill
+          className="object-cover"
+          priority
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
+
+        {/* Back button */}
+        <Link
+          href="/gallery"
+          className="absolute top-6 left-6 flex items-center gap-2 text-white text-sm font-medium bg-black/40 hover:bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 transition-all duration-200 hover:-translate-x-0.5"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Kembali ke Gallery
+        </Link>
+
+        {/* Album info */}
+        <div className="absolute bottom-0 left-0 right-0 px-[5%] py-8">
+          <span className="inline-flex items-center text-xs font-semibold px-3 py-1 rounded-full bg-accentColor/90 text-white mb-3">
+            {album.category}
+          </span>
+          <h1 className="text-3xl md:text-5xl font-bold text-white mb-2">{album.name}</h1>
+          <p className="text-white/70 text-sm md:text-base mb-4 max-w-2xl">{album.description}</p>
+          <div className="flex items-center gap-5 text-white/60 text-sm">
+            <span className="flex items-center gap-1.5">
+              <Images className="w-4 h-4 text-accentColor" />
+              {photos.length} foto
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-accentColor" />
+              {album.period}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Location summary ── */}
+      {photos.length > 0 && (
+        <section className="px-[5%] max-w-7xl mx-auto py-6">
+          <div className="flex flex-wrap gap-2">
+            {[...new Set(photos.map((p) => p.location))].map((loc) => (
+              <span
+                key={loc}
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
+              >
+                <MapPin className="w-3 h-3 text-accentColor" />
+                {loc}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── Photos Masonry ── */}
+      <section className="px-[5%] max-w-7xl mx-auto pb-16">
+        {photos.length === 0 ? (
+          <div className="flex flex-col items-center py-24 gap-4 text-gray-400">
+            <Images className="w-16 h-16 opacity-30" />
+            <p>Belum ada foto di album ini</p>
+          </div>
+        ) : (
+          <Masonry
+            breakpointCols={masonryBreakpoints}
+            className="flex -ml-4 w-[calc(100%+1rem)]"
+            columnClassName="pl-4"
+          >
+            {photos.map((photo) => (
+              <GalleryPhotoCard
+                key={photo.id}
+                photo={photo}
+                onView={openLightbox}
+                onDownload={handleDownload}
+                onShare={openLightbox}
+              />
+            ))}
+          </Masonry>
+        )}
+      </section>
+
+      {/* ── Lightbox ── */}
+      {lightboxIndex !== null && photos.length > 0 && (
+        <GalleryLightbox
+          photos={photos}
+          initialIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
+      )}
+    </main>
+  )
+}

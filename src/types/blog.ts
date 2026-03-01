@@ -14,6 +14,7 @@ export interface BlogAuthor {
   name: string
   email?: string
   phone?: string
+  avatar?: string // optional profile picture URL
   type: AuthorType
 }
 

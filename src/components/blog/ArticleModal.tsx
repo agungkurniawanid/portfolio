@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { X, Upload, Eye, Send, AlertCircle, User, Mail, Phone, FileText, Tag, Image as ImageIcon } from "lucide-react"
+import { X, Upload, Eye, Send, AlertCircle, User, Mail, Phone, FileText, Tag, Image as ImageIcon, UserCircle } from "lucide-react"
 import { BlogCategory } from "@/types/blog"
 import { useBlogStore } from "@/stores/BlogStore"
 import { supabase } from "@/lib/supabase"
@@ -47,6 +47,8 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
   const [authorName, setAuthorName] = useState("")
   const [authorEmail, setAuthorEmail] = useState("")
   const [authorPhone, setAuthorPhone] = useState("")
+  const [authorAvatarFile, setAuthorAvatarFile] = useState<File | null>(null)
+  const [authorAvatarPreview, setAuthorAvatarPreview] = useState("")
   const [title, setTitle] = useState("")
   const [category, setCategory] = useState<BlogCategory>("General")
   const [content, setContent] = useState("")
@@ -57,6 +59,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
   const [submitError, setSubmitError] = useState("")
 
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const avatarInputRef = useRef<HTMLInputElement>(null)
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {}
@@ -78,6 +81,13 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
     setThumbnail("") // clear URL input when file is selected
   }
 
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setAuthorAvatarFile(file)
+    setAuthorAvatarPreview(URL.createObjectURL(file))
+  }
+
   const handlePreview = () => {
     if (validate()) setStep("preview")
   }
@@ -88,7 +98,22 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
     setSubmitError("")
 
     try {
-      // 1. Upload thumbnail to Supabase Storage if a file was selected
+      // 1. Upload author avatar to Supabase Storage if a file was selected (optional)
+      let finalAvatarUrl: string | null = null
+      if (authorAvatarFile) {
+        const ext = authorAvatarFile.name.split(".").pop()
+        const avatarPath = `avatar-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`
+        const { error: avatarUploadError } = await supabase.storage
+          .from("author-avatars")
+          .upload(avatarPath, authorAvatarFile, { cacheControl: "3600", upsert: false })
+        if (avatarUploadError) throw new Error(avatarUploadError.message)
+        const { data: avatarUrlData } = supabase.storage
+          .from("author-avatars")
+          .getPublicUrl(avatarPath)
+        finalAvatarUrl = avatarUrlData.publicUrl
+      }
+
+      // 2. Upload thumbnail to Supabase Storage if a file was selected
       let finalThumbnailUrl =
         thumbnail.trim() ||
         `https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80`
@@ -106,7 +131,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
         finalThumbnailUrl = urlData.publicUrl
       }
 
-      // 2. Insert blog to Supabase
+      // 3. Insert blog to Supabase
       const id = generateId()
       const excerpt = content.replace(/<[^>]+>/g, " ").trim().slice(0, 180) + "..."
       const { error: insertError } = await supabase.from("blogs").insert({
@@ -119,6 +144,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
         author_name: authorName.trim(),
         author_email: authorEmail.trim(),
         author_phone: authorPhone.trim() || null,
+        author_avatar: finalAvatarUrl,
         author_type: "visitor",
         published_at: new Date().toISOString(),
         reading_time: estimateReadingTime(content),
@@ -147,6 +173,8 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
     setAuthorName("")
     setAuthorEmail("")
     setAuthorPhone("")
+    setAuthorAvatarFile(null)
+    setAuthorAvatarPreview("")
     setTitle("")
     setCategory("General")
     setContent("")
@@ -213,6 +241,53 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                   <User size={15} /> Informasi Penulis
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Profile Picture (optional) */}
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+                      <span className="flex items-center gap-1.5"><UserCircle size={13} /> Foto Profil <span className="text-gray-400">(opsional)</span></span>
+                    </label>
+                    <div className="flex items-center gap-4">
+                      {/* Avatar preview */}
+                      <div
+                        onClick={() => avatarInputRef.current?.click()}
+                        className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden border-2 border-dashed border-gray-200 dark:border-gray-600 hover:border-accentColor transition-colors cursor-pointer flex items-center justify-center bg-gray-100 dark:bg-gray-800"
+                      >
+                        {authorAvatarPreview ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={authorAvatarPreview} alt="avatar preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <UserCircle size={28} className="text-gray-400" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <button
+                          type="button"
+                          onClick={() => avatarInputRef.current?.click()}
+                          className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-accentColor hover:text-accentColor transition-colors dark:text-gray-300"
+                        >
+                          {authorAvatarPreview ? "Ganti Foto" : "Upload Foto"}
+                        </button>
+                        {authorAvatarPreview && (
+                          <button
+                            type="button"
+                            onClick={() => { setAuthorAvatarFile(null); setAuthorAvatarPreview("") }}
+                            className="ml-2 text-xs px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-800/50 text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                          >
+                            Hapus
+                          </button>
+                        )}
+                        <p className="text-[11px] text-gray-400 mt-1">Jika tidak diupload, akan menggunakan inisial nama. PNG, JPG (max 2MB)</p>
+                      </div>
+                    </div>
+                    <input
+                      ref={avatarInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarUpload}
+                    />
+                  </div>
+
                   <div>
                     <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
                       Nama Lengkap <span className="text-red-500">*</span>
@@ -408,8 +483,13 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                 </div>
                 <h1 className="text-2xl font-bold dark:text-white mb-3">{title}</h1>
                 <div className="flex items-center gap-2 mb-6">
-                  <div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-semibold dark:text-white">
-                    {authorName.charAt(0).toUpperCase()}
+                  <div className="w-7 h-7 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-semibold dark:text-white shrink-0">
+                    {authorAvatarPreview ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={authorAvatarPreview} alt={authorName} className="w-full h-full object-cover" />
+                    ) : (
+                      authorName.charAt(0).toUpperCase()
+                    )}
                   </div>
                   <div>
                     <p className="text-sm font-medium dark:text-white">{authorName}</p>
@@ -466,13 +546,9 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSubmitting || success}
-                className={cn(
-                  "flex items-center gap-2 px-5 py-2 text-sm rounded-lg font-medium transition-all",
-                  success
-                    ? "bg-green-500 text-white"
-                    : "bg-accentColor text-white hover:bg-accentColor/90",
-                  isSubmitting && "opacity-70 cursor-not-allowed"
-                )}
+                className={`flex items-center gap-2 px-5 py-2 text-sm rounded-lg font-medium transition-all text-white ${
+                  success ? "bg-green-500" : "bg-accentColor hover:bg-accentColor/90"
+                } ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}`}
               >
                 {success ? (
                   "✓ Artikel Dipublikasikan!"

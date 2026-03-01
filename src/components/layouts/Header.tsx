@@ -78,6 +78,7 @@ export default function Header() {
                 return (
                   <div key={link.title} className="relative" ref={dropdownRef}>
                     <button
+                      suppressHydrationWarning
                       onClick={() => setDropdownOpen((prev) => !prev)}
                       className={cn(
                         "group flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",

@@ -243,23 +243,35 @@ export default function WelcomePopup() {
           <div className="h-1.5 w-full rounded-t-2xl bg-gradient-to-r from-accentColor via-emerald-400 to-accentColor bg-[length:200%_100%] animate-[gradient_3s_linear_infinite]" />
 
           {/* ── Header ── */}
-          <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-gray-100 dark:border-white/10">
+          <div className="px-6 pt-5 pb-4 border-b border-gray-100 dark:border-white/10 flex flex-col gap-3">
             <div className="flex flex-col gap-1">
               <h2 className="text-xl font-extrabold dark:text-white text-gray-900 leading-snug">
                 Hei, Saya AGUNG, Selamat Datang! 👋
               </h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[340px] leading-relaxed">
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                 Terima kasih sudah mengunjungi website saya! Saya ingin mendengar pengalaman dan pesan dari Anda.{" "}
                 <span className="text-accentColor font-medium">Tidak ada yang dipublikasikan.</span>
               </p>
             </div>
-            <button
-              onClick={handleClose}
-              aria-label="Tutup popup"
-              className="mt-0.5 ml-3 flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-200"
-            >
-              <FaTimes size={13} />
-            </button>
+            {/* ── Quick-action buttons — visible di atas sebelum form ── */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="inline-flex items-center gap-1.5 py-1.5 px-3.5 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 text-xs font-medium transition-all duration-200 whitespace-nowrap"
+              >
+                <FaTimes size={10} />
+                Tutup
+              </button>
+              <button
+                type="button"
+                onClick={handleNeverShow}
+                className="inline-flex items-center gap-1.5 py-1.5 px-3.5 rounded-lg border border-red-200 dark:border-red-500/20 text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs font-medium transition-all duration-200 whitespace-nowrap"
+              >
+                <FaEyeSlash size={10} />
+                Jangan Tampilkan Lagi
+              </button>
+            </div>
           </div>
 
           {/* ── Form body ── */}
@@ -378,12 +390,11 @@ export default function WelcomePopup() {
             </div>
 
             {/* ── Action buttons ── */}
-            <div className="flex flex-col gap-2.5 pt-1">
-              {/* Submit */}
+            <div className="pt-1">
               <button
                 type="submit"
                 disabled={status === "sending" || status === "sent"}
-                className="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-accentColor text-white font-semibold text-sm transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-accentColor/25"
+                className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-accentColor text-white font-semibold text-sm transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-accentColor/25"
               >
                 {status === "sending" ? (
                   <>
@@ -399,26 +410,6 @@ export default function WelcomePopup() {
                   </>
                 )}
               </button>
-
-              {/* Close & Never show row */}
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 text-xs font-medium transition-all duration-200"
-                >
-                  <FaTimes size={11} />
-                  Tutup
-                </button>
-                <button
-                  type="button"
-                  onClick={handleNeverShow}
-                  className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-red-200 dark:border-red-500/20 text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs font-medium transition-all duration-200"
-                >
-                  <FaEyeSlash size={11} />
-                  Jangan Tampilkan Lagi
-                </button>
-              </div>
             </div>
           </form>
         </div>

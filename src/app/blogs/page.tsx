@@ -6,7 +6,7 @@ import { BlogCategory } from "@/types/blog"
 import BlogPageCard from "@/components/blog/BlogPageCard"
 import BlogPageCardSkeleton from "@/components/blog/BlogPageCardSkeleton"
 import ArticleModal from "@/components/blog/ArticleModal"
-import { Search, PenSquare, LayoutGrid, List, Rss, ChevronLeft, ChevronRight } from "lucide-react"
+import { Search, PenSquare, LayoutGrid, List, Rss, ChevronLeft, ChevronRight, AlertTriangle, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/Utils"
 
 const CATEGORIES: (BlogCategory | "All")[] = [
@@ -187,6 +187,25 @@ export default function BlogsPage() {
 
       {/* Content */}
       <section className="px-[5%] py-10 max-w-[1100px] mx-auto">
+        {/* Community Warning Banner */}
+        <div className="mb-6 rounded-2xl border border-amber-200 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-900/20 px-5 py-4 flex gap-3.5 items-start">
+          <div className="shrink-0 mt-0.5">
+            <AlertTriangle className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1 flex items-center gap-2 flex-wrap">
+              Blog Komunitas Terbuka
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-700/60 text-amber-800 dark:text-amber-200">
+                <ShieldCheck className="w-3 h-3" />
+                Disclaimer
+              </span>
+            </p>
+            <p className="text-xs text-amber-700/90 dark:text-amber-400/90 leading-relaxed">
+              Artikel di halaman ini <span className="font-semibold">dapat ditulis oleh siapa saja</span>, termasuk pengunjung. Jika kamu menemukan konten yang mengandung unsur pornografi, kekerasan, atau hal-hal yang tidak pantas — itu <span className="font-semibold">bukan</span> dari Developer (<span className="font-semibold">Agung Kurniawan</span>). Sarkas, meme, dan humor ringan diperbolehkan selama tidak berbau pornografi atau menyinggung SARA. Bijaklah dalam menulis. 🙏
+            </p>
+          </div>
+        </div>
+
         {/* Filters + View Toggle */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           {/* Category Tabs */}

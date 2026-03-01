@@ -95,6 +95,9 @@ const config = {
           from: { transform: "translateX(0)" },
           to: { transform: "translateX(-100%)" },
         },
+        shimmer: {
+          "100%": { transform: "translateX(100%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -102,6 +105,7 @@ const config = {
         "animate-frame-contact-me-btn-icon":
           "frame-contact-me-btn-icon .3s ease",
         "infinite-scroll": "infinite-scroll 25s linear infinite",
+        shimmer: "shimmer 1.5s infinite",
       },
     },
   },
@@ -113,6 +117,11 @@ const config = {
         ".bg-clip-text": {
           "background-clip": "text",
           "-webkit-background-clip": "text",
+        },
+        ".scrollbar-none": {
+          "-ms-overflow-style": "none",
+          "scrollbar-width": "none",
+          "&::-webkit-scrollbar": { display: "none" },
         },
       })
     },

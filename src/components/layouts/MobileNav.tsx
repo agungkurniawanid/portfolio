@@ -127,8 +127,8 @@ export default function MobileNav() {
                     className={cn(
                       "w-full group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left",
                       "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white",
-                      "hover:bg-gray-100 dark:hover:bg-white/8",
-                      lainnyaOpen && "bg-gray-100 dark:bg-white/8 text-gray-900 dark:text-white"
+                    "hover:bg-gray-100 dark:hover:bg-white/10",
+                    lainnyaOpen && "bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white"
                     )}
                   >
                     <span
@@ -136,7 +136,7 @@ export default function MobileNav() {
                         "p-1.5 rounded-lg transition-colors",
                         lainnyaOpen
                           ? "bg-accentColor/20 text-accentColor"
-                          : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200"
+                          : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 group-hover:bg-accentColor/10 group-hover:text-accentColor"
                       )}
                     >
                       <Icon size={16} />
@@ -168,10 +168,10 @@ export default function MobileNav() {
                             className={cn(
                               "group w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-150 text-left",
                               "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white",
-                              "hover:bg-gray-100 dark:hover:bg-white/8"
+                              "hover:bg-gray-100 dark:hover:bg-white/10"
                             )}
                           >
-                            <span className="p-1 rounded-md bg-gray-100 dark:bg-white/10 text-gray-400 dark:text-gray-500 group-hover:bg-accentColor/10 group-hover:text-accentColor transition-colors">
+                            <span className="p-1 rounded-md bg-gray-100 dark:bg-white/10 text-gray-400 dark:text-gray-500 group-hover:bg-accentColor/10 group-hover:text-accentColor dark:group-hover:bg-accentColor/20 transition-colors">
                               <SubIcon size={13} />
                             </span>
                             <div className="flex flex-col">
@@ -195,7 +195,7 @@ export default function MobileNav() {
                   "group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left",
                   active
                     ? "bg-accentColor/10 text-accentColor"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/8"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10"
                 )}
               >
                 <span
@@ -203,7 +203,7 @@ export default function MobileNav() {
                     "p-1.5 rounded-lg transition-colors",
                     active
                       ? "bg-accentColor/20 text-accentColor"
-                      : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200"
+                      : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 group-hover:bg-accentColor/10 group-hover:text-accentColor dark:group-hover:bg-accentColor/20"
                   )}
                 >
                   <Icon size={16} />

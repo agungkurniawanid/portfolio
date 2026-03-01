@@ -7,28 +7,37 @@ export default function MouseSection() {
   const cursorRef = useRef(null)
 
   useEffect(() => {
-    document.addEventListener("mousemove", (e) => {
-      const mouseX = e.clientX
-      const mouseY = e.clientY
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!cursorRef.current) return
       gsap.to(cursorRef.current, {
-        x: mouseX,
-        y: mouseY,
+        x: e.clientX,
+        y: e.clientY,
         opacity: 1,
         delay: 0,
       })
-    })
+    }
 
     const hideCursor = () => {
+      if (!cursorRef.current) return
       gsap.to(cursorRef.current, { opacity: 0 })
     }
 
     const showCursor = () => {
+      if (!cursorRef.current) return
       gsap.to(cursorRef.current, { opacity: 1 })
     }
 
+    document.addEventListener("mousemove", handleMouseMove)
     document.addEventListener("mouseleave", hideCursor)
     document.addEventListener("mousedown", hideCursor)
     document.addEventListener("mouseup", showCursor)
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseleave", hideCursor)
+      document.removeEventListener("mousedown", hideCursor)
+      document.removeEventListener("mouseup", showCursor)
+    }
   }, [])
   return (
     <div

@@ -41,8 +41,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={jost.className}>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
+      <body className={jost.className} suppressHydrationWarning>
         {/* <Loader /> */}
         {/* Loading animation (0–12 counter) — uncomment to re-enable */}
 

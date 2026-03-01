@@ -21,6 +21,7 @@ export default function ThemeSwitch() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
+          suppressHydrationWarning
           className="dark:hover:bg-gray-800 hover:backdrop-opacity-10"
           variant="ghost"
           size="icon"

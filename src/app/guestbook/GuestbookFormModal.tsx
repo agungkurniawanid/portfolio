@@ -1,0 +1,746 @@
+"use client"
+
+import { useCallback, useRef, useState } from "react"
+import { createPortal } from "react-dom"
+import { X, Upload, ChevronRight, ChevronLeft, Send, Star, Check, ImageIcon } from "lucide-react"
+import { cn } from "@/lib/Utils"
+import { supabase } from "@/lib/supabase"
+import { generateFingerprint } from "@/lib/fingerprint"
+import GuestbookCard, { GuestbookEntry } from "./GuestbookCard"
+import Image from "next/image"
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+export const MOODS = [
+  { emoji: "😍", label: "Kagum" },
+  { emoji: "😄", label: "Senang" },
+  { emoji: "🤩", label: "Terinspirasi" },
+  { emoji: "🤔", label: "Penasaran" },
+  { emoji: "😎", label: "Keren" },
+  { emoji: "🥰", label: "Suka" },
+  { emoji: "😮", label: "Terkejut" },
+]
+
+export const REFERRAL_SOURCES = [
+  "Google Search",
+  "Instagram",
+  "LinkedIn",
+  "Twitter / X",
+  "Referral / Teman",
+  "GitHub",
+  "Other",
+]
+
+export const COLOR_PRESETS = [
+  "#6366f1",
+  "#8b5cf6",
+  "#ec4899",
+  "#f59e0b",
+  "#10b981",
+  "#3b82f6",
+  "#ef4444",
+  "#f97316",
+  "#14b8a6",
+  "#84cc16",
+  "#0ea5e9",
+  "#a855f7",
+]
+
+// ─── Types ─────────────────────────────────────────────────────────────────────
+
+export interface FormData {
+  name: string
+  city: string
+  profession: string
+  referral_source: string
+  mood: string
+  rating: number
+  message: string
+  card_color: string
+  avatar_url: string | null
+  avatarFile: File | null
+  avatarPreview: string | null
+}
+
+const INITIAL_FORM: FormData = {
+  name: "",
+  city: "",
+  profession: "",
+  referral_source: "",
+  mood: "",
+  rating: 0,
+  message: "",
+  card_color: "#6366f1",
+  avatar_url: null,
+  avatarFile: null,
+  avatarPreview: null,
+}
+
+interface Props {
+  isOpen: boolean
+  onClose: () => void
+  onSuccess: (entry: GuestbookEntry) => void
+}
+
+// ─── Interactive Star Rating ───────────────────────────────────────────────────
+
+function StarRatingInput({
+  value,
+  onChange,
+}: {
+  value: number
+  onChange: (v: number) => void
+}) {
+  const [hover, setHover] = useState(0)
+  return (
+    <div className="flex items-center gap-1">
+      {Array.from({ length: 5 }).map((_, i) => {
+        const idx = i + 1
+        return (
+          <button
+            key={idx}
+            type="button"
+            onClick={() => onChange(idx)}
+            onMouseEnter={() => setHover(idx)}
+            onMouseLeave={() => setHover(0)}
+            className="transition-transform hover:scale-110"
+          >
+            <Star
+              size={28}
+              className={cn(
+                "transition-colors",
+                idx <= (hover || value)
+                  ? "fill-amber-400 text-amber-400"
+                  : "fill-gray-200 text-gray-200 dark:fill-gray-700 dark:text-gray-700"
+              )}
+            />
+          </button>
+        )
+      })}
+      {value > 0 && (
+        <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+          {["", "Cukup", "Lumayan", "Bagus", "Sangat Bagus", "Luar Biasa!"][value]}
+        </span>
+      )}
+    </div>
+  )
+}
+
+// ─── Avatar Upload Area ────────────────────────────────────────────────────────
+
+function AvatarUpload({
+  preview,
+  onFile,
+  onClear,
+}: {
+  preview: string | null
+  onFile: (file: File) => void
+  onClear: () => void
+}) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [error, setError] = useState("")
+
+  const handleFile = (file: File) => {
+    setError("")
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setError("Hanya format JPG, PNG, atau WEBP yang didukung.")
+      return
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Ukuran file maksimal 2MB.")
+      return
+    }
+    onFile(file)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const file = e.dataTransfer.files[0]
+    if (file) handleFile(file)
+  }
+
+  if (preview) {
+    return (
+      <div className="flex items-center gap-4">
+        <div className="relative w-20 h-20 rounded-full overflow-hidden ring-2 ring-accentColor ring-offset-2 dark:ring-offset-gray-900">
+          <Image src={preview} alt="Avatar preview" fill className="object-cover" sizes="80px" />
+        </div>
+        <div className="flex flex-col gap-2">
+          <p className="text-sm text-gray-600 dark:text-gray-400">Foto dipilih ✓</p>
+          <button
+            type="button"
+            onClick={onClear}
+            className="text-xs text-red-500 hover:text-red-600 underline"
+          >
+            Hapus foto
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-2">
+      <div
+        onClick={() => inputRef.current?.click()}
+        onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={handleDrop}
+        className={cn(
+          "border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all",
+          isDragging
+            ? "border-accentColor bg-accentColor/5"
+            : "border-gray-200 dark:border-gray-700 hover:border-accentColor/50 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+        )}
+      >
+        <div className="flex flex-col items-center gap-2">
+          <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-800">
+            <ImageIcon size={20} className="text-gray-400" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Drag & drop atau{" "}
+              <span className="text-accentColor underline">klik untuk upload</span>
+            </p>
+            <p className="text-xs text-gray-400 mt-0.5">JPG, PNG, WEBP • Maks 2MB • Opsional</p>
+          </div>
+        </div>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) handleFile(file)
+          }}
+        />
+      </div>
+      {error && <p className="text-xs text-red-500">{error}</p>}
+    </div>
+  )
+}
+
+// ─── Card Preview (Step 3) ─────────────────────────────────────────────────────
+
+function PreviewCard({ form }: { form: FormData }) {
+  const fakeEntry: GuestbookEntry = {
+    id: "preview",
+    name: form.name || "Nama Kamu",
+    city: form.city || "Kota",
+    profession: form.profession || "Profesi",
+    message: form.message || "Pesan kamu akan muncul di sini...",
+    mood: form.mood || "Senang",
+    rating: form.rating || 5,
+    card_color: form.card_color,
+    avatar_url: form.avatarPreview,
+    referral_source: form.referral_source || "Google Search",
+    is_approved: true,
+    created_at: new Date().toISOString(),
+  }
+  return (
+    <div className="max-w-sm mx-auto">
+      <GuestbookCard entry={fakeEntry} />
+    </div>
+  )
+}
+
+// ─── Main Modal ────────────────────────────────────────────────────────────────
+
+export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props) {
+  const [step, setStep] = useState(1)
+  const [form, setForm] = useState<FormData>(INITIAL_FORM)
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState("")
+
+  const update = (key: keyof FormData, value: unknown) => {
+    setForm((prev) => ({ ...prev, [key]: value }))
+    setErrors((prev) => ({ ...prev, [key]: "" }))
+  }
+
+  const handleAvatarFile = useCallback((file: File) => {
+    const url = URL.createObjectURL(file)
+    setForm((prev) => ({ ...prev, avatarFile: file, avatarPreview: url }))
+  }, [])
+
+  const clearAvatar = useCallback(() => {
+    if (form.avatarPreview) URL.revokeObjectURL(form.avatarPreview)
+    setForm((prev) => ({ ...prev, avatarFile: null, avatarPreview: null }))
+  }, [form.avatarPreview])
+
+  const validateStep1 = () => {
+    const e: typeof errors = {}
+    if (!form.name.trim()) e.name = "Nama wajib diisi."
+    if (!form.city.trim()) e.city = "Kota / negara wajib diisi."
+    if (!form.profession.trim()) e.profession = "Profesi wajib diisi."
+    if (!form.referral_source) e.referral_source = "Pilih salah satu."
+    setErrors(e)
+    return Object.keys(e).length === 0
+  }
+
+  const validateStep2 = () => {
+    const e: typeof errors = {}
+    if (!form.mood) e.mood = "Pilih mood kamu."
+    if (!form.rating) e.rating = "Berikan rating."
+    if (!form.message.trim()) e.message = "Pesan wajib diisi."
+    if (form.message.trim().length < 10) e.message = "Pesan minimal 10 karakter."
+    setErrors(e)
+    return Object.keys(e).length === 0
+  }
+
+  const handleNext = () => {
+    if (step === 1 && !validateStep1()) return
+    if (step === 2 && !validateStep2()) return
+    setStep((s) => Math.min(s + 1, 3))
+  }
+
+  const handleBack = () => setStep((s) => Math.max(s - 1, 1))
+
+  const handleClose = () => {
+    setStep(1)
+    setForm(INITIAL_FORM)
+    setErrors({})
+    setSubmitError("")
+    onClose()
+  }
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true)
+    setSubmitError("")
+
+    try {
+      const fingerprint = await generateFingerprint()
+
+      // Check fingerprint in Supabase
+      const { data: existing } = await supabase
+        .from("guestbook")
+        .select("id")
+        .eq("browser_fingerprint", fingerprint)
+        .single()
+
+      if (existing) {
+        localStorage.setItem("guestbook_submitted", "true")
+        throw new Error("Kamu sudah pernah mengisi buku tamu sebelumnya.")
+      }
+
+      // Upload avatar if provided
+      let avatarUrl: string | null = null
+      if (form.avatarFile) {
+        const ext = form.avatarFile.name.split(".").pop()
+        const fileName = `${fingerprint.slice(0, 16)}-${Date.now()}.${ext}`
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("guestbook-avatars")
+          .upload(fileName, form.avatarFile, { upsert: false, cacheControl: "31536000" })
+
+        if (!uploadError && uploadData) {
+          const { data: urlData } = supabase.storage
+            .from("guestbook-avatars")
+            .getPublicUrl(uploadData.path)
+          avatarUrl = urlData.publicUrl
+        }
+        // Silently fallback to null if storage not set up
+      }
+
+      // Insert entry
+      const { data: newEntry, error: insertError } = await supabase
+        .from("guestbook")
+        .insert({
+          browser_fingerprint: fingerprint,
+          name: form.name.trim(),
+          city: form.city.trim(),
+          profession: form.profession.trim(),
+          message: form.message.trim(),
+          mood: form.mood,
+          rating: form.rating,
+          card_color: form.card_color,
+          avatar_url: avatarUrl,
+          referral_source: form.referral_source,
+        })
+        .select()
+        .single()
+
+      if (insertError) throw new Error(insertError.message)
+
+      // Save flag to localStorage
+      localStorage.setItem("guestbook_submitted", "true")
+
+      handleClose()
+      onSuccess(newEntry as GuestbookEntry)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setSubmitError(err.message)
+      } else {
+        setSubmitError("Terjadi kesalahan. Coba lagi.")
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (!isOpen) return null
+
+  const STEPS = ["Identitas", "Pesan", "Preview"]
+  const progress = ((step - 1) / (STEPS.length - 1)) * 100
+
+  return createPortal(
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9990]"
+        onClick={handleClose}
+      />
+
+      {/* Modal */}
+      <div
+        className="fixed inset-0 z-[9991] flex items-end sm:items-center justify-center p-0 sm:p-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="w-full sm:max-w-lg bg-white dark:bg-gray-900 rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[95dvh] sm:max-h-[90dvh]">
+
+          {/* Progress Bar */}
+          <div className="h-1 bg-gray-100 dark:bg-gray-800">
+            <div
+              className="h-full bg-accentColor transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+
+          {/* Modal Header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+            <div>
+              <h2 className="font-semibold text-gray-900 dark:text-white text-base">
+                Isi Buku Tamu
+              </h2>
+              <div className="flex items-center gap-2 mt-1">
+                {STEPS.map((label, i) => (
+                  <div key={label} className="flex items-center gap-1.5">
+                    <div
+                      className={cn(
+                        "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-all",
+                        i + 1 < step
+                          ? "bg-accentColor text-white"
+                          : i + 1 === step
+                          ? "bg-accentColor/20 text-accentColor border border-accentColor"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-400"
+                      )}
+                    >
+                      {i + 1 < step ? <Check size={10} /> : i + 1}
+                    </div>
+                    <span
+                      className={cn(
+                        "text-xs",
+                        i + 1 === step
+                          ? "text-accentColor font-medium"
+                          : "text-gray-400 dark:text-gray-500"
+                      )}
+                    >
+                      {label}
+                    </span>
+                    {i < STEPS.length - 1 && (
+                      <div
+                        className={cn(
+                          "w-4 h-px transition-colors",
+                          i + 1 < step ? "bg-accentColor" : "bg-gray-200 dark:bg-gray-700"
+                        )}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button
+              onClick={handleClose}
+              className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              aria-label="Tutup"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Modal Body */}
+          <div className="flex-1 overflow-y-auto px-5 py-5">
+
+            {/* ─ STEP 1: Identitas ──────────────────────────────────── */}
+            {step === 1 && (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
+                    🖼️ Foto Profil <span className="text-gray-400 font-normal">(opsional)</span>
+                  </label>
+                  <AvatarUpload
+                    preview={form.avatarPreview}
+                    onFile={handleAvatarFile}
+                    onClear={clearAvatar}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    👤 Nama Lengkap <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={form.name}
+                    onChange={(e) => update("name", e.target.value)}
+                    placeholder="Nama kamu..."
+                    maxLength={100}
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 outline-none transition-all",
+                      "focus:ring-2 focus:ring-accentColor/30 focus:border-accentColor",
+                      errors.name ? "border-red-400" : "border-gray-200 dark:border-gray-700"
+                    )}
+                  />
+                  {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    📍 Asal Kota / Negara <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={form.city}
+                    onChange={(e) => update("city", e.target.value)}
+                    placeholder="Jakarta, Indonesia"
+                    maxLength={100}
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 outline-none transition-all",
+                      "focus:ring-2 focus:ring-accentColor/30 focus:border-accentColor",
+                      errors.city ? "border-red-400" : "border-gray-200 dark:border-gray-700"
+                    )}
+                  />
+                  {errors.city && <p className="text-xs text-red-500 mt-1">{errors.city}</p>}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    💼 Pekerjaan / Profesi <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={form.profession}
+                    onChange={(e) => update("profession", e.target.value)}
+                    placeholder="Software Engineer, Designer, dll."
+                    maxLength={100}
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 outline-none transition-all",
+                      "focus:ring-2 focus:ring-accentColor/30 focus:border-accentColor",
+                      errors.profession ? "border-red-400" : "border-gray-200 dark:border-gray-700"
+                    )}
+                  />
+                  {errors.profession && (
+                    <p className="text-xs text-red-500 mt-1">{errors.profession}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    🔍 Dari mana tahu website ini? <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={form.referral_source}
+                    onChange={(e) => update("referral_source", e.target.value)}
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white outline-none transition-all cursor-pointer",
+                      "focus:ring-2 focus:ring-accentColor/30 focus:border-accentColor",
+                      errors.referral_source ? "border-red-400" : "border-gray-200 dark:border-gray-700"
+                    )}
+                  >
+                    <option value="">-- Pilih --</option>
+                    {REFERRAL_SOURCES.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                  {errors.referral_source && (
+                    <p className="text-xs text-red-500 mt-1">{errors.referral_source}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ─ STEP 2: Pesan & Ekspresi ───────────────────────────── */}
+            {step === 2 && (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
+                    😊 Mood kamu saat berkunjung <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {MOODS.map((m) => (
+                      <button
+                        key={m.label}
+                        type="button"
+                        onClick={() => update("mood", m.label)}
+                        className={cn(
+                          "flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-medium transition-all",
+                          form.mood === m.label
+                            ? "border-accentColor bg-accentColor/10 text-accentColor"
+                            : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-accentColor/50"
+                        )}
+                      >
+                        <span className="text-base">{m.emoji}</span>
+                        <span>{m.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                  {errors.mood && <p className="text-xs text-red-500 mt-1.5">{errors.mood}</p>}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
+                    ⭐ Rating website <span className="text-red-500">*</span>
+                  </label>
+                  <StarRatingInput value={form.rating} onChange={(v) => update("rating", v)} />
+                  {errors.rating && <p className="text-xs text-red-500 mt-1.5">{errors.rating}</p>}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    💬 Pesan / Kesan <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={form.message}
+                    onChange={(e) => update("message", e.target.value)}
+                    placeholder="Tulis pesan atau kesanmu di sini... (min 10 karakter)"
+                    rows={4}
+                    maxLength={500}
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 outline-none transition-all resize-none",
+                      "focus:ring-2 focus:ring-accentColor/30 focus:border-accentColor",
+                      errors.message ? "border-red-400" : "border-gray-200 dark:border-gray-700"
+                    )}
+                  />
+                  <div className="flex justify-between items-center mt-1">
+                    {errors.message ? (
+                      <p className="text-xs text-red-500">{errors.message}</p>
+                    ) : (
+                      <span />
+                    )}
+                    <span className="text-xs text-gray-400">{form.message.length}/500</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
+                    🎨 Warna Card
+                  </label>
+                  <div className="flex flex-wrap gap-2.5">
+                    {COLOR_PRESETS.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => update("card_color", c)}
+                        className={cn(
+                          "w-8 h-8 rounded-full transition-all",
+                          form.card_color === c
+                            ? "ring-2 ring-offset-2 ring-gray-800 dark:ring-white scale-110"
+                            : "hover:scale-105"
+                        )}
+                        style={{ backgroundColor: c }}
+                        title={c}
+                      />
+                    ))}
+                  </div>
+                  <div className="mt-3 flex items-center gap-2">
+                    <div
+                      className="w-6 h-6 rounded-full border border-gray-200 dark:border-gray-700"
+                      style={{ backgroundColor: form.card_color }}
+                    />
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      Warna terpilih: {form.card_color}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ─ STEP 3: Preview ────────────────────────────────────── */}
+            {step === 3 && (
+              <div className="space-y-5">
+                <div className="text-center">
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-base mb-1">
+                    Preview Card Kamu
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Begini tampilan kamu di halaman buku tamu
+                  </p>
+                </div>
+
+                <PreviewCard form={form} />
+
+                {submitError && (
+                  <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                    <span className="text-red-500 text-sm">{submitError}</span>
+                  </div>
+                )}
+
+                <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">
+                    ℹ️ Data kamu akan ditampilkan publik di halaman ini. Pastikan informasi yang
+                    kamu masukkan sudah benar.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Modal Footer */}
+          <div className="flex items-center justify-between px-5 py-4 border-t border-gray-100 dark:border-gray-800 gap-3">
+            {step > 1 ? (
+              <button
+                type="button"
+                onClick={handleBack}
+                disabled={isSubmitting}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all disabled:opacity-50"
+              >
+                <ChevronLeft size={15} />
+                Kembali
+              </button>
+            ) : (
+              <div />
+            )}
+
+            {step < 3 ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-medium bg-accentColor text-white hover:bg-accentColor/90 transition-all shadow-sm"
+              >
+                Lanjut
+                <ChevronRight size={15} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className={cn(
+                  "flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium bg-accentColor text-white transition-all shadow-sm",
+                  isSubmitting
+                    ? "opacity-70 cursor-not-allowed"
+                    : "hover:bg-accentColor/90"
+                )}
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    Mengirim...
+                  </>
+                ) : (
+                  <>
+                    <Send size={14} />
+                    Konfirmasi & Kirim
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </>,
+    document.body
+  )
+}

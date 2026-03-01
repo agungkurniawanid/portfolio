@@ -60,6 +60,7 @@ export default function ProjectCard({ item }: Props) {
             alt={item.title}
             src={item.image}
             fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover"
           />
         </div>

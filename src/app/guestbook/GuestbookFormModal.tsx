@@ -330,18 +330,25 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
       let avatarUrl: string | null = null
       if (form.avatarFile) {
         const ext = form.avatarFile.name.split(".").pop()
-        const fileName = `${fingerprint.slice(0, 16)}-${Date.now()}.${ext}`
+        const fileName = `avatars/${fingerprint.slice(0, 16)}-${Date.now()}.${ext}`
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("guestbook-avatars")
-          .upload(fileName, form.avatarFile, { upsert: false, cacheControl: "31536000" })
+          .upload(fileName, form.avatarFile, {
+            upsert: false,
+            cacheControl: "31536000",
+            contentType: form.avatarFile.type,
+          })
 
-        if (!uploadError && uploadData) {
+        if (uploadError) {
+          throw new Error(`Gagal mengunggah foto: ${uploadError.message}`)
+        }
+
+        if (uploadData) {
           const { data: urlData } = supabase.storage
             .from("guestbook-avatars")
             .getPublicUrl(uploadData.path)
           avatarUrl = urlData.publicUrl
         }
-        // Silently fallback to null if storage not set up
       }
 
       // Insert entry

@@ -84,6 +84,27 @@ CREATE POLICY "author_avatars_select"
   USING (bucket_id = 'author-avatars');
 
 -- ============================================================
+-- SUPABASE STORAGE: Bucket untuk foto profil tamu (guestbook)
+-- ============================================================
+
+-- 11. Buat storage bucket untuk guestbook avatars
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('guestbook-avatars', 'guestbook-avatars', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- 12. Policy: Semua orang bisa upload foto ke bucket guestbook-avatars
+DROP POLICY IF EXISTS "guestbook_avatars_insert" ON storage.objects;
+CREATE POLICY "guestbook_avatars_insert"
+  ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'guestbook-avatars');
+
+-- 13. Policy: Semua orang bisa baca/akses foto dari bucket guestbook-avatars
+DROP POLICY IF EXISTS "guestbook_avatars_select" ON storage.objects;
+CREATE POLICY "guestbook_avatars_select"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'guestbook-avatars');
+
+-- ============================================================
 -- SEED: Developer blogs awal (opsional — hapus jika tidak perlu)
 -- ============================================================
 

@@ -21,14 +21,14 @@ const navlinks: NavLink[] = [
   { title: "Skills", href: "/skills", icon: Zap },
   { title: "Projects", href: "/projects", icon: FolderKanban },
   { title: "Blog", href: "/blogs", icon: Newspaper },
-  { title: "Contact & Media", href: "/contact", icon: Mail },
+  { title: "Guestbook", href: "/guestbook", icon: BookOpen },
   {
     title: "Lainnya",
     href: "#",
     icon: MoreHorizontal,
     subMenu: [
       { title: "Gallery", href: "/gallery", icon: ImageIcon, description: "Koleksi foto & media" },
-      { title: "Guestbook", href: "/guestbook", icon: BookOpen, description: "Buku tamu pengunjung" },
+      { title: "Contact & Media", href: "/contact", icon: Mail, description: "Hubungi & media sosial" },
       { title: "Certificate", href: "/certificate", icon: Award, description: "Sertifikat & pencapaian" },
       { title: "Entertainment", href: "/entertainment", icon: Gamepad2, description: "Movie, Game, Hiburan" },
       { title: "Timeline", href: "/timeline", icon: History, description: "Perjalanan karir & pendidikan" },

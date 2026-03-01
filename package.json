@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "migrate": "node scripts/migrate.mjs",
-    "migrate:guestbook": "node scripts/migrate-guestbook.mjs"
+    "migrate:guestbook": "node scripts/migrate-guestbook.mjs",
+    "migrate:guestbook-storage": "node scripts/migrate-guestbook-storage.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

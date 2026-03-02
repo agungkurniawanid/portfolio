@@ -11,10 +11,6 @@ import ThemeColorSync from "@/components/ThemeColorSync"
 const jost = Jost({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#111c20" },
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-  ],
   title: "Agung Kurniawan - Portfolio",
   description: "A Software Engineer",
   applicationName: "Portfolio",
@@ -49,6 +45,34 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
+      {/*
+       * Inline script runs synchronously before first paint.
+       * Reads localStorage (next-themes key = "theme") or falls back to
+       * prefers-color-scheme, then sets:
+       *   - <meta name="theme-color">   → Android browser chrome color
+       *   - <meta name="color-scheme">  → browser scrollbar / input style
+       *   - html backgroundColor        → prevents white flash under chrome
+       */}
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){
+  try{
+    var t=localStorage.getItem('theme');
+    var dark=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);
+    var c=dark?'#111c20':'#ffffff';
+    var cs=dark?'dark':'light';
+    var m=document.createElement('meta');m.name='theme-color';m.content=c;
+    document.head.appendChild(m);
+    var s=document.createElement('meta');s.name='color-scheme';s.content=cs;
+    document.head.appendChild(s);
+    document.documentElement.style.backgroundColor=c;
+    document.documentElement.style.colorScheme=cs;
+  }catch(e){}
+})();`,
+          }}
+        />
+      </head>
       <body className={jost.className} suppressHydrationWarning>
         {/* <Loader /> */}
         {/* Loading animation (0–12 counter) — uncomment to re-enable */}

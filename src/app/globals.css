@@ -91,6 +91,13 @@
 @layer base {
   html {
     @apply scroll-smooth;
+    /* Explicit background on <html> ensures the Android browser chrome
+       (status bar / nav bar) colour matches before CSS variables resolve.
+       Kept in sync with ThemeColorSync and the pre-hydration inline script. */
+    background-color: #ffffff;
+  }
+  html.dark {
+    background-color: #111c20;
   }
   * {
     @apply border-border;

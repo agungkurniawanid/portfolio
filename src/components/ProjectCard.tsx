@@ -54,15 +54,22 @@ export default function ProjectCard({ item }: Props) {
         className="relative col-span-1 w-full flex flex-col shadow-shadow0 border rounded-2xl overflow-hidden bg-white hover:shadow-lg transition-shadow duration-300"
       >
         {/* Thumbnail */}
-        <div className="relative w-full aspect-video overflow-hidden">
-          <Image
-            priority
-            alt={item.title}
-            src={item.image}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover"
-          />
+        <div className="relative w-full aspect-video overflow-hidden bg-gray-100">
+          {item.image ? (
+            <Image
+              priority
+              alt={item.title}
+              src={item.image}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover"
+            />
+          ) : (
+            /* Placeholder shown when thumbnail_url is NULL in Supabase */
+            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+              <span className="text-xs text-gray-400 select-none">No image</span>
+            </div>
+          )}
         </div>
 
         {/* Info */}

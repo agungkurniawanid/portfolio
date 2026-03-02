@@ -1,10 +1,12 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
 import { ArrowRight } from "iconsax-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Blog } from "@/types/blog"
+import { useTranslate } from "@/hooks/useTranslate"
+import TranslateButton from "@/components/blog/TranslateButton"
 
 interface Props {
   item: Blog
@@ -12,23 +14,36 @@ interface Props {
 
 export default function BlogCard({ item }: Props) {
   const cardRef = useRef<HTMLDivElement>(null)
+  const { translate, revert, translating, isTranslated, targetLang, targetLangLabel, error } =
+    useTranslate()
+
+  // Translated content — null means "show original"
+  const [translated, setTranslated] = useState<{ title: string; excerpt: string } | null>(null)
+
+  const displayTitle   = translated?.title   ?? item.title
+  const displayExcerpt = translated?.excerpt ?? item.excerpt
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger)
-
     const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: cardRef.current,
-        start: `70% bottom`,
-      },
+      scrollTrigger: { trigger: cardRef.current, start: "70% bottom" },
     })
-
-    tl.fromTo(
-      cardRef.current,
-      { y: "100%" },
-      { y: 0, ease: "power1.inOut" }
-    )
+    tl.fromTo(cardRef.current, { y: "100%" }, { y: 0, ease: "power1.inOut" })
   }, [])
+
+  const handleTranslate = useCallback(async () => {
+    try {
+      const out = await translate({ title: item.title, excerpt: item.excerpt })
+      setTranslated({ title: out.title, excerpt: out.excerpt })
+    } catch {
+      // error state is managed by the hook
+    }
+  }, [translate, item.title, item.excerpt])
+
+  const handleRevert = useCallback(() => {
+    revert()
+    setTranslated(null)
+  }, [revert])
 
   const dateLabel = new Date(item.publishedAt).toLocaleDateString("id-ID", {
     year: "numeric",
@@ -37,16 +52,17 @@ export default function BlogCard({ item }: Props) {
   })
 
   return (
-    <Link
-      href={`/blogs/${item.id}`}
-      aria-label={item.title}
-      className="w-full overflow-hidden"
-    >
+    // Outer wrapper is NOT a Link so the translate button doesn't navigate
+    <div className="w-full overflow-hidden">
       <div
         ref={cardRef}
         className="w-full group flex justify-between items-center hover:bg-gray-500 rounded-md hover:bg-opacity-5 transition-colors p-1 pr-0 md:pr-4"
       >
-        <div className="w-full flex flex-col md:flex-row items-center gap-5">
+        <Link
+          href={`/blogs/${item.id}`}
+          aria-label={item.title}
+          className="w-full flex flex-col md:flex-row items-center gap-5"
+        >
           <Image
             priority
             width={200}
@@ -56,20 +72,37 @@ export default function BlogCard({ item }: Props) {
             alt={item.title}
           />
           <div className="flex w-full md:w-3/5 flex-col items-start gap-2">
-            <div className="dark:text-gray-300">{item.title}</div>
-            <div className="flex items-center gap-2">
+            <div className="dark:text-gray-300">{displayTitle}</div>
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-accentColor text-sm">{dateLabel}</span>
+              {/* Translate button — stopPropagation prevents navigation */}
+              <TranslateButton
+                onTranslate={handleTranslate}
+                onRevert={handleRevert}
+                translating={translating}
+                isTranslated={isTranslated}
+                targetLang={targetLang}
+                targetLangLabel={targetLangLabel}
+                error={error}
+                size="sm"
+              />
             </div>
-            <div className="dark:text-gray-400 text-sm line-clamp-2">{item.excerpt}</div>
+            <div className="dark:text-gray-400 text-sm line-clamp-2">{displayExcerpt}</div>
           </div>
-        </div>
+        </Link>
 
-        <div className="hidden md:flex flex-col items-start gap-2">
-          <div className="w-7 group-hover:scale-110 transition-transform -rotate-45 h-7 rounded-full bg-accentColor flex justify-center items-center">
-            <ArrowRight color="white" size={14} />
-          </div>
+        <div className="hidden md:flex flex-col items-start gap-2 pl-2">
+          <Link
+            href={`/blogs/${item.id}`}
+            aria-label={`Read ${item.title}`}
+            tabIndex={-1}
+          >
+            <div className="w-7 group-hover:scale-110 transition-transform -rotate-45 h-7 rounded-full bg-accentColor flex justify-center items-center">
+              <ArrowRight color="white" size={14} />
+            </div>
+          </Link>
         </div>
       </div>
-    </Link>
+    </div>
   )
 }

@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "migrate": "node scripts/migrate.mjs",
+    "migrate:projects": "node scripts/migrate-projects.mjs",
+    "migrate:projects-thumbnails": "node scripts/migrate-projects-thumbnails.mjs",
     "migrate:guestbook": "node scripts/migrate-guestbook.mjs",
     "migrate:guestbook-storage": "node scripts/migrate-guestbook-storage.mjs"
   },

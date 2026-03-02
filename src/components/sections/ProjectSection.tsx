@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import useOnScreen from "@/hooks/UseOnScreen";
 import useScrollActive from "@/hooks/UseScrollActive";
 import { useSectionStore } from "@/stores/Section";
@@ -11,6 +11,7 @@ import Link from "next/link";
 import { RoughNotation } from "react-rough-notation";
 import ProjectCard from "../ProjectCard";
 import { useTranslations } from "next-intl";
+import { fetchPopularProjects } from "@/lib/projectsApi";
 import ThumbGreenhouse from "@/assets/thumbnails/Intelligence-Quality-Air-Control-System-Greenhouse-Kopi-Nrsery-App.jpeg";
 import ThumbEmotional from "@/assets/thumbnails/Emotional-Faces-Classification.jpeg";
 import ThumbKampSewa from "@/assets/thumbnails/Marketplace-KampSewa_-Jual-Beli,-Sewa-dan-Menyewakan-Alat-Kamping-App.jpeg";
@@ -21,6 +22,28 @@ import ThumbElectroMart from "@/assets/thumbnails/Electro-Mart-App.jpeg";
 import ThumbQRCode from "@/assets/thumbnails/QR-Code-Reader-App.jpeg";
 import ThumbHandyCraft from "@/assets/thumbnails/HandyCraft-App.jpeg";
 
+// ─── Skeleton card shown while Supabase data is loading ──────────────────────
+function ProjectCardSkeleton() {
+  return (
+    <div className="relative col-span-1 w-full flex flex-col shadow-shadow0 border rounded-2xl overflow-hidden bg-white animate-pulse">
+      <div className="w-full aspect-video bg-gray-200" />
+      <div className="flex flex-col gap-2 p-4">
+        <div className="h-3 w-3/4 rounded bg-gray-200" />
+        <div className="h-2.5 w-full rounded bg-gray-100" />
+        <div className="h-2.5 w-2/3 rounded bg-gray-100" />
+        <div className="flex gap-1.5 mt-1">
+          <div className="h-4 w-14 rounded-full bg-gray-200" />
+          <div className="h-4 w-14 rounded-full bg-gray-200" />
+        </div>
+      </div>
+      <div className="px-4 pb-4 flex justify-between">
+        <div className="h-3 w-8 rounded bg-gray-200" />
+        <div className="h-6 w-16 rounded-full bg-gray-200" />
+      </div>
+    </div>
+  );
+}
+
 export default function ProjectSection() {
   gsap.registerPlugin(ScrollTrigger);
   const t = useTranslations("projects");
@@ -28,6 +51,22 @@ export default function ProjectSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const elementRef = useRef<HTMLDivElement>(null);
   const isOnScreen = useOnScreen(elementRef as React.RefObject<HTMLElement>);
+
+  // ─── Supabase data state ────────────────────────────────────────────────────
+  const [displayProjects, setDisplayProjects] = useState<Project[]>(staticProjects);
+  const [loading, setLoading] = useState(true);
+
+  // ─── Fetch popular projects from Supabase ─────────────────────────────────
+  useEffect(() => {
+    fetchPopularProjects().then((rows) => {
+      if (rows.length > 0) {
+        // Map ProjectCardItem → Project (image comes as a URL string from Supabase)
+        setDisplayProjects(rows as Project[]);
+      }
+      // If Supabase returns empty (DB not seeded yet), staticProjects stay as fallback
+      setLoading(false);
+    });
+  }, []);
 
   useEffect(() => {
     const q = gsap.utils.selector(sectionRef);
@@ -90,9 +129,13 @@ export default function ProjectSection() {
           </div>
         </div>
         <div className="w-full pt-40 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {projects.map((project) => (
-            <ProjectCard key={project.id} item={project} />
-          ))}
+          {loading
+            ? Array.from({ length: 9 }).map((_, i) => (
+                <ProjectCardSkeleton key={i} />
+              ))
+            : displayProjects.map((project) => (
+                <ProjectCard key={project.id} item={project} />
+              ))}
         </div>
 
         <div className="font-medium text-black">
@@ -113,11 +156,12 @@ export default function ProjectSection() {
 }
 
 export interface Project {
-  id: number;
+  id: number | string;
   title: string;
   description: string;
   platformApp: string[];
-  image: StaticImageData;
+  /** Accepts a Next.js StaticImageData import OR a Supabase CDN URL string. */
+  image: StaticImageData | string;
   githubURL: {
     [key: string]: string;
   };
@@ -126,7 +170,12 @@ export interface Project {
   technologies: string[];
 }
 
-const projects: Project[] = [
+/**
+ * staticProjects — used as:
+ *   1. The initial render value (zero layout shift before Supabase responds)
+ *   2. A fallback when Supabase is unreachable or the DB has not been seeded yet
+ */
+const staticProjects: Project[] = [
   {
     id: 1,
     title: "Intelligence Quality Air Control System Greenhouse Kopi Nrsery App",

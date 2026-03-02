@@ -13,9 +13,11 @@ import {
   Facebook,
   Link as LinkIcon,
 } from "lucide-react"
-import { useMemo, useState, useEffect, use } from "react"
+import { useMemo, useState, useEffect, use, useCallback } from "react"
 import BlogPageCard from "@/components/blog/BlogPageCard"
 import { cn } from "@/lib/Utils"
+import { useTranslate } from "@/hooks/useTranslate"
+import TranslateButton from "@/components/blog/TranslateButton"
 
 const ID_MONTHS = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -44,6 +46,35 @@ export default function BlogDetailPage({ params }: { params: Promise<{ id: strin
       .filter((b) => b.id !== blog.id && b.category === blog.category)
       .slice(0, 3)
   }, [blog, blogs])
+
+  // ── Translation state ──────────────────────────────────────────────────────
+  const { translate, revert, translating, isTranslated, targetLang, targetLangLabel, error } =
+    useTranslate()
+  const [translatedTitle, setTranslatedTitle]     = useState<string | null>(null)
+  const [translatedContent, setTranslatedContent] = useState<string | null>(null)
+
+  const displayTitle   = translatedTitle   ?? blog?.title   ?? ""
+  const displayContent = translatedContent ?? blog?.content ?? ""
+
+  const handleTranslate = useCallback(async () => {
+    if (!blog) return
+    try {
+      const out = await translate(
+        { title: blog.title, content: blog.content },
+        { content: "html" }
+      )
+      setTranslatedTitle(out.title)
+      setTranslatedContent(out.content)
+    } catch {
+      // error state managed by hook
+    }
+  }, [translate, blog])
+
+  const handleRevert = useCallback(() => {
+    revert()
+    setTranslatedTitle(null)
+    setTranslatedContent(null)
+  }, [revert])
 
   const handleCopyLink = () => {
     if (typeof window !== "undefined") {
@@ -109,10 +140,24 @@ export default function BlogDetailPage({ params }: { params: Promise<{ id: strin
               </span>
             </div>
 
-            {/* Title */}
-            <h1 className="text-2xl md:text-3xl font-bold dark:text-white leading-snug mb-6">
-              {blog.title}
-            </h1>
+            {/* Title + Translate */}
+            <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+              <h1 className="flex-1 text-2xl md:text-3xl font-bold dark:text-white leading-snug">
+                {displayTitle || blog.title}
+              </h1>
+              <div className="shrink-0 mt-1">
+                <TranslateButton
+                  onTranslate={handleTranslate}
+                  onRevert={handleRevert}
+                  translating={translating}
+                  isTranslated={isTranslated}
+                  targetLang={targetLang}
+                  targetLangLabel={targetLangLabel}
+                  error={error}
+                  size="md"
+                />
+              </div>
+            </div>
 
             {/* Author */}
             <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl mb-8 border border-gray-100 dark:border-gray-700/40">
@@ -197,7 +242,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ id: strin
                 prose-strong:dark:text-white
                 prose-ul:list-disc prose-ol:list-decimal
                 prose-li:text-gray-700 prose-li:dark:text-gray-300"
-              dangerouslySetInnerHTML={{ __html: blog.content }}
+              dangerouslySetInnerHTML={{ __html: displayContent || blog.content }}
             />
 
             {/* Tags */}

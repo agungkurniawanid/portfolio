@@ -41,6 +41,10 @@ export interface AboutStats {
    * These are filtered out on the /projects page so the count must match.
    */
   totalProjects: number;
+  /** "Teknologi Dikuasai" — total published rows in the `skills` table */
+  totalSkills: number;
+  /** "Total Sertifikat" — total published rows in the `certificates` table */
+  totalCertificates: number;
 }
 
 /**
@@ -66,7 +70,7 @@ const STATS_FALLBACK = {
 export async function fetchAboutStats(): Promise<AboutStats> {
   type GitHubStats = { contributions: number; public_repos: number };
 
-  const [supabaseResult, unpublishedResult, githubResult] = await Promise.allSettled([
+  const [supabaseResult, unpublishedResult, githubResult, skillsResult, certificatesResult] = await Promise.allSettled([
     supabase
       .from("portfolio_stats")
       .select("years_experience")
@@ -77,6 +81,14 @@ export async function fetchAboutStats(): Promise<AboutStats> {
       .select("id", { count: "exact", head: true })
       .eq("is_published", false),
     fetch("/api/github-stats").then((r) => r.json() as Promise<GitHubStats>),
+    supabase
+      .from("skills")
+      .select("id", { count: "exact", head: true })
+      .eq("is_published", true),
+    supabase
+      .from("certificates")
+      .select("id", { count: "exact", head: true })
+      .eq("is_published", true),
   ]);
 
   // ── Supabase portfolio_stats (years_experience only) ─────────────────────
@@ -137,11 +149,188 @@ export async function fetchAboutStats(): Promise<AboutStats> {
     );
   }
 
+  // ── Supabase skills count ──────────────────────────────────────────────────
+  let totalSkills = 0;
+
+  if (
+    skillsResult.status === "fulfilled" &&
+    !skillsResult.value.error &&
+    typeof skillsResult.value.count === "number"
+  ) {
+    totalSkills = skillsResult.value.count;
+  } else {
+    console.error(
+      "[projectsApi] fetchAboutStats — Supabase skills count error:",
+      skillsResult.status === "fulfilled"
+        ? skillsResult.value.error?.message
+        : skillsResult.reason
+    );
+  }
+
+  // ── Supabase certificates count ───────────────────────────────────────────
+  let totalCertificates = 0;
+
+  if (
+    certificatesResult.status === "fulfilled" &&
+    !certificatesResult.value.error &&
+    typeof certificatesResult.value.count === "number"
+  ) {
+    totalCertificates = certificatesResult.value.count;
+  } else {
+    console.error(
+      "[projectsApi] fetchAboutStats — Supabase certificates count error:",
+      certificatesResult.status === "fulfilled"
+        ? certificatesResult.value.error?.message
+        : certificatesResult.reason
+    );
+  }
+
   return {
     yearsExperience,
     contributions,
     totalProjects: unpublishedCount + publicRepos,
+    totalSkills,
+    totalCertificates,
   };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Coding Journey timeline
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Shape of a row in the `coding_journey` Supabase table */
+export interface CodingJourneyRow {
+  id: string;
+  year: string;
+  title: string;
+  description: string;
+  /** React icon identifier resolved on the frontend (e.g. "GraduationCap", "SiCplusplus") */
+  icon_key: string;
+  /** Tailwind gradient class (e.g. "from-blue-500 to-cyan-500") */
+  color: string;
+  display_order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Fetches published coding-journey milestones from Supabase ordered by
+ * `display_order` ascending.
+ *
+ * Returns an empty array on error so the caller can gracefully fall back
+ * to the static TIMELINE_STATIC scaffold in about/page.tsx.
+ */
+export async function fetchCodingJourney(): Promise<CodingJourneyRow[]> {
+  const { data, error } = await supabase
+    .from("coding_journey")
+    .select("*")
+    .eq("is_published", true)
+    .order("display_order", { ascending: true });
+
+  if (error) {
+    console.error("[projectsApi] fetchCodingJourney error:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as CodingJourneyRow[];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Work Experiences
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Shape of a row in the `work_experiences` Supabase table */
+export interface WorkExperienceRow {
+  id: string;
+  company: string;
+  position: string;
+  /** 'Full-time' | 'Part-time' | 'Internship' | 'Contract' | 'Freelance' */
+  employment_type: string;
+  /** ISO date string — first day of employment (e.g. "2025-10-01") */
+  start_date: string;
+  /** ISO date string — last day; null means still active ("Present") */
+  end_date: string | null;
+  /** Explicit "currently working here" flag */
+  is_current: boolean;
+  /** City + region (e.g. "Kediri, East Java, Indonesia") */
+  location: string;
+  /** 'On-site' | 'Remote' | 'Hybrid' | '' */
+  work_mode: string;
+  description: string;
+  /** Array of technology / tool names */
+  tech_stack: string[];
+  display_order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Fetches published work-experience entries from Supabase ordered by
+ * `display_order` ascending.
+ *
+ * Returns an empty array on error so the caller can gracefully fall back
+ * to the static EXPERIENCES_STATIC scaffold in about/page.tsx.
+ */
+export async function fetchWorkExperiences(): Promise<WorkExperienceRow[]> {
+  const { data, error } = await supabase
+    .from("work_experiences")
+    .select("*")
+    .eq("is_published", true)
+    .order("display_order", { ascending: true });
+
+  if (error) {
+    console.error("[projectsApi] fetchWorkExperiences error:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as WorkExperienceRow[];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Skills
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Shape of a row in the `skills` Supabase table */
+export interface SkillRow {
+  id: string;
+  name: string;
+  /** 'frontend' | 'backend' | 'ai_ml' | 'mobile' | 'devops' | 'database' | 'cloud' */
+  category: string;
+  /** react-icons SI identifier, e.g. "SiReact" or "FaMicrochip" */
+  icon_key: string;
+  /** Hex tint colour, e.g. "#61DAFB" */
+  icon_color: string;
+  /** Proficiency 0–100 (shown as progress bar / percentage) */
+  level: number;
+  display_order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Fetches all published skills from Supabase ordered by category then
+ * display_order.
+ *
+ * Returns an empty array on error so the caller can fall back to the
+ * static `techStackGroups` scaffold in about/page.tsx.
+ */
+export async function fetchSkills(): Promise<SkillRow[]> {
+  const { data, error } = await supabase
+    .from("skills")
+    .select("*")
+    .eq("is_published", true)
+    .order("category", { ascending: true })
+    .order("display_order", { ascending: true });
+
+  if (error) {
+    console.error("[projectsApi] fetchSkills error:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as SkillRow[];
 }
 
 // Number of slots in the Home page Popular Projects grid

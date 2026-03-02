@@ -17,7 +17,7 @@ import { useLanguageStore } from "@/stores/LanguageStore";
 import { fetchAboutStats, type AboutStats } from "@/lib/projectsApi";
 
 /** Fallback stats displayed while data is loading or on fetch error */
-const STATS_DEFAULT: AboutStats = { yearsExperience: 5, contributions: 24, totalProjects: 49 };
+const STATS_DEFAULT: AboutStats = { yearsExperience: 5, contributions: 24, totalProjects: 49, totalSkills: 30, totalCertificates: 8 };
 
 export default function AboutSection() {
   gsap.registerPlugin(ScrollTrigger);

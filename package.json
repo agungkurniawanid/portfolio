@@ -12,7 +12,11 @@
     "migrate:projects-thumbnails": "node scripts/migrate-projects-thumbnails.mjs",
     "migrate:guestbook": "node scripts/migrate-guestbook.mjs",
     "migrate:guestbook-storage": "node scripts/migrate-guestbook-storage.mjs",
-    "migrate:portfolio-stats": "node scripts/migrate-portfolio-stats.mjs"
+    "migrate:portfolio-stats": "node scripts/migrate-portfolio-stats.mjs",
+    "migrate:skills": "node scripts/migrate-skills.mjs",
+    "migrate:certificates": "node scripts/migrate-certificates.mjs",
+    "migrate:coding-journey": "node scripts/migrate-coding-journey.mjs",
+    "migrate:work-experiences": "node scripts/migrate-work-experiences.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

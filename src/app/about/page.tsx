@@ -19,11 +19,17 @@ import {
   SiDocker, SiGit, SiGithub, SiLinux, SiVercel,
   SiMongodb, SiMysql, SiPostgresql, SiFirebase, SiOpenai,
   SiCplusplus, SiDjango, SiFlask, SiNestjs, SiExpress,
+  SiHtml5, SiCss3, SiRedux, SiGo, SiKeras, SiOpencv,
+  SiFlutter, SiGooglecloud,
 } from "react-icons/si";
+import { FaMicrochip } from "react-icons/fa";
 import ProfileImg from "@/assets/SAVE_20221213_123032 (1).jpg";
 import { cn } from "@/lib/Utils";
 import { useTranslations } from "next-intl";
 import { useLanguageStore } from "@/stores/LanguageStore";
+import TranslateWidget from "@/components/TranslateWidget";
+import { fetchAboutStats, type AboutStats } from "@/lib/statsApi";
+import { fetchCodingJourney, type CodingJourneyRow, fetchWorkExperiences, type WorkExperienceRow, fetchSkills, type SkillRow } from "@/lib/projectsApi";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -46,12 +52,12 @@ function useInView(threshold = 0.15) {
 
 /* ─────────────────────────── data ─────────────────────────── */
 
-/* Static scaffold — labels are injected with t() inside the component */
+/* Static scaffold — icons + fallback values (replaced by Supabase/GitHub at runtime) */
 const STATS_STATIC = [
-  { value: 50, suffix: "+", icon: <Code2 size={22} /> },
-  { value: 4,  suffix: "+", icon: <Calendar size={22} /> },
-  { value: 30, suffix: "+", icon: <Cpu size={22} /> },
-  { value: 8,  suffix: "+", icon: <Award size={22} /> },
+  { fallback: 50, suffix: "+", icon: <Code2 size={22} /> },    // totalProjects
+  { fallback: 4,  suffix: "+", icon: <Calendar size={22} /> }, // yearsExperience
+  { fallback: 30, suffix: "+", icon: <Cpu size={22} /> },      // totalSkills
+  { fallback: 8,  suffix: "+", icon: <Award size={22} /> },    // totalCertificates
 ];
 
 const TIMELINE_STATIC = [
@@ -65,7 +71,141 @@ const TIMELINE_STATIC = [
   { year: "2026", icon: <Briefcase size={18} />,    color: "from-red-500 to-pink-500" },
 ];
 
-const experiences = [
+/**
+ * Maps an icon_key string from the `skills` Supabase table to a React element.
+ * Supports react-icons/si and react-icons/fa keys.
+ * Falls back to <Code2> when the key is unrecognised.
+ */
+function getTechIcon(iconKey: string, color?: string, size = 24): React.ReactNode {
+  const style = color ? { color } : {};
+  const map: Record<string, React.ReactNode> = {
+    // Frontend
+    SiReact:       <SiReact       size={size} style={color ? style : { color: "#61DAFB" }} />,
+    SiNextdotjs:   <SiNextdotjs   size={size} style={style} />,
+    SiTypescript:  <SiTypescript  size={size} style={color ? style : { color: "#3178C6" }} />,
+    SiJavascript:  <SiJavascript  size={size} style={color ? style : { color: "#F7DF1E" }} />,
+    SiTailwindcss: <SiTailwindcss size={size} style={color ? style : { color: "#38BDF8" }} />,
+    SiHtml5:       <SiHtml5       size={size} style={color ? style : { color: "#E34F26" }} />,
+    SiCss3:        <SiCss3        size={size} style={color ? style : { color: "#1572B6" }} />,
+    SiFramer:      <SiFramer      size={size} style={color ? style : { color: "#F859A2" }} />,
+    SiRedux:       <SiRedux       size={size} style={color ? style : { color: "#764ABC" }} />,
+    // Backend
+    SiNodedotjs:   <SiNodedotjs   size={size} style={color ? style : { color: "#339933" }} />,
+    SiExpress:     <SiExpress     size={size} style={style} />,
+    SiNestjs:      <SiNestjs      size={size} style={color ? style : { color: "#E0234E" }} />,
+    SiFastapi:     <SiFastapi     size={size} style={color ? style : { color: "#009688" }} />,
+    SiFlask:       <SiFlask       size={size} style={style} />,
+    SiDjango:      <SiDjango      size={size} style={color ? style : { color: "#092E20" }} />,
+    SiGo:          <SiGo          size={size} style={color ? style : { color: "#00ADD8" }} />,
+    SiLaravel:     <SiLaravel     size={size} style={color ? style : { color: "#FF2D20" }} />,
+    SiPython:      <SiPython      size={size} style={color ? style : { color: "#F7D754" }} />,
+    SiPhp:         <SiPhp         size={size} style={color ? style : { color: "#777BB4" }} />,
+    // AI / ML
+    SiTensorflow:  <SiTensorflow  size={size} style={color ? style : { color: "#FF6F00" }} />,
+    SiKeras:       <SiKeras       size={size} style={color ? style : { color: "#D00000" }} />,
+    SiPytorch:     <SiPytorch     size={size} style={color ? style : { color: "#EE4C2C" }} />,
+    SiScikitlearn: <SiScikitlearn size={size} style={color ? style : { color: "#F7931E" }} />,
+    SiOpencv:      <SiOpencv      size={size} style={color ? style : { color: "#5C3EE8" }} />,
+    SiOpenai:      <SiOpenai      size={size} style={color ? style : { color: "#74AA9C" }} />,
+    FaMicrochip:   <FaMicrochip   size={size} style={color ? style : { color: "#818CF8" }} />,
+    // Mobile
+    SiFlutter:     <SiFlutter     size={size} style={color ? style : { color: "#54C5F8" }} />,
+    // DevOps & Tools
+    SiDocker:      <SiDocker      size={size} style={color ? style : { color: "#2496ED" }} />,
+    SiGit:         <SiGit         size={size} style={color ? style : { color: "#F05032" }} />,
+    SiGithub:      <SiGithub      size={size} style={style} />,
+    SiLinux:       <SiLinux       size={size} style={color ? style : { color: "#FCC624" }} />,
+    SiVercel:      <SiVercel      size={size} style={style} />,
+    // Database
+    SiMongodb:     <SiMongodb     size={size} style={color ? style : { color: "#47A248" }} />,
+    SiMysql:       <SiMysql       size={size} style={color ? style : { color: "#4479A1" }} />,
+    SiPostgresql:  <SiPostgresql  size={size} style={color ? style : { color: "#4169E1" }} />,
+    SiFirebase:    <SiFirebase    size={size} style={color ? style : { color: "#FFCA28" }} />,
+    // Cloud
+    SiGooglecloud: <SiGooglecloud size={size} style={color ? style : { color: "#4285F4" }} />,
+    // C++ (journey icon reuse)
+    SiCplusplus:   <SiCplusplus   size={size} style={style} />,
+  };
+  return map[iconKey] ?? <Code2 size={size} />;
+}
+
+/** Category display metadata for the Tech Stack section */
+const CATEGORY_META: Record<string, { label: string; gradient: string; color: string; order: number }> = {
+  frontend: { label: "Frontend",       gradient: "from-blue-500/20 to-cyan-500/10",     color: "text-blue-400",   order: 1 },
+  backend:  { label: "Backend",        gradient: "from-green-500/20 to-emerald-500/10", color: "text-green-400",  order: 2 },
+  database: { label: "Database",       gradient: "from-purple-500/20 to-pink-500/10",   color: "text-purple-400", order: 3 },
+  devops:   { label: "DevOps & Tools", gradient: "from-orange-500/20 to-yellow-500/10", color: "text-orange-400", order: 4 },
+  ai_ml:    { label: "AI / ML",        gradient: "from-pink-500/20 to-rose-500/10",     color: "text-pink-400",   order: 5 },
+  mobile:   { label: "Mobile",         gradient: "from-teal-500/20 to-cyan-500/10",     color: "text-teal-400",   order: 6 },
+  cloud:    { label: "Cloud",          gradient: "from-sky-500/20 to-blue-500/10",      color: "text-sky-400",    order: 7 },
+};
+
+/**
+ * Maps an icon_key string from the coding_journey Supabase table to a
+ * React element. Supports both lucide-react keys and react-icons/si keys.
+ * Falls back to <Code2> when the key is unrecognised.
+ */
+function getJourneyIcon(iconKey: string, size = 18): React.ReactNode {
+  const luc = { size };
+  const map: Record<string, React.ReactNode> = {
+    // lucide-react
+    GraduationCap: <GraduationCap {...luc} />,
+    Code2:         <Code2 {...luc} />,
+    Rocket:        <Rocket {...luc} />,
+    Briefcase:     <Briefcase {...luc} />,
+    Star:          <Star {...luc} />,
+    Globe:         <Globe {...luc} />,
+    Calendar:      <Calendar {...luc} />,
+    Target:        <Target {...luc} />,
+    Lightbulb:     <Lightbulb {...luc} />,
+    Zap:           <Zap {...luc} />,
+    Brain:         <Brain {...luc} />,
+    Award:         <Award {...luc} />,
+    CheckCircle2:  <CheckCircle2 {...luc} />,
+    Cpu:           <Cpu {...luc} />,
+    // react-icons/si
+    SiCplusplus:   <SiCplusplus size={size} />,
+    SiReact:       <SiReact size={size} />,
+    SiNextdotjs:   <SiNextdotjs size={size} />,
+    SiTypescript:  <SiTypescript size={size} />,
+    SiJavascript:  <SiJavascript size={size} />,
+    SiTailwindcss: <SiTailwindcss size={size} />,
+    SiNodedotjs:   <SiNodedotjs size={size} />,
+    SiPython:      <SiPython size={size} />,
+    SiDocker:      <SiDocker size={size} />,
+    SiGit:         <SiGit size={size} />,
+    SiGithub:      <SiGithub size={size} />,
+  };
+  return map[iconKey] ?? <Code2 {...luc} />;
+}
+
+/** Normalised shape used by the experience card renderer */
+interface DisplayExperience {
+  company:     string;
+  position:    string;
+  type:        string;
+  period:      string;
+  location:    string;
+  description: string;
+  stack:       string[];
+}
+
+/**
+ * Formats start_date + optional end_date / is_current flag into
+ * a human-readable period string (e.g. "Oct 2025 – Present").
+ */
+function formatExpPeriod(
+  startDate: string,
+  endDate: string | null,
+  isCurrent: boolean,
+): string {
+  const fmt = (d: string) =>
+    new Date(d).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+  return `${fmt(startDate)} – ${isCurrent || !endDate ? "Present" : fmt(endDate)}`;
+}
+
+/** Static fallback — used when Supabase fetch fails or returns empty */
+const EXPERIENCES_STATIC: DisplayExperience[] = [
   {
     company: "Charoen Pokphand Indonesia",
     position: "Information Communication Technology",
@@ -294,14 +434,121 @@ export default function AboutPage() {
   const t = useTranslations("aboutPage");
   const { locale } = useLanguageStore();
 
-  // Build translated data inside component so they update with locale
-  const stats = STATS_STATIC.map((s, i) => ({ ...s, label: t(`stat_${i}` as never) }));
+  // ── Dynamic stats from Supabase + GitHub ──────────────────────────────────
+  const [dynamicStats, setDynamicStats] = useState<Partial<AboutStats>>({});
 
-  const timeline = TIMELINE_STATIC.map((item, i) => ({
-    ...item,
-    title: t(`journey_${i}_title` as never),
-    description: t(`journey_${i}_desc` as never),
+  useEffect(() => {
+    fetchAboutStats()
+      .then(setDynamicStats)
+      .catch((err) => console.error("[AboutPage] fetchAboutStats error:", err));
+  }, []);
+
+  // ── Coding Journey from Supabase ──────────────────────────────────────────
+  const [journeyData, setJourneyData] = useState<CodingJourneyRow[]>([]);
+  // Per-card translate state: idx → { title, description }
+  const [journeyTranslations, setJourneyTranslations] = useState<
+    Record<number, { title: string; description: string }>
+  >({});
+
+  useEffect(() => {
+    fetchCodingJourney()
+      .then(setJourneyData)
+      .catch((err) => console.error("[AboutPage] fetchCodingJourney error:", err));
+  }, []);
+
+  // ── Work Experiences from Supabase ────────────────────────────────────────
+  const [experiencesData, setExperiencesData] = useState<WorkExperienceRow[]>([]);
+  // Per-card translate state: idx → translated description string
+  const [expTranslations, setExpTranslations] = useState<Record<number, string>>({});
+
+  useEffect(() => {
+    fetchWorkExperiences()
+      .then(setExperiencesData)
+      .catch((err) => console.error("[AboutPage] fetchWorkExperiences error:", err));
+  }, []);
+
+  // ── Skills / Tech Stack from Supabase ─────────────────────────────────────
+  const [skillsData, setSkillsData] = useState<SkillRow[]>([]);
+
+  useEffect(() => {
+    fetchSkills()
+      .then(setSkillsData)
+      .catch((err) => console.error("[AboutPage] fetchSkills error:", err));
+  }, []);
+
+  /**
+   * Build grouped tech-stack data from Supabase rows.
+   * Falls back to static `techStackGroups` when the fetch returns empty.
+   */
+  const dynamicTechGroups = skillsData.length > 0
+    ? Object.entries(
+        skillsData.reduce<Record<string, SkillRow[]>>((acc, row) => {
+          (acc[row.category] ??= []).push(row);
+          return acc;
+        }, {})
+      )
+        .sort(([a], [b]) =>
+          (CATEGORY_META[a]?.order ?? 99) - (CATEGORY_META[b]?.order ?? 99)
+        )
+        .map(([cat, rows]) => {
+          const meta = CATEGORY_META[cat] ?? {
+            label: cat, gradient: "from-gray-500/20 to-gray-400/10", color: "text-gray-400", order: 99,
+          };
+          return {
+            category: meta.label,
+            gradient: meta.gradient,
+            color:    meta.color,
+            skills:   rows.map((r) => ({
+              name:  r.name,
+              icon:  getTechIcon(r.icon_key, r.icon_color),
+              level: r.level,
+            })),
+          };
+        })
+    : techStackGroups;
+
+  // Normalise Supabase rows → DisplayExperience; fall back to static when empty
+  const displayExperiences: DisplayExperience[] = experiencesData.length > 0
+    ? experiencesData.map((row) => ({
+        company:     row.company,
+        position:    row.position,
+        type:        row.employment_type,
+        period:      formatExpPeriod(row.start_date, row.end_date, row.is_current),
+        location:    row.work_mode ? `${row.location} · ${row.work_mode}` : row.location,
+        description: row.description,
+        stack:       row.tech_stack,
+      }))
+    : EXPERIENCES_STATIC;
+
+  // Build translated + dynamic stats — use fetched value when available,
+  // fall back to static scaffold until the request resolves.
+  const STAT_KEYS: (keyof AboutStats)[] = [
+    "totalProjects",
+    "yearsExperience",
+    "totalSkills",
+    "totalCertificates",
+  ];
+
+  const stats = STATS_STATIC.map((s, i) => ({
+    ...s,
+    value: (dynamicStats[STAT_KEYS[i]] as number | undefined) ?? s.fallback,
+    label: t(`stat_${i}` as never),
   }));
+
+  // Use Supabase rows when available; fall back to static scaffold + i18n text.
+  const timeline = journeyData.length > 0
+    ? journeyData.map((item) => ({
+        year:        item.year,
+        title:       item.title,
+        description: item.description,
+        color:       item.color,
+        icon:        getJourneyIcon(item.icon_key),
+      }))
+    : TIMELINE_STATIC.map((item, i) => ({
+        ...item,
+        title:       t(`journey_${i}_title` as never),
+        description: t(`journey_${i}_desc` as never),
+      }));
 
   const softSkills = SOFT_SKILLS_STATIC.map((s, i) => ({
     ...s,
@@ -536,24 +783,45 @@ export default function AboutPage() {
           {/* Vertical line */}
           <div className="absolute left-8 top-0 bottom-0 w-px bg-gradient-to-b from-accentColor/60 via-accentColor/20 to-transparent hidden sm:block" />
           <div className="space-y-8">
-            {timeline.map((item, idx) => (
-              <div key={idx} className="flex gap-6 group">
-                {/* Icon circle */}
-                <div className="relative shrink-0 hidden sm:block">
-                  <div className={cn("w-16 h-16 rounded-full flex items-center justify-center text-white bg-gradient-to-br", item.color, "shadow-lg shadow-accentColor/20 group-hover:scale-110 transition-transform duration-300")}>
-                    {item.icon}
+            {timeline.map((item, idx) => {
+              const displayTitle       = journeyTranslations[idx]?.title       ?? item.title;
+              const displayDescription = journeyTranslations[idx]?.description ?? item.description;
+              return (
+                <div key={idx} className="flex gap-6 group">
+                  {/* Icon circle */}
+                  <div className="relative shrink-0 hidden sm:block">
+                    <div className={cn("w-16 h-16 rounded-full flex items-center justify-center text-white bg-gradient-to-br", item.color, "shadow-lg shadow-accentColor/20 group-hover:scale-110 transition-transform duration-300")}>
+                      {item.icon}
+                    </div>
+                  </div>
+                  {/* Content */}
+                  <div className="flex-1 bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm group-hover:border-accentColor/30 transition-colors duration-300">
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <span className="text-xs font-bold text-accentColor bg-accentColor/10 px-2.5 py-1 rounded-full">{item.year}</span>
+                      <h3 className="font-semibold text-gray-900 dark:text-white flex-1">{displayTitle}</h3>
+                      <TranslateWidget
+                        fields={{ title: item.title, description: item.description }}
+                        onTranslated={(out) =>
+                          setJourneyTranslations((prev) => ({
+                            ...prev,
+                            [idx]: { title: out.title, description: out.description },
+                          }))
+                        }
+                        onReverted={() =>
+                          setJourneyTranslations((prev) => {
+                            const next = { ...prev };
+                            delete next[idx];
+                            return next;
+                          })
+                        }
+                        size="sm"
+                      />
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{displayDescription}</p>
                   </div>
                 </div>
-                {/* Content */}
-                <div className="flex-1 bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm group-hover:border-accentColor/30 transition-colors duration-300">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-bold text-accentColor bg-accentColor/10 px-2.5 py-1 rounded-full">{item.year}</span>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">{item.title}</h3>
-                  </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{item.description}</p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </SectionWrapper>
@@ -568,49 +836,70 @@ export default function AboutPage() {
           subtitle={t("exp_subtitle")}
         />
         <div className="space-y-6 max-w-4xl mx-auto">
-          {experiences.map((exp, idx) => (
-            <div
-              key={idx}
-              className="bg-white dark:bg-gray-900 rounded-2xl p-6 md:p-8 border border-gray-200 dark:border-gray-800 shadow-sm hover:border-accentColor/40 hover:shadow-[0_4px_30px_rgba(14,189,122,0.12)] transition-all duration-300"
-            >
-              <div className="flex flex-col md:flex-row md:items-start gap-4">
-                {/* Company initial badge */}
-                <div className="shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br from-accentColor/20 to-cyan-500/20 flex items-center justify-center text-accentColor font-bold text-xl border border-accentColor/20">
-                  {exp.company[0]}
-                </div>
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <h3 className="font-bold text-lg text-gray-900 dark:text-white">{exp.position}</h3>
-                    <span className={cn(
-                      "text-xs font-medium px-2.5 py-0.5 rounded-full",
-                      exp.type === "Internship"
-                        ? "bg-blue-500/10 text-blue-500 border border-blue-500/20"
-                        : exp.type === "Contract"
-                        ? "bg-purple-500/10 text-purple-500 border border-purple-500/20"
-                        : exp.type === "Part-time"
-                        ? "bg-orange-500/10 text-orange-500 border border-orange-500/20"
-                        : "bg-green-500/10 text-green-500 border border-green-500/20"
-                    )}>
-                      {exp.type}
-                    </span>
+          {displayExperiences.map((exp, idx) => {
+            const displayDesc = expTranslations[idx] ?? exp.description;
+            return (
+              <div
+                key={idx}
+                className="bg-white dark:bg-gray-900 rounded-2xl p-6 md:p-8 border border-gray-200 dark:border-gray-800 shadow-sm hover:border-accentColor/40 hover:shadow-[0_4px_30px_rgba(14,189,122,0.12)] transition-all duration-300"
+              >
+                <div className="flex flex-col md:flex-row md:items-start gap-4">
+                  {/* Company initial badge */}
+                  <div className="shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br from-accentColor/20 to-cyan-500/20 flex items-center justify-center text-accentColor font-bold text-xl border border-accentColor/20">
+                    {exp.company[0]}
                   </div>
-                  <p className="text-accentColor font-medium text-sm mb-1">{exp.company}</p>
-                  <div className="flex flex-wrap gap-3 text-xs text-gray-400 dark:text-gray-500 mb-3">
-                    <span className="flex items-center gap-1"><Calendar size={11} />{exp.period}</span>
-                    <span className="flex items-center gap-1"><MapPin size={11} />{exp.location}</span>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">{exp.description}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {exp.stack.map((tech) => (
-                      <span key={tech} className="text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 px-2.5 py-1 rounded-lg">
-                        {tech}
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <h3 className="font-bold text-lg text-gray-900 dark:text-white flex-1">{exp.position}</h3>
+                      <span className={cn(
+                        "text-xs font-medium px-2.5 py-0.5 rounded-full",
+                        exp.type === "Internship"
+                          ? "bg-blue-500/10 text-blue-500 border border-blue-500/20"
+                          : exp.type === "Contract"
+                          ? "bg-purple-500/10 text-purple-500 border border-purple-500/20"
+                          : exp.type === "Part-time"
+                          ? "bg-orange-500/10 text-orange-500 border border-orange-500/20"
+                          : exp.type === "Freelance"
+                          ? "bg-teal-500/10 text-teal-500 border border-teal-500/20"
+                          : "bg-green-500/10 text-green-500 border border-green-500/20"
+                      )}>
+                        {exp.type}
                       </span>
-                    ))}
+                    </div>
+                    <p className="text-accentColor font-medium text-sm mb-1">{exp.company}</p>
+                    <div className="flex flex-wrap gap-3 text-xs text-gray-400 dark:text-gray-500 mb-3">
+                      <span className="flex items-center gap-1"><Calendar size={11} />{exp.period}</span>
+                      <span className="flex items-center gap-1"><MapPin size={11} />{exp.location}</span>
+                    </div>
+                    <div className="flex items-start gap-2 mb-4">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed flex-1">{displayDesc}</p>
+                      <TranslateWidget
+                        fields={{ description: exp.description }}
+                        onTranslated={(out) =>
+                          setExpTranslations((prev) => ({ ...prev, [idx]: out.description }))
+                        }
+                        onReverted={() =>
+                          setExpTranslations((prev) => {
+                            const next = { ...prev };
+                            delete next[idx];
+                            return next;
+                          })
+                        }
+                        size="sm"
+                      />
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {exp.stack.map((tech) => (
+                        <span key={tech} className="text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 px-2.5 py-1 rounded-lg">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </SectionWrapper>
 
@@ -624,7 +913,7 @@ export default function AboutPage() {
           subtitle={t("tech_subtitle")}
         />
         <div className="space-y-8">
-          {techStackGroups.map((group) => (
+          {dynamicTechGroups.map((group) => (
             <div key={group.category}>
               <h3 className={cn("text-sm font-semibold tracking-widest uppercase mb-4", group.color)}>{group.category}</h3>
               <div className={cn("bg-gradient-to-br rounded-2xl p-6 border border-gray-200 dark:border-gray-800", group.gradient)}>

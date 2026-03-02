@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import gsap from "gsap";
 import Image from "next/image";
@@ -9,6 +9,7 @@ import { Github } from "lucide-react";
 import { FaYoutube } from "react-icons/fa";
 import { getTechIcon } from "./TechIcon";
 import { Project } from "./sections/ProjectSection";
+import TranslateWidget from "@/components/TranslateWidget";
 
 interface Props {
   item: Project;
@@ -18,6 +19,10 @@ interface Props {
 export default function ProjectDetailModal({ item, onClose }: Props) {
   const backdropRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const [translated, setTranslated] = useState<{ title: string; description: string } | null>(null);
+
+  const displayTitle       = translated?.title       ?? item.title;
+  const displayDescription = translated?.description ?? item.description;
 
   // Open animation
   useEffect(() => {
@@ -98,14 +103,25 @@ export default function ProjectDetailModal({ item, onClose }: Props) {
 
         {/* Content */}
         <div className="p-6 flex flex-col gap-5">
-          {/* Title */}
-          <h2 className="text-accentColor font-semibold text-lg leading-snug">
-            {item.title}
-          </h2>
+          {/* Title + Translate */}
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="text-accentColor font-semibold text-lg leading-snug">
+              {displayTitle}
+            </h2>
+            <TranslateWidget
+              fields={{ title: item.title, description: item.description }}
+              onTranslated={(out) =>
+                setTranslated({ title: out.title, description: out.description })
+              }
+              onReverted={() => setTranslated(null)}
+              size="md"
+              className="shrink-0 mt-0.5"
+            />
+          </div>
 
           {/* Description */}
           <p className="text-sm text-gray-700 leading-relaxed">
-            {item.description}
+            {displayDescription}
           </p>
 
           {/* Platform */}

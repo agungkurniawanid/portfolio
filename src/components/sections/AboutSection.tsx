@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import useScrollActive from "@/hooks/UseScrollActive";
 import Circle from "@/assets/about/circle.svg";
 import Signs from "@/assets/about/signs.svg";
@@ -14,6 +14,10 @@ import Image from "next/image";
 import SplitType from "split-type";
 import { useTranslations } from "next-intl";
 import { useLanguageStore } from "@/stores/LanguageStore";
+import { fetchAboutStats, type AboutStats } from "@/lib/projectsApi";
+
+/** Fallback stats displayed while data is loading or on fetch error */
+const STATS_DEFAULT: AboutStats = { yearsExperience: 5, contributions: 24, totalProjects: 49 };
 
 export default function AboutSection() {
   gsap.registerPlugin(ScrollTrigger);
@@ -22,6 +26,50 @@ export default function AboutSection() {
 
   // Menginisialisasi sectionRef dengan tipe HTMLElement dan memberi tahu TypeScript bahwa ini tidak akan null
   const sectionRef = useRef<HTMLElement>(null!);
+
+  /**
+   * Mutable ref so GSAP's onEnter closure always reads the latest fetched values
+   * without needing to re-register the ScrollTrigger.
+   */
+  const statsRef = useRef<AboutStats>(STATS_DEFAULT);
+
+  /** True once the ScrollTrigger onEnter has fired at least once */
+  const hasEnteredRef = useRef(false);
+
+  /** Animate the three counters to the given stats values */
+  const animateCounters = useCallback((s: AboutStats) => {
+    const q = gsap.utils.selector(sectionRef);
+    gsap.to(q(".experience-count"), {
+      innerText: s.yearsExperience,
+      duration: 0.5,
+      snap: { innerText: 1 },
+    });
+    gsap.to(q(".project-count"), {
+      innerText: s.totalProjects,
+      duration: 0.5,
+      snap: { innerText: 1 },
+    });
+    gsap.to(q(".user-count"), {
+      innerText: s.contributions,
+      duration: 0.5,
+      snap: { innerText: 1 },
+    });
+  }, []);
+
+  // Fetch stats from Supabase + GitHub API once on mount
+  useEffect(() => {
+    fetchAboutStats()
+      .then((data) => {
+        statsRef.current = data;
+        // If onEnter already fired with default values → re-animate to real values
+        if (hasEnteredRef.current) {
+          animateCounters(data);
+        }
+      })
+      .catch((err) => {
+        console.error("[AboutSection] fetchAboutStats failed:", err);
+      });
+  }, [animateCounters]);
 
   useEffect(() => {
     const q = gsap.utils.selector(sectionRef);
@@ -51,6 +99,8 @@ export default function AboutSection() {
         trigger: sectionRef.current,
         scrub: true,
         onEnter: () => {
+          hasEnteredRef.current = true;
+
           const tl = gsap.timeline({
             defaults: {
               stagger: 0.2,
@@ -62,8 +112,11 @@ export default function AboutSection() {
 
           tl.fromTo(q(".text-animation"), { y: 100 }, { y: 0 });
 
+          // Read the latest fetched values from the ref at animation time
+          const s = statsRef.current;
+
           tl.to(q(".experience-count"), {
-            innerText: 5,
+            innerText: s.yearsExperience,
             duration: 0.5,
             snap: {
               innerText: 1,
@@ -73,7 +126,7 @@ export default function AboutSection() {
           tl.to(
             q(".project-count"),
             {
-              innerText: 49,
+              innerText: s.totalProjects,
               duration: 0.5,
               snap: {
                 innerText: 1,
@@ -85,7 +138,7 @@ export default function AboutSection() {
           tl.to(
             q(".user-count"),
             {
-              innerText: 24,
+              innerText: s.contributions,
               duration: 0.5,
               snap: {
                 innerText: 1,

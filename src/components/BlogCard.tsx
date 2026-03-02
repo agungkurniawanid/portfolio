@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState, useCallback } from "react"
+import { useEffect, useRef, useState } from "react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
 import { ArrowRight } from "iconsax-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Blog } from "@/types/blog"
-import { useTranslate } from "@/hooks/useTranslate"
-import TranslateButton from "@/components/blog/TranslateButton"
+import TranslateWidget from "@/components/TranslateWidget"
 
 interface Props {
   item: Blog
@@ -14,9 +13,6 @@ interface Props {
 
 export default function BlogCard({ item }: Props) {
   const cardRef = useRef<HTMLDivElement>(null)
-  const { translate, revert, translating, isTranslated, targetLang, targetLangLabel, error } =
-    useTranslate()
-
   // Translated content — null means "show original"
   const [translated, setTranslated] = useState<{ title: string; excerpt: string } | null>(null)
 
@@ -30,20 +26,6 @@ export default function BlogCard({ item }: Props) {
     })
     tl.fromTo(cardRef.current, { y: "100%" }, { y: 0, ease: "power1.inOut" })
   }, [])
-
-  const handleTranslate = useCallback(async () => {
-    try {
-      const out = await translate({ title: item.title, excerpt: item.excerpt })
-      setTranslated({ title: out.title, excerpt: out.excerpt })
-    } catch {
-      // error state is managed by the hook
-    }
-  }, [translate, item.title, item.excerpt])
-
-  const handleRevert = useCallback(() => {
-    revert()
-    setTranslated(null)
-  }, [revert])
 
   const dateLabel = new Date(item.publishedAt).toLocaleDateString("id-ID", {
     year: "numeric",
@@ -76,14 +58,12 @@ export default function BlogCard({ item }: Props) {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-accentColor text-sm">{dateLabel}</span>
               {/* Translate button — stopPropagation prevents navigation */}
-              <TranslateButton
-                onTranslate={handleTranslate}
-                onRevert={handleRevert}
-                translating={translating}
-                isTranslated={isTranslated}
-                targetLang={targetLang}
-                targetLangLabel={targetLangLabel}
-                error={error}
+              <TranslateWidget
+                fields={{ title: item.title, excerpt: item.excerpt }}
+                onTranslated={(out) =>
+                  setTranslated({ title: out.title, excerpt: out.excerpt })
+                }
+                onReverted={() => setTranslated(null)}
                 size="sm"
               />
             </div>

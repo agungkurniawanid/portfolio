@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Project } from "./sections/ProjectSection";
 import { MonitorSmartphone } from "lucide-react";
 import ProjectDetailModal from "./ProjectDetailModal";
+import TranslateWidget from "@/components/TranslateWidget";
 
 interface Props {
   item: Project;
@@ -16,6 +17,10 @@ export default function ProjectCard({ item }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [starCount, setStarCount] = useState<number>(0);
   const [showModal, setShowModal] = useState(false);
+  const [translated, setTranslated] = useState<{ title: string; description: string } | null>(null);
+
+  const displayTitle       = translated?.title       ?? item.title;
+  const displayDescription = translated?.description ?? item.description;
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -75,11 +80,11 @@ export default function ProjectCard({ item }: Props) {
         {/* Info */}
         <div className="flex flex-col gap-2 p-4 flex-1">
           <h3 className="text-accentColor font-semibold text-sm leading-snug line-clamp-2">
-            {item.title}
+            {displayTitle}
           </h3>
 
           <p className="text-xs text-gray-600 line-clamp-2">
-            {item.description}
+            {displayDescription}
           </p>
 
           {/* Platform badges */}
@@ -102,12 +107,22 @@ export default function ProjectCard({ item }: Props) {
 
         {/* Footer */}
         <div className="px-4 pb-4 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1 text-xs text-gray-500">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" />
-            </svg>
-            <span>{starCount}</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 text-xs text-gray-500">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" />
+              </svg>
+              <span>{starCount}</span>
+            </div>
+            <TranslateWidget
+              fields={{ title: item.title, description: item.description }}
+              onTranslated={(out) =>
+                setTranslated({ title: out.title, description: out.description })
+              }
+              onReverted={() => setTranslated(null)}
+              size="sm"
+            />
           </div>
 
           <button

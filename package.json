@@ -11,7 +11,8 @@
     "migrate:projects": "node scripts/migrate-projects.mjs",
     "migrate:projects-thumbnails": "node scripts/migrate-projects-thumbnails.mjs",
     "migrate:guestbook": "node scripts/migrate-guestbook.mjs",
-    "migrate:guestbook-storage": "node scripts/migrate-guestbook-storage.mjs"
+    "migrate:guestbook-storage": "node scripts/migrate-guestbook-storage.mjs",
+    "migrate:portfolio-stats": "node scripts/migrate-portfolio-stats.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

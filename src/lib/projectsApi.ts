@@ -6,12 +6,16 @@
  *   fetchPopularProjects()  — Home page "Popular Projects" section.
  *   fetchAboutStats()       — Home page About section dynamic stats
  *                             (years_experience, contributions, total_projects).
- *                             total_projects = count(projects WHERE is_published = false)
- *                                            + public_repos (GitHub API)
+ *
+ *   Data sources:
+ *     • years_experience  → Supabase `portfolio_stats` table
+ *     • contributions     → GitHub GraphQL API (via /api/github-stats, cached 6 h)
+ *     • total_projects    → count(projects WHERE is_published = false) + public_repos
  *
  * Schema references:
  *   supabase/migrations/20260302000000_create_projects_tables.sql
  *   supabase/migrations/20260303000000_create_portfolio_stats.sql
+ *   supabase/migrations/20260304000000_refactor_portfolio_stats.sql
  */
 
 import { supabase } from "@/lib/supabase";
@@ -46,46 +50,44 @@ export interface AboutStats {
 const IGNORED_GITHUB_REPOS = 2; // "agungkurniawanid" + "portfolio"
 
 /** Fallback values used when Supabase or GitHub is unreachable */
-const STATS_FALLBACK: AboutStats = {
+const STATS_FALLBACK = {
   yearsExperience: 5,
-  contributions: 24,
-  totalProjects: 49,
-};
+} as const;
 
 /**
- * Fetches all three About-section stats in parallel:
- *   1. `portfolio_stats` row from Supabase (years + contributions)
- *   2. Count of projects in `projects` table where `is_published = false`
- *   3. GitHub public repo count from /api/github-stats (server-side cached)
+ * Fetches all About-section stats in parallel:
+ *   1. `portfolio_stats` row from Supabase (years_experience only)
+ *   2. Count of `projects` rows where `is_published = false`
+ *   3. GitHub stats from /api/github-stats (GraphQL contributions + REST public_repos,
+ *      cached server-side for 6 hours — max 4 GitHub calls per day)
  *
- * Falls back gracefully to hardcoded defaults if either source fails.
+ * Falls back gracefully to hardcoded defaults if any source fails.
  */
 export async function fetchAboutStats(): Promise<AboutStats> {
+  type GitHubStats = { contributions: number; public_repos: number };
+
   const [supabaseResult, unpublishedResult, githubResult] = await Promise.allSettled([
     supabase
       .from("portfolio_stats")
-      .select("years_experience, total_contributions")
+      .select("years_experience")
       .limit(1)
       .single(),
     supabase
       .from("projects")
       .select("id", { count: "exact", head: true })
       .eq("is_published", false),
-    fetch("/api/github-stats").then((r) => r.json() as Promise<{ public_repos: number }>),
+    fetch("/api/github-stats").then((r) => r.json() as Promise<GitHubStats>),
   ]);
 
-  // ── Supabase portfolio_stats ──────────────────────────────────────────────
+  // ── Supabase portfolio_stats (years_experience only) ─────────────────────
   let yearsExperience = STATS_FALLBACK.yearsExperience;
-  let contributions   = STATS_FALLBACK.contributions;
 
   if (
     supabaseResult.status === "fulfilled" &&
     !supabaseResult.value.error &&
     supabaseResult.value.data
   ) {
-    const row = supabaseResult.value.data;
-    yearsExperience = row.years_experience    ?? yearsExperience;
-    contributions   = row.total_contributions ?? contributions;
+    yearsExperience = supabaseResult.value.data.years_experience ?? yearsExperience;
   } else {
     console.error(
       "[projectsApi] fetchAboutStats — Supabase portfolio_stats error:",
@@ -96,7 +98,7 @@ export async function fetchAboutStats(): Promise<AboutStats> {
   }
 
   // ── Supabase unpublished projects count ───────────────────────────────────
-  let unpublishedCount = 25; // local default
+  let unpublishedCount = 0;
 
   if (
     unpublishedResult.status === "fulfilled" &&
@@ -113,15 +115,21 @@ export async function fetchAboutStats(): Promise<AboutStats> {
     );
   }
 
-  // ── GitHub ────────────────────────────────────────────────────────────────
-  let publicRepos = 0;
+  // ── GitHub (contributions + public repos) ────────────────────────────────
+  let contributions = 0;
+  let publicRepos   = 0;
 
   if (
     githubResult.status === "fulfilled" &&
-    typeof githubResult.value?.public_repos === "number"
+    githubResult.value !== null &&
+    typeof githubResult.value === "object"
   ) {
+    const gh = githubResult.value;
+    contributions = typeof gh.contributions === "number" ? gh.contributions : 0;
     // Subtract ignored repos so count matches the /projects page (same as IGNORE_NAMES there)
-    publicRepos = Math.max(0, githubResult.value.public_repos - IGNORED_GITHUB_REPOS);
+    publicRepos = typeof gh.public_repos === "number"
+      ? Math.max(0, gh.public_repos - IGNORED_GITHUB_REPOS)
+      : 0;
   } else {
     console.error(
       "[projectsApi] fetchAboutStats — GitHub API error:",

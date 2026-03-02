@@ -16,7 +16,7 @@ export default function IntlProvider({ children }: { children: React.ReactNode }
   const { locale } = useLanguageStore()
 
   return (
-    <NextIntlClientProvider locale={locale} messages={allMessages[locale]}>
+    <NextIntlClientProvider locale={locale} messages={allMessages[locale]} timeZone="Asia/Jakarta">
       {children}
     </NextIntlClientProvider>
   )

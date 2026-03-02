@@ -153,7 +153,7 @@ DROP POLICY IF EXISTS "popular_projects_public_read" ON public.popular_projects;
 -- All four tables are read-only for the public (portfolio is read-only for visitors)
 CREATE POLICY "projects_public_read"
   ON public.projects FOR SELECT
-  USING (is_published = true);
+  USING (true);
 
 CREATE POLICY "project_github_public_read"
   ON public.project_github_urls FOR SELECT

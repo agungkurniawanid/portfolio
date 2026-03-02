@@ -36,6 +36,9 @@ export default function AboutSection() {
   /** True once the ScrollTrigger onEnter has fired at least once */
   const hasEnteredRef = useRef(false);
 
+  /** Ref to the counter ScrollTrigger so it can be properly killed on cleanup */
+  const counterSTRef = useRef<ReturnType<typeof ScrollTrigger.create> | null>(null);
+
   /** Animate the three counters to the given stats values */
   const animateCounters = useCallback((s: AboutStats) => {
     const q = gsap.utils.selector(sectionRef);
@@ -43,16 +46,19 @@ export default function AboutSection() {
       innerText: s.yearsExperience,
       duration: 0.5,
       snap: { innerText: 1 },
+      overwrite: true,
     });
     gsap.to(q(".project-count"), {
       innerText: s.totalProjects,
       duration: 0.5,
       snap: { innerText: 1 },
+      overwrite: true,
     });
     gsap.to(q(".user-count"), {
       innerText: s.contributions,
       duration: 0.5,
       snap: { innerText: 1 },
+      overwrite: true,
     });
   }, []);
 
@@ -61,7 +67,7 @@ export default function AboutSection() {
     fetchAboutStats()
       .then((data) => {
         statsRef.current = data;
-        // If onEnter already fired with default values → re-animate to real values
+        // If onEnter already fired → re-animate to real values immediately
         if (hasEnteredRef.current) {
           animateCounters(data);
         }
@@ -94,64 +100,62 @@ export default function AboutSection() {
       },
     });
 
-    gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        scrub: true,
-        onEnter: () => {
-          hasEnteredRef.current = true;
+    counterSTRef.current = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: "top 80%",
+      once: true,
+      onEnter: () => {
+        hasEnteredRef.current = true;
 
-          const tl = gsap.timeline({
-            defaults: {
-              stagger: 0.2,
-              duration: 0.3,
-            },
-          });
+        const tl = gsap.timeline({
+          defaults: {
+            stagger: 0.2,
+            duration: 0.3,
+          },
+        });
 
-          tl.fromTo(q(".image-animation"), { x: 200 }, { x: 0 });
+        tl.fromTo(q(".image-animation"), { x: 200 }, { x: 0 });
+        tl.fromTo(q(".text-animation"), { y: 100 }, { y: 0 });
 
-          tl.fromTo(q(".text-animation"), { y: 100 }, { y: 0 });
+        // Read the latest fetched values from the ref at animation time
+        const s = statsRef.current;
 
-          // Read the latest fetched values from the ref at animation time
-          const s = statsRef.current;
+        tl.to(q(".experience-count"), {
+          innerText: s.yearsExperience,
+          duration: 0.5,
+          snap: { innerText: 1 },
+          overwrite: true,
+        });
 
-          tl.to(q(".experience-count"), {
-            innerText: s.yearsExperience,
+        tl.to(
+          q(".project-count"),
+          {
+            innerText: s.totalProjects,
             duration: 0.5,
-            snap: {
-              innerText: 1,
-            },
-          });
+            snap: { innerText: 1 },
+            overwrite: true,
+          },
+          "-=0.3"
+        );
 
-          tl.to(
-            q(".project-count"),
-            {
-              innerText: s.totalProjects,
-              duration: 0.5,
-              snap: {
-                innerText: 1,
-              },
-            },
-            "-=0.3"
-          );
-
-          tl.to(
-            q(".user-count"),
-            {
-              innerText: s.contributions,
-              duration: 0.5,
-              snap: {
-                innerText: 1,
-              },
-            },
-            "-=0.3"
-          );
-        },
+        tl.to(
+          q(".user-count"),
+          {
+            innerText: s.contributions,
+            duration: 0.5,
+            snap: { innerText: 1 },
+            overwrite: true,
+          },
+          "-=0.3"
+        );
       },
     });
 
     return () => {
       titleTrigger.scrollTrigger?.kill();
+      counterSTRef.current?.kill();
+      counterSTRef.current = null;
+      hasEnteredRef.current = false;
       splitInstances.forEach((instance: SplitType) => instance.revert());
     };
   }, [locale]);

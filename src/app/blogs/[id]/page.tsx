@@ -60,8 +60,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ id: strin
     if (!blog) return
     try {
       const out = await translate(
-        { title: blog.title, content: blog.content },
-        { content: "html" }
+        { title: blog.title, content: blog.content }
       )
       setTranslatedTitle(out.title)
       setTranslatedContent(out.content)

@@ -263,7 +263,7 @@ export default function MobileNav() {
 
             <div className="h-px bg-gray-100 dark:bg-gray-800 my-3" />
             <p className="text-xs text-gray-400 dark:text-gray-600 text-center">
-              AgungKurniawan<span className="text-accentColor">.dev</span>
+              Gungzz<span className="text-accentColor">leefy</span>
             </p>
           </div>
         </nav>

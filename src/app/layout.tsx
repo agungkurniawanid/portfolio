@@ -6,17 +6,22 @@ import "./globals.css"
 import { ThemeProvider } from "@/providers/ThemeProvider"
 import IntlProvider from "@/providers/IntlProvider"
 import WelcomePopup from "@/components/WelcomePopup"
+import ThemeColorSync from "@/components/ThemeColorSync"
 
 const jost = Jost({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#111c20" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+  ],
   title: "Agung Kurniawan - Portfolio",
   description: "A Software Engineer",
   applicationName: "Portfolio",
   openGraph: {
     type: "website",
     url: "https://gungzzleefy.vercel.app/",
-    title: "AgungKurniawan.dev",
+    title: "Gungzzleefy",
     description:
       "Portfolio website developed with NextJS, TypeScript, ShadcnUI & GSAP.",
     siteName: "Portfolio website",
@@ -55,6 +60,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <ThemeColorSync />
             <GuestbookBanner />
             <Header />
             <WelcomePopup />

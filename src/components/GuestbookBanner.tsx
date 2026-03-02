@@ -23,8 +23,9 @@ export default function GuestbookBanner() {
       style={{ height: BANNER_HEIGHT }}
       className={cn(
         "fixed top-0 left-0 right-0 z-[200] flex items-center justify-center",
-        "bg-gradient-to-r from-accentColor/90 via-emerald-500/90 to-accentColor/90",
-        "backdrop-blur-sm border-b border-accentColor/30",
+        "bg-gradient-to-r from-emerald-700 via-emerald-500 to-emerald-700",
+        "dark:from-accentColor dark:via-emerald-500 dark:to-accentColor",
+        "border-b border-emerald-800/40 dark:border-accentColor/30",
         "animate-in slide-in-from-top-full duration-500"
       )}
     >

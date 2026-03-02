@@ -84,9 +84,9 @@ export default function Header() {
                 section === "#project" && "dark:text-black"
               )}
             >
-              AgungKurniawan
+              Gungzz
             </span>
-            <span className="text-accentColor font-bold text-[#0EBD7A]">.dev</span>
+            <span className="text-accentColor font-bold text-[#0EBD7A]">leefy</span>
           </Link>
 
           {/* Desktop Nav */}

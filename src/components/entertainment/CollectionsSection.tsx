@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Package, Search, X } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/Utils";
 import { CollectionItem, CollectionCategory, CollectionCondition } from "@/types/entertainment";
 import { COLLECTIONS_DATA } from "@/data/entertainmentData";
@@ -66,9 +67,9 @@ export default function CollectionsSection({ globalSearch }: { globalSearch?: st
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {[
-          { icon: "🎁", label: "Total Koleksi", value: COLLECTIONS_DATA.length },
-          { icon: "✨", label: "Kondisi Mint", value: COLLECTIONS_DATA.filter((c) => c.condition === "mint").length },
-          { icon: "📅", label: "Tahun Terbaru", value: Math.max(...COLLECTIONS_DATA.map((c) => c.year_acquired)) },
+          { icon: "🎁", label: t("stat_total_coll"),  value: COLLECTIONS_DATA.length },
+          { icon: "✨",  label: t("stat_mint_cond"),  value: COLLECTIONS_DATA.filter((c) => c.condition === "mint").length },
+          { icon: "📅", label: t("stat_latest_year"), value: Math.max(...COLLECTIONS_DATA.map((c) => c.year_acquired)) },
         ].map(({ icon, label, value }) => (
           <div key={label} className="rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-gray-800/40 p-4 flex items-center gap-3">
             <span className="text-xl">{icon}</span>
@@ -84,14 +85,14 @@ export default function CollectionsSection({ globalSearch }: { globalSearch?: st
       <div className="flex flex-col gap-3">
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari nama koleksi..." className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accentColor/40 transition" />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("search_collection")} className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accentColor/40 transition" />
           {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"><X size={14} /></button>}
         </div>
         {/* Category filter */}
         <div className="flex gap-2 flex-wrap">
           {ALL_CATEGORIES.map((c) => (
             <button key={c} onClick={() => setFilterCategory(c)} className={cn("px-3 py-1.5 rounded-xl text-xs font-medium border transition-all", filterCategory === c ? "bg-accentColor text-white border-accentColor" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:border-accentColor/60")}>
-              {c === "all" ? "Semua" : `${CATEGORY_ICONS[c]} ${c}`}
+              {c === "all" ? t("all") : `${CATEGORY_ICONS[c]} ${c}`}
               {c !== "all" && totalByCategory[c] ? ` (${totalByCategory[c]})` : ""}
             </button>
           ))}
@@ -100,7 +101,7 @@ export default function CollectionsSection({ globalSearch }: { globalSearch?: st
         <div className="flex gap-2">
           {(["all", "mint", "good", "used"] as const).map((c) => (
             <button key={c} onClick={() => setFilterCondition(c)} className={cn("px-3 py-1.5 rounded-xl text-xs font-medium border transition-all", filterCondition === c ? "bg-accentColor/20 text-accentColor border-accentColor/40" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:border-accentColor/60")}>
-              {c === "all" ? "Semua Kondisi" : CONDITION_LABEL[c]}
+              {c === "all" ? t("all_conditions") : CONDITION_LABEL[c]}
             </button>
           ))}
         </div>
@@ -110,12 +111,12 @@ export default function CollectionsSection({ globalSearch }: { globalSearch?: st
       {filtered.length === 0 ? (
         <div className="text-center py-20 text-gray-500 dark:text-gray-400">
           <Package size={48} className="mx-auto mb-3 opacity-30" />
-          <p>Tidak ada koleksi ditemukan.</p>
+          <p>{t("no_collections")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filtered.map((item) => (
-            <CollectionCard key={item.id} item={item} />
+            <CollectionCard key={item.id} item={item} conditionLabel={CONDITION_LABEL} />
           ))}
         </div>
       )}
@@ -123,7 +124,7 @@ export default function CollectionsSection({ globalSearch }: { globalSearch?: st
   );
 }
 
-function CollectionCard({ item }: { item: CollectionItem }) {
+function CollectionCard({ item, conditionLabel }: { item: CollectionItem; conditionLabel: Record<CollectionCondition, string> }) {
   const [imgErr, setImgErr] = useState(false);
 
   return (
@@ -139,7 +140,7 @@ function CollectionCard({ item }: { item: CollectionItem }) {
           </div>
         )}
         <span className={cn("absolute top-3 right-3 text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm", CONDITION_COLOR[item.condition])}>
-          {CONDITION_LABEL[item.condition]}
+          {conditionLabel[item.condition]}
         </span>
       </div>
       {/* Info */}

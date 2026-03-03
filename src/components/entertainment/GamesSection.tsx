@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Gamepad2, Clock, Trophy, Search, SlidersHorizontal, X, ChevronDown } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/Utils";
 import {
   fetchSteamGames,
@@ -18,13 +19,6 @@ import {
 import { GameCardSkeleton } from "./EntertainmentSkeletons";
 
 type SortOption = "most_played" | "recently_played" | "az";
-
-const STATUS_LABELS: Record<GameStatus, string> = {
-  playing: "🎮 Playing",
-  completed: "✅ Selesai",
-  wishlist: "📋 Wishlist",
-  never_played: "💤 Belum Dimainkan",
-};
 
 const STATUS_COLORS: Record<GameStatus, string> = {
   playing: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
@@ -51,6 +45,13 @@ function enrichGame(game: SteamGame): SteamGame {
 }
 
 export default function GamesSection({ globalSearch }: { globalSearch?: string }) {
+  const t = useTranslations("entertainment");
+  const STATUS_LABELS: Record<GameStatus, string> = {
+    playing:      t("game_status_playing"),
+    completed:    t("game_status_completed"),
+    wishlist:     t("game_status_wishlist"),
+    never_played: t("game_status_never_played"),
+  };
   const [games, setGames] = useState<SteamGame[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -104,8 +105,8 @@ export default function GamesSection({ globalSearch }: { globalSearch?: string }
   const totalCompleted = games.filter((g) => g.status === "completed").length;
 
   const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-    { value: "most_played", label: "Paling Banyak Dimainkan" },
-    { value: "az", label: "A–Z" },
+    { value: "most_played", label: t("sort_most_played") },
+    { value: "az",          label: t("sort_az") },
   ];
 
   return (
@@ -113,9 +114,9 @@ export default function GamesSection({ globalSearch }: { globalSearch?: string }
       {/* Stats bar */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { icon: <Gamepad2 size={16} />, label: "Total Games", value: games.length, color: "text-blue-500" },
-          { icon: <Clock size={16} />, label: "Total Jam", value: `${totalHours}j`, color: "text-green-500" },
-          { icon: <Trophy size={16} />, label: "Selesai", value: totalCompleted, color: "text-yellow-500" },
+          { icon: <Gamepad2 size={16} />, label: t("stat_total_games"),  value: games.length,    color: "text-blue-500" },
+          { icon: <Clock size={16} />,   label: t("stat_total_hours"),  value: `${totalHours}j`, color: "text-green-500" },
+          { icon: <Trophy size={16} />,  label: t("stat_completed"),    value: totalCompleted,  color: "text-yellow-500" },
         ].map(({ icon, label, value, color }) => (
           <div
             key={label}
@@ -138,7 +139,7 @@ export default function GamesSection({ globalSearch }: { globalSearch?: string }
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari nama game..."
+              placeholder={t("search_game")}
             className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accentColor/40 transition"
           />
           {search && (
@@ -161,7 +162,7 @@ export default function GamesSection({ globalSearch }: { globalSearch?: string }
                   : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:border-accentColor/60"
               )}
             >
-              {s === "all" ? "Semua" : STATUS_LABELS[s]}
+              {s === "all" ? t("all") : STATUS_LABELS[s]}
             </button>
           ))}
         </div>
@@ -197,7 +198,7 @@ export default function GamesSection({ globalSearch }: { globalSearch?: string }
 
       {error && (
         <div className="rounded-xl border border-yellow-200 dark:border-yellow-800/50 bg-yellow-50 dark:bg-yellow-900/20 px-4 py-3 text-sm text-yellow-700 dark:text-yellow-300">
-          ⚠️ Tidak bisa terhubung ke Steam API. Menampilkan data sampel.
+          {t("steam_error")}
         </div>
       )}
 
@@ -209,7 +210,7 @@ export default function GamesSection({ globalSearch }: { globalSearch?: string }
       ) : filtered.length === 0 ? (
         <div className="text-center py-20 text-gray-500 dark:text-gray-400">
           <Gamepad2 size={48} className="mx-auto mb-3 opacity-30" />
-          <p>Tidak ada game ditemukan.</p>
+          <p>{t("no_games")}</p>
         </div>
       ) : (
         <>
@@ -224,7 +225,7 @@ export default function GamesSection({ globalSearch }: { globalSearch?: string }
                 onClick={() => setVisibleCount((v) => v + 20)}
                 className="px-6 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 text-sm text-gray-700 dark:text-gray-300 hover:border-accentColor hover:text-accentColor transition"
               >
-                Muat lebih banyak ({filtered.length - visibleCount} tersisa)
+                {t("load_more_n").replace("{n}", String(filtered.length - visibleCount))}
               </button>
             </div>
           )}
@@ -235,6 +236,7 @@ export default function GamesSection({ globalSearch }: { globalSearch?: string }
 }
 
 function GameCard({ game }: { game: SteamGame }) {
+  const t = useTranslations("entertainment");
   const [imgError, setImgError] = useState(false);
   const status = game.status ?? "never_played";
   const hours = Math.floor(game.playtime_forever / 60);
@@ -271,7 +273,7 @@ function GameCard({ game }: { game: SteamGame }) {
           {game.name}
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          {game.playtime_forever > 0 ? `⏱ ${formatPlaytime(game.playtime_forever)}` : "Belum dimainkan"}
+          {game.playtime_forever > 0 ? `⏱ ${formatPlaytime(game.playtime_forever)}` : t("game_status_never_played")}
         </p>
         {game.achievements_total && game.achievements_total > 0 && (
           <div className="mt-2">

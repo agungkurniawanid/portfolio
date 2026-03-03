@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Gamepad2, Film, Tv, Music, BookOpen, Package, Clock } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/Utils";
 import { EntertainmentTab } from "@/types/entertainment";
 import { BOOKS_DATA, COLLECTIONS_DATA, ANIME_SERIES_DATA, SPOTIFY_PLAYLISTS, STEAM_GAMES_FALLBACK, LOCAL_MOVIES } from "@/data/entertainmentData";
@@ -67,7 +68,7 @@ function StatCard({ icon, label, value, suffix = "", color, bgColor, tab, descri
         <div className={cn("p-2.5 rounded-xl", bgColor, "bg-opacity-15 dark:bg-opacity-20")}>
           <span className={cn(color)}>{icon}</span>
         </div>
-        <span className="text-[10px] text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">{description ?? "Klik untuk lihat"} →</span>
+        <span className="text-[10px] text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">{description ?? "Click to view"} →</span>
       </div>
       <p className={cn("text-3xl font-extrabold tracking-tight", color)}>
         {count.toLocaleString()}<span className="text-lg ml-0.5">{suffix}</span>
@@ -78,6 +79,7 @@ function StatCard({ icon, label, value, suffix = "", color, bgColor, tab, descri
 }
 
 export default function DashboardSection({ onTabClick }: { onTabClick: (tab: EntertainmentTab) => void }) {
+  const t = useTranslations("entertainment");
   const [steamLoaded, setSteamLoaded] = useState(false);
   const [totalGames, setTotalGames] = useState(0);
   const [totalHours, setTotalHours] = useState(0);
@@ -99,39 +101,39 @@ export default function DashboardSection({ onTabClick }: { onTabClick: (tab: Ent
 
   const stats: Omit<StatCardProps, "onTabClick">[] = [
     {
-      icon: <Gamepad2 size={20} />, label: "Total Games", value: totalGames,
+      icon: <Gamepad2 size={20} />, label: t("stat_total_games"), value: totalGames,
       color: "text-blue-500", bgColor: "bg-blue-500", tab: "games",
-      description: "Lihat koleksi game",
+      description: t("desc_game_collection"),
     },
     {
-      icon: <Clock size={20} />, label: "Total Jam Bermain", value: totalHours, suffix: "j",
+      icon: <Clock size={20} />, label: t("stat_play_hours"), value: totalHours, suffix: "j",
       color: "text-cyan-500", bgColor: "bg-cyan-500", tab: "games",
-      description: "Lihat statistik",
+      description: t("desc_game_stats"),
     },
     {
-      icon: <Film size={20} />, label: "Film Ditonton", value: LOCAL_MOVIES.filter((m) => m.status === "watched").length,
+      icon: <Film size={20} />, label: t("stat_movies_watched"), value: LOCAL_MOVIES.filter((m) => m.status === "watched").length,
       color: "text-rose-500", bgColor: "bg-rose-500", tab: "movies",
-      description: "Lihat koleksi film",
+      description: t("desc_movies"),
     },
     {
-      icon: <Tv size={20} />, label: "Anime / Series Selesai", value: ANIME_SERIES_DATA.filter((s) => s.status === "completed").length,
+      icon: <Tv size={20} />, label: t("stat_anime_completed"), value: ANIME_SERIES_DATA.filter((s) => s.status === "completed").length,
       color: "text-purple-500", bgColor: "bg-purple-500", tab: "anime",
-      description: "Lihat watchlist",
+      description: t("desc_anime"),
     },
     {
-      icon: <Music size={20} />, label: "Playlist Spotify", value: SPOTIFY_PLAYLISTS.length,
+      icon: <Music size={20} />, label: t("stat_playlists"), value: SPOTIFY_PLAYLISTS.length,
       color: "text-green-500", bgColor: "bg-green-500", tab: "music",
-      description: "Dengarkan playlist",
+      description: t("desc_music"),
     },
     {
-      icon: <BookOpen size={20} />, label: "Buku Dibaca", value: BOOKS_DATA.filter((b) => b.status === "finished").length,
+      icon: <BookOpen size={20} />, label: t("stat_books_read"), value: BOOKS_DATA.filter((b) => b.status === "finished").length,
       color: "text-amber-500", bgColor: "bg-amber-500", tab: "books",
-      description: "Lihat koleksi buku",
+      description: t("desc_books"),
     },
     {
-      icon: <Package size={20} />, label: "Total Koleksi", value: COLLECTIONS_DATA.length,
+      icon: <Package size={20} />, label: t("stat_collections"), value: COLLECTIONS_DATA.length,
       color: "text-pink-500", bgColor: "bg-pink-500", tab: "collections",
-      description: "Lihat koleksi",
+      description: t("desc_collections"),
     },
   ];
 
@@ -141,11 +143,10 @@ export default function DashboardSection({ onTabClick }: { onTabClick: (tab: Ent
       <div className="rounded-2xl bg-gradient-to-br from-accentColor/10 via-transparent to-purple-500/10 border border-accentColor/20 dark:border-accentColor/10 p-6 md:p-8">
         <div className="max-w-2xl">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            🎉 Dunia Hiburan Saya
+            {t("dash_world_title")}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-            Ringkasan semua aktivitas hiburan — dari game, film, anime, musik, buku, hingga koleksi fisik.
-            Klik kartu statistik untuk menjelajahi masing-masing kategori.
+            {t("dash_world_desc")}
           </p>
         </div>
       </div>
@@ -153,7 +154,7 @@ export default function DashboardSection({ onTabClick }: { onTabClick: (tab: Ent
       {/* Stats grid */}
       <div>
         <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
-          Statistik Entertainment
+          {t("dash_stats_heading")}
         </h3>
         {!steamLoaded ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -171,7 +172,7 @@ export default function DashboardSection({ onTabClick }: { onTabClick: (tab: Ent
       {/* Activity highlights */}
       <div>
         <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
-          Highlight Terkini
+          {t("dash_highlights_heading")}
         </h3>
         <div className="grid md:grid-cols-3 gap-4">
           {/* Last watched movie */}
@@ -180,7 +181,7 @@ export default function DashboardSection({ onTabClick }: { onTabClick: (tab: Ent
             return last ? (
               <HighlightCard
                 emoji="🎬"
-                category="Film Terakhir Ditonton"
+                category={t("hl_last_movie")}
                 title={last.title}
                 sub={last.watched_date ? new Date(last.watched_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : ""}
                 rating={last.personal_rating}
@@ -197,9 +198,9 @@ export default function DashboardSection({ onTabClick }: { onTabClick: (tab: Ent
             return top ? (
               <HighlightCard
                 emoji="🎌"
-                category="Anime / Series Favorit"
+                category={t("hl_fav_anime")}
                 title={top.title}
-                sub={top.status === "completed" ? "Selesai ditonton" : top.status === "ongoing" ? "Sedang ditonton" : "Di-wishlist"}
+                sub={top.status === "completed" ? t("hl_completed") : top.status === "ongoing" ? t("hl_watching") : t("hl_wishlisted")}
                 rating={top.personal_rating}
                 color="text-purple-500"
                 bg="bg-purple-500/10 dark:bg-purple-500/5"
@@ -214,7 +215,7 @@ export default function DashboardSection({ onTabClick }: { onTabClick: (tab: Ent
             return top ? (
               <HighlightCard
                 emoji="📚"
-                category={top.status === "reading" ? "Sedang Dibaca" : "Buku Teratas"}
+                category={top.status === "reading" ? t("hl_reading") : t("hl_top_book")}
                 title={top.title}
                 sub={top.author}
                 rating={top.personal_rating}

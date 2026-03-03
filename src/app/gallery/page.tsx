@@ -14,15 +14,18 @@ import {
   Image as ImageIcon,
   User,
   Users,
+  Plus,
 } from "lucide-react"
 import { cn } from "@/lib/Utils"
-import { GalleryPhoto, GalleryAlbum, GalleryCategory, SortOption } from "@/types/gallery"
+import { GalleryPhoto, GalleryAlbum, GalleryCategory, GalleryGuest, SortOption } from "@/types/gallery"
 import { GALLERY_CATEGORIES } from "@/data/galleryData"
-import { fetchGalleryPhotos, fetchGalleryAlbums } from "@/lib/galleryApi"
+import { fetchGalleryPhotos, fetchGalleryAlbums, fetchGalleryGuests } from "@/lib/galleryApi"
 
 import FeaturedCarousel from "@/components/gallery/FeaturedCarousel"
 import GalleryPhotoCard from "@/components/gallery/GalleryPhotoCard"
 import GalleryAlbumCard from "@/components/gallery/GalleryAlbumCard"
+import GuestDirectory from "@/components/gallery/GuestDirectory"
+import GuestRegistrationModal from "@/components/gallery/GuestRegistrationModal"
 
 // Dynamically import lightbox to avoid SSR issues
 const GalleryLightbox = dynamic(() => import("@/components/gallery/GalleryLightbox"), {
@@ -48,18 +51,22 @@ export default function GalleryPage() {
   // ── Data from Supabase ─────────────────────────────────────────────────────
   const [allPhotos, setAllPhotos] = useState<GalleryPhoto[]>([])
   const [allAlbums, setAllAlbums] = useState<GalleryAlbum[]>([])
+  const [allGuests, setAllGuests] = useState<GalleryGuest[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let cancelled = false
     setLoading(true)
-    Promise.all([fetchGalleryPhotos(), fetchGalleryAlbums()]).then(([photos, albums]) => {
-      if (!cancelled) {
-        setAllPhotos(photos)
-        setAllAlbums(albums)
-        setLoading(false)
+    Promise.all([fetchGalleryPhotos(), fetchGalleryAlbums(), fetchGalleryGuests()]).then(
+      ([photos, albums, guests]) => {
+        if (!cancelled) {
+          setAllPhotos(photos)
+          setAllAlbums(albums)
+          setAllGuests(guests)
+          setLoading(false)
+        }
       }
-    })
+    )
     return () => { cancelled = true }
   }, [])
 
@@ -74,6 +81,7 @@ export default function GalleryPage() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const [showSortMenu, setShowSortMenu] = useState(false)
   const [showYearMenu, setShowYearMenu] = useState(false)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
   // ── Owner-tab filtered base ───────────────────────────────────────────────
   const tabPhotos = useMemo(
@@ -84,6 +92,7 @@ export default function GalleryPage() {
     () => allAlbums.filter((a) => (a.ownerType ?? "personal") === ownerTab),
     [allAlbums, ownerTab]
   )
+  const tabGuests = useMemo(() => allGuests, [allGuests])
 
   // Featured photos
   const featuredPhotos = useMemo(() => tabPhotos.filter((p) => p.isFeatured), [tabPhotos])
@@ -228,11 +237,17 @@ export default function GalleryPage() {
               </>
             ) : (
               (
-                [
-                  { n: tabPhotos.length, label: t("stat_photos") },
-                  { n: tabAlbums.length, label: t("stat_albums") },
-                  { n: GALLERY_CATEGORIES.length - 1, label: t("stat_categories") },
-                ]
+                ownerTab === "guest"
+                  ? [
+                      { n: tabGuests.length, label: t("stat_guests") },
+                      { n: tabPhotos.length, label: t("stat_photos") },
+                      { n: tabAlbums.length, label: t("stat_albums") },
+                    ]
+                  : [
+                      { n: tabPhotos.length, label: t("stat_photos") },
+                      { n: tabAlbums.length, label: t("stat_albums") },
+                      { n: GALLERY_CATEGORIES.length - 1, label: t("stat_categories") },
+                    ]
               ).map(({ n, label }) => (
                 <div key={label} className="flex flex-col items-center">
                   <span className="text-2xl font-bold text-accentColor">{n}</span>
@@ -241,6 +256,24 @@ export default function GalleryPage() {
               ))
             )}
           </div>
+
+          {/* ── Guest Tab: Add Button ── */}
+          {ownerTab === "guest" && !loading && (
+            <div className="flex justify-center mb-6">
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className={cn(
+                  "flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold",
+                  "bg-accentColor hover:bg-accentColor/80 text-white",
+                  "shadow-lg shadow-accentColor/30 hover:shadow-xl hover:shadow-accentColor/40",
+                  "transition-all duration-200 hover:scale-105 hover:-translate-y-0.5"
+                )}
+              >
+                <Plus className="w-4 h-4" />
+                {t("guest_add_btn")}
+              </button>
+            </div>
+          )}
 
           {/* Search */}
           <div className="relative max-w-xl mx-auto mb-6">
@@ -529,30 +562,42 @@ export default function GalleryPage() {
             ) : (
               /* ── Album View ── */
               <>
-                {tabAlbums.filter(
-                  (a) => activeCategory === "Semua" || a.category === activeCategory
-                ).length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-24 gap-4 text-gray-400">
-                    <FolderOpen className="w-16 h-16 opacity-30" />
-                    <p className="text-lg font-medium">{t("empty_albums")}</p>
-                  </div>
+                {/* For guest tab: show A-Z guest directory */}
+                {ownerTab === "guest" ? (
+                  <GuestDirectory
+                    guests={tabGuests}
+                    albums={tabAlbums}
+                    loading={loading}
+                  />
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                    {tabAlbums
-                      .filter(
-                        (a) => activeCategory === "Semua" || a.category === activeCategory
-                      )
-                      .filter((a) => {
-                        if (!search.trim()) return true
-                        return (
-                          a.name.toLowerCase().includes(search.toLowerCase()) ||
-                          a.description.toLowerCase().includes(search.toLowerCase())
-                        )
-                      })
-                      .map((album) => (
-                        <GalleryAlbumCard key={album.slug} album={album} />
-                      ))}
-                  </div>
+                  /* For personal tab: regular album grid */
+                  <>
+                    {tabAlbums.filter(
+                      (a) => activeCategory === "Semua" || a.category === activeCategory
+                    ).length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-24 gap-4 text-gray-400">
+                        <FolderOpen className="w-16 h-16 opacity-30" />
+                        <p className="text-lg font-medium">{t("empty_albums")}</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                        {tabAlbums
+                          .filter(
+                            (a) => activeCategory === "Semua" || a.category === activeCategory
+                          )
+                          .filter((a) => {
+                            if (!search.trim()) return true
+                            return (
+                              a.name.toLowerCase().includes(search.toLowerCase()) ||
+                              a.description.toLowerCase().includes(search.toLowerCase())
+                            )
+                          })
+                          .map((album) => (
+                            <GalleryAlbumCard key={album.slug} album={album} />
+                          ))}
+                      </div>
+                    )}
+                  </>
                 )}
               </>
             )}
@@ -568,6 +613,28 @@ export default function GalleryPage() {
           onClose={() => setLightboxIndex(null)}
         />
       )}
+
+      {/* ─────────── Guest Registration Modal ─────────── */}
+      <GuestRegistrationModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={(updatedGuest) => {
+          // Refresh guests list after successful submission
+          setAllGuests((prev) => {
+            const idx = prev.findIndex((g) => g.id === updatedGuest.id)
+            if (idx !== -1) {
+              const copy = [...prev]
+              copy[idx] = updatedGuest
+              return copy
+            }
+            return [...prev, updatedGuest]
+          })
+          setIsAddModalOpen(false)
+          // Switch to guest tab and album view to show the new content
+          setOwnerTab("guest")
+          setViewMode("album")
+        }}
+      />
     </main>
   )
 }

@@ -17,7 +17,13 @@
     "migrate:certificates": "node scripts/migrate-certificates.mjs",
     "migrate:coding-journey": "node scripts/migrate-coding-journey.mjs",
     "migrate:work-experiences": "node scripts/migrate-work-experiences.mjs",
-    "migrate:gallery": "node scripts/migrate-gallery.mjs"
+    "migrate:gallery": "node scripts/migrate-gallery.mjs",
+    "migrate:guest-gallery": "node scripts/migrate-guest-gallery.mjs",
+    "migrate:visitor-ip-log": "node scripts/migrate-visitor-ip-log.mjs",
+    "migrate:visitor-ip-log-guestbook": "node scripts/migrate-visitor-ip-log-guestbook.mjs",
+    "migrate:visitor-ip-log-fingerprint": "node scripts/migrate-visitor-ip-log-fingerprint.mjs",
+    "migrate:visitor-ip-log-fix-index": "node scripts/migrate-visitor-ip-log-fix-index.mjs",
+    "migrate:guestbook-fix-rls": "node scripts/migrate-guestbook-fix-rls.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
@@ -67,6 +73,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@types/json-schema": "^7.0.15",
     "@types/node": "^20.19.35",
+    "@types/pg": "^8.18.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9",

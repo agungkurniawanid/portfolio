@@ -210,12 +210,35 @@ export default function GuestbookPage() {
     fetchEntries()
   }, [])
 
-  // ── Check if already submitted ───────────────────────────────────────────────
+  // ── Check if already submitted (localStorage + fingerprint server-side) ──────
   useEffect(() => {
     if (typeof window === "undefined") return
+
+    // 1. Cek localStorage terlebih dahulu (cepat)
     if (localStorage.getItem("guestbook_submitted") === "true") {
       setHasSubmitted(true)
+      return
     }
+
+    // 2. Cek fingerprint server-side — mencegah bypass dengan hapus localStorage.
+    //    Fingerprint unik per perangkat/browser, tidak terpengaruh shared IP.
+    const checkFingerprint = async () => {
+      try {
+        const { generateFingerprint } = await import("@/lib/fingerprint")
+        const fp  = await generateFingerprint()
+        const res = await fetch(`/api/visitor-check?type=guestbook_submitted&fp=${fp}`)
+        const data = await res.json()
+        if (data.checked) {
+          // Fingerprint sudah tercatat → sync localStorage & tandai sudah submit
+          localStorage.setItem("guestbook_submitted", "true")
+          setHasSubmitted(true)
+        }
+      } catch {
+        // Gagal cek → fail-open, biarkan user mengisi (tidak blok)
+      }
+    }
+
+    checkFingerprint()
   }, [])
 
   // ── Supabase Realtime subscription ──────────────────────────────────────────

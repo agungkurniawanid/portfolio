@@ -3,17 +3,13 @@
 import { useEffect, useState, useRef } from "react";
 import { Tv, Search, X, Star, SlidersHorizontal, ChevronDown } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/Utils";
 import { searchTMDBTV, tmdbPosterUrl } from "@/lib/entertainmentApi";
 import { AnimeSeries, SeriesStatus } from "@/types/entertainment";
 import { ANIME_SERIES_DATA } from "@/data/entertainmentData";
 import { MovieCardSkeleton } from "./EntertainmentSkeletons";
 
-const STATUS_LABEL: Record<SeriesStatus, string> = {
-  completed: "✅ Selesai",
-  ongoing: "▶️ Ongoing",
-  wishlist: "📋 Watchlist",
-};
 const STATUS_COLOR: Record<SeriesStatus, string> = {
   completed: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
   ongoing: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
@@ -43,6 +39,12 @@ function StarRating({ value, max = 5 }: { value: number; max?: number }) {
 }
 
 export default function AnimeSection({ globalSearch }: { globalSearch?: string }) {
+  const t = useTranslations("entertainment");
+  const STATUS_LABEL: Record<SeriesStatus, string> = {
+    completed: t("anime_status_completed"),
+    ongoing:   t("anime_status_ongoing"),
+    wishlist:  t("anime_status_watchlist"),
+  };
   const [series, setSeries] = useState<EnrichedSeries[]>(
     ANIME_SERIES_DATA.map((s) => ({ ...s, loading: true }))
   );
@@ -113,9 +115,9 @@ export default function AnimeSection({ globalSearch }: { globalSearch?: string }
     (series.filter((s) => s.personal_rating > 0).length || 1);
 
   const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-    { value: "rating_high", label: "Rating Tertinggi" },
-    { value: "episodes", label: "Terbanyak Episode" },
-    { value: "az", label: "A–Z" },
+    { value: "rating_high", label: t("sort_rating_high") },
+    { value: "episodes",   label: t("sort_most_episodes") },
+    { value: "az",         label: t("sort_az") },
   ];
 
   return (
@@ -123,9 +125,9 @@ export default function AnimeSection({ globalSearch }: { globalSearch?: string }
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { icon: "📺", label: "Total Judul", value: series.length, color: "text-blue-500" },
-          { icon: "✅", label: "Selesai", value: totalCompleted, color: "text-green-500" },
-          { icon: "⭐", label: "Rata-rata Rating", value: avgRating.toFixed(1), color: "text-yellow-500" },
+          { icon: "📺", label: t("stat_total_titles"), value: series.length,              color: "text-blue-500" },
+          { icon: "✅",    label: t("stat_completed"),    value: totalCompleted,           color: "text-green-500" },
+          { icon: "⭐",   label: t("avg_rating"),       value: avgRating.toFixed(1),     color: "text-yellow-500" },
         ].map(({ icon, label, value, color }) => (
           <div key={label} className="rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-gray-800/40 p-4 flex items-center gap-3">
             <span className={cn("text-xl", color)}>{icon}</span>
@@ -142,7 +144,7 @@ export default function AnimeSection({ globalSearch }: { globalSearch?: string }
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari judul anime / series..." className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accentColor/40 transition" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("search_anime")} className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accentColor/40 transition" />
             {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"><X size={14} /></button>}
           </div>
           <div className="relative" ref={sortRef}>
@@ -162,13 +164,13 @@ export default function AnimeSection({ globalSearch }: { globalSearch?: string }
         <div className="flex gap-2 flex-wrap">
           {(["all", "completed", "ongoing", "wishlist"] as const).map((s) => (
             <button key={s} onClick={() => setFilterStatus(s)} className={cn("px-3 py-1.5 rounded-xl text-xs font-medium border transition-all", filterStatus === s ? "bg-accentColor text-white border-accentColor" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:border-accentColor/60")}>
-              {s === "all" ? "Semua" : STATUS_LABEL[s]}
+              {s === "all" ? t("all") : STATUS_LABEL[s]}
             </button>
           ))}
           <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 self-center" />
-          {(["all", "anime", "series"] as const).map((t) => (
-            <button key={t} onClick={() => setFilterType(t)} className={cn("px-3 py-1.5 rounded-xl text-xs font-medium border transition-all", filterType === t ? "bg-accentColor/20 text-accentColor border-accentColor/40" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:border-accentColor/60")}>
-              {t === "all" ? "Semua Tipe" : t === "anime" ? "🎌 Anime" : "📺 Series"}
+          {(["all", "anime", "series"] as const).map((type) => (
+            <button key={type} onClick={() => setFilterType(type)} className={cn("px-3 py-1.5 rounded-xl text-xs font-medium border transition-all", filterType === type ? "bg-accentColor/20 text-accentColor border-accentColor/40" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:border-accentColor/60")}>
+              {type === "all" ? t("all_types") : type === "anime" ? "🃌 Anime" : "📺 Series"}
             </button>
           ))}
         </div>
@@ -178,19 +180,19 @@ export default function AnimeSection({ globalSearch }: { globalSearch?: string }
       {filtered.length === 0 ? (
         <div className="text-center py-20 text-gray-500 dark:text-gray-400">
           <Tv size={48} className="mx-auto mb-3 opacity-30" />
-          <p>Tidak ada judul ditemukan.</p>
+          <p>{t("no_anime")}</p>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             {filtered.slice(0, visibleCount).map((s, i) =>
-              s.loading ? <MovieCardSkeleton key={i} /> : <SeriesCard key={s.id} series={s} />
+              s.loading ? <MovieCardSkeleton key={i} /> : <SeriesCard key={s.id} series={s} statusLabel={STATUS_LABEL} />
             )}
           </div>
           {visibleCount < filtered.length && (
             <div className="text-center">
               <button onClick={() => setVisibleCount((v) => v + 12)} className="px-6 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 text-sm text-gray-700 dark:text-gray-300 hover:border-accentColor hover:text-accentColor transition">
-                Muat lebih banyak
+                {t("load_more")}
               </button>
             </div>
           )}
@@ -200,7 +202,7 @@ export default function AnimeSection({ globalSearch }: { globalSearch?: string }
   );
 }
 
-function SeriesCard({ series }: { series: EnrichedSeries }) {
+function SeriesCard({ series, statusLabel }: { series: EnrichedSeries; statusLabel: Record<SeriesStatus, string> }) {
   const [imgErr, setImgErr] = useState(false);
   const posterUrl = series.tmdb_poster ? tmdbPosterUrl(series.tmdb_poster, "w185") : series.poster_path ? tmdbPosterUrl(series.poster_path, "w185") : null;
 
@@ -214,7 +216,7 @@ function SeriesCard({ series }: { series: EnrichedSeries }) {
             <Tv size={28} className="text-gray-500" />
           </div>
         )}
-        <span className={cn("absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full", STATUS_COLOR[series.status])}>{STATUS_LABEL[series.status].split(" ")[0]}</span>
+        <span className={cn("absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full", STATUS_COLOR[series.status])}>{statusLabel[series.status].split(" ")[0]}</span>
         {series.type === "anime" && (
           <span className="absolute bottom-2 left-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-pink-500/90 text-white">🎌 Anime</span>
         )}

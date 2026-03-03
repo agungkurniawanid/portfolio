@@ -384,6 +384,14 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
       // Save flag to localStorage
       localStorage.setItem("guestbook_submitted", "true")
 
+      // Catat fingerprint server-side agar tidak bisa bypass dengan hapus localStorage
+      // Fingerprint sudah tersedia dari langkah validasi sebelumnya
+      fetch("/api/visitor-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "guestbook_submitted", fingerprint }),
+      }).catch(() => {})
+
       handleClose()
       onSuccess(newEntry as GuestbookEntry)
     } catch (err: unknown) {
@@ -742,7 +750,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
               <button
                 type="button"
                 onClick={handleNext}
-                className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-medium bg-accentColor text-white hover:bg-accentColor/90 transition-all shadow-sm"
+                className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-medium bg-accentColor text-white hover:bg-emerald-700 dark:hover:bg-emerald-600 active:scale-95 transition-all shadow-sm"
               >
                 {t("btn_next")}
                 <ChevronRight size={15} />
@@ -753,10 +761,10 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
                 onClick={handleSubmit}
                 disabled={isSubmitting}
                 className={cn(
-                  "flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium bg-accentColor text-white transition-all shadow-sm",
+                  "flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium bg-accentColor text-white transition-all shadow-sm active:scale-95",
                   isSubmitting
                     ? "opacity-70 cursor-not-allowed"
-                    : "hover:bg-accentColor/90"
+                    : "hover:bg-emerald-700 dark:hover:bg-emerald-600"
                 )}
               >
                 {isSubmitting ? (

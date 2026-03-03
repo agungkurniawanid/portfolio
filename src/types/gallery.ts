@@ -11,6 +11,15 @@ export type SortOption = "Terbaru" | "Terlama" | "A–Z"
 
 export type GalleryOwnerType = "personal" | "guest"
 
+export interface GalleryGuest {
+  id: number
+  name: string
+  avatarUrl: string | null
+  albumCount: number
+  photoCount: number
+  createdAt: string
+}
+
 export interface GalleryPhoto {
   id: number
   title: string
@@ -30,6 +39,7 @@ export interface GalleryPhoto {
   tags: string[]
   ownerType?: GalleryOwnerType
   uploaderName?: string | null
+  guestId?: number | null
 }
 
 export interface GalleryAlbum {
@@ -41,4 +51,5 @@ export interface GalleryAlbum {
   period: string
   photoCount: number
   ownerType?: GalleryOwnerType
+  guestId?: number | null
 }

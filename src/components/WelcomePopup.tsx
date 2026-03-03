@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import emailjs from "@emailjs/browser";
 import { FaTimes, FaStar, FaPaperPlane, FaEyeSlash } from "react-icons/fa";
+import { generateFingerprint } from "@/lib/fingerprint";
 
 /* ─────────────────── Config ─────────────────── */
 // Set your EmailJS credentials in .env.local:
@@ -78,12 +79,16 @@ export default function WelcomePopup() {
   const [toast, setToast]       = useState<{ message: string; type: ToastType } | null>(null);
   const [status, setStatus]     = useState<"idle" | "sending" | "sent">("idle");
 
-  const overlayRef   = useRef<HTMLDivElement>(null);
-  const modalRef     = useRef<HTMLDivElement>(null);
-  const timerRef     = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isMountedRef = useRef(false);
-  const pathname     = usePathname();
-  const router       = useRouter();
+  const overlayRef       = useRef<HTMLDivElement>(null);
+  const modalRef         = useRef<HTMLDivElement>(null);
+  const timerRef         = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef     = useRef(false);
+  // Dedicated guard — true only on the very first run of the [pathname] effect.
+  // isMountedRef cannot be used for this because the mount effect (runs first)
+  // sets it to true synchronously BEFORE the navigation effect checks it.
+  const isFirstNavEffect = useRef(true);
+  const pathname         = usePathname();
+  const router           = useRouter();
 
   const [form, setForm] = useState({
     name: "",
@@ -130,13 +135,39 @@ export default function WelcomePopup() {
     if (typeof window === "undefined") return;
     if (localStorage.getItem(LS_KEY) === "true") return;
     if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setVisible(true), delay);
+    // Re-check localStorage inside the callback: initCheck() may have set it
+    // after the timer was scheduled but before it fires (async race condition).
+    timerRef.current = setTimeout(() => {
+      if (localStorage.getItem(LS_KEY) === "true") return;
+      setVisible(true);
+    }, delay);
   }, []);
 
-  /* ── Initial mount — wait for hero to finish (~3 s) then +1.5 s buffer ── */
+  /* ── Initial mount — cek IP dulu, baru jadwalkan popup ── */
   useEffect(() => {
     isMountedRef.current = true;
-    showWithDelay(4500);
+
+    // Cek fingerprint server-side: jika sudah pernah submit atau hide →
+    // set localStorage dan jangan tampilkan popup (anti-bypass inspect tools).
+    const initCheck = async () => {
+      try {
+        const fp = await generateFingerprint();
+        const [r1, r2] = await Promise.all([
+          fetch(`/api/visitor-check?type=welcome_popup_submitted&fp=${fp}`),
+          fetch(`/api/visitor-check?type=welcome_popup_hidden&fp=${fp}`),
+        ]);
+        const [d1, d2] = await Promise.all([r1.json(), r2.json()]);
+        if (d1.checked || d2.checked) {
+          localStorage.setItem(LS_KEY, "true");
+          return; // Fingerprint sudah tercatat → jangan tampilkan
+        }
+      } catch {
+        // Gagal cek → tetap lanjut (fail-open), andalkan localStorage
+      }
+      showWithDelay(4500);
+    };
+
+    initCheck();
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
@@ -145,8 +176,13 @@ export default function WelcomePopup() {
 
   /* ── Re-trigger on every client-side navigation (3 s) ── */
   useEffect(() => {
-    // Skip the very first render (already handled by mount effect above)
-    if (!isMountedRef.current) return;
+    // Skip the very first render (already handled by mount effect above).
+    // NOTE: isMountedRef cannot guard this because the mount effect runs
+    // before this effect in the same pass and sets it to true synchronously.
+    if (isFirstNavEffect.current) {
+      isFirstNavEffect.current = false;
+      return;
+    }
     if (typeof window === "undefined") return;
     if (localStorage.getItem(LS_KEY) === "true") return;
 
@@ -170,8 +206,15 @@ export default function WelcomePopup() {
   const handleClose = () => animateOut();
 
   const handleNeverShow = () =>
-    animateOut(() => {
+    animateOut(async () => {
       localStorage.setItem(LS_KEY, "true");
+      // Catat fingerprint server-side agar tidak bisa bypass dengan hapus localStorage
+      const fp = await generateFingerprint().catch(() => "");
+      fetch("/api/visitor-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "welcome_popup_hidden", fingerprint: fp }),
+      }).catch(() => {});
     });
 
   /* ── Backdrop click → plain close ── */
@@ -209,6 +252,14 @@ export default function WelcomePopup() {
       setToast({ message: "Terima kasih! Mengalihkan ke Buku Tamu... 🙏", type: "success" });
       setForm({ name: "", email: "", phone: "", purpose: "", rating: 0, source: "", message: "" });
       localStorage.setItem(LS_KEY, "true");
+      // Catat fingerprint server-side agar tidak bisa bypass dengan hapus localStorage
+      generateFingerprint().then((fp) => {
+        fetch("/api/visitor-check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "welcome_popup_submitted", fingerprint: fp }),
+        }).catch(() => {});
+      }).catch(() => {});
       setTimeout(() => animateOut(() => router.push("/guestbook")), 1800);
     } catch {
       setStatus("idle");

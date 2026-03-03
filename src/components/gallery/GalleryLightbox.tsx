@@ -201,7 +201,7 @@ export default function GalleryLightbox({
 
         {/* ── Info Panel ─────────────────────────────────────────── */}
         {/* Mobile: fixed height at bottom, scrollable. Desktop: full right panel */}
-        <div className="shrink-0 w-full md:w-80 lg:w-96 max-h-[45vh] md:max-h-none bg-white dark:bg-gray-900 md:bg-gray-900/95 md:dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 md:border-t-0 md:border-l overflow-y-auto">
+        <div className="shrink-0 w-full md:w-80 lg:w-96 max-h-[45vh] md:max-h-none bg-white dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-200 dark:border-gray-700 md:border-t-0 md:border-l md:border-l-gray-200 md:dark:border-l-white/10 overflow-y-auto">
           <div className="p-5 space-y-4">
             {/* Title + TranslateWidget */}
             <div>
@@ -295,7 +295,7 @@ export default function GalleryLightbox({
                     {photo.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/8 text-gray-600 dark:text-white/60 border border-gray-200 dark:border-white/10"
+                        className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white/70 border border-gray-200 dark:border-white/10"
                       >
                         #{tag}
                       </span>

@@ -1,12 +1,12 @@
 /**
  * galleryApi.ts
  *
- * Fetches gallery photos and albums from Supabase.
+ * Fetches gallery photos, albums, and guest profiles from Supabase.
  * Converts snake_case DB columns → camelCase TypeScript types.
  */
 
 import { supabase } from "@/lib/supabase"
-import { GalleryPhoto, GalleryAlbum, GalleryOwnerType } from "@/types/gallery"
+import { GalleryPhoto, GalleryAlbum, GalleryOwnerType, GalleryGuest } from "@/types/gallery"
 
 // ── Row types (raw from Supabase) ────────────────────────────────────────────
 
@@ -29,6 +29,7 @@ interface GalleryPhotoRow {
   tags: string[]
   owner_type: GalleryOwnerType
   uploader_name: string | null
+  guest_id: number | null
 }
 
 interface GalleryAlbumRow {
@@ -40,6 +41,16 @@ interface GalleryAlbumRow {
   period: string
   photo_count: number
   owner_type: GalleryOwnerType
+  guest_id: number | null
+}
+
+interface GalleryGuestRow {
+  id: number
+  name: string
+  avatar_url: string | null
+  album_count: number
+  photo_count: number
+  created_at: string
 }
 
 // ── Mappers ──────────────────────────────────────────────────────────────────
@@ -64,6 +75,7 @@ function mapPhoto(row: GalleryPhotoRow): GalleryPhoto {
     tags: row.tags ?? [],
     ownerType: row.owner_type,
     uploaderName: row.uploader_name,
+    guestId: row.guest_id,
   }
 }
 
@@ -77,6 +89,18 @@ function mapAlbum(row: GalleryAlbumRow): GalleryAlbum {
     period: row.period,
     photoCount: row.photo_count,
     ownerType: row.owner_type,
+    guestId: row.guest_id,
+  }
+}
+
+function mapGuest(row: GalleryGuestRow): GalleryGuest {
+  return {
+    id: row.id,
+    name: row.name,
+    avatarUrl: row.avatar_url,
+    albumCount: row.album_count,
+    photoCount: row.photo_count,
+    createdAt: row.created_at,
   }
 }
 
@@ -156,4 +180,21 @@ export async function fetchPhotosByAlbum(albumSlug: string): Promise<GalleryPhot
   }
 
   return (data as GalleryPhotoRow[]).map(mapPhoto)
+}
+
+/**
+ * Fetch all gallery guests (sorted A-Z by name).
+ */
+export async function fetchGalleryGuests(): Promise<GalleryGuest[]> {
+  const { data, error } = await supabase
+    .from("gallery_guests")
+    .select("id, name, avatar_url, album_count, photo_count, created_at")
+    .order("name", { ascending: true })
+
+  if (error) {
+    console.error("[galleryApi] fetchGalleryGuests error:", error.message)
+    return []
+  }
+
+  return (data as GalleryGuestRow[]).map(mapGuest)
 }

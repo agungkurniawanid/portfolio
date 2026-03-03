@@ -3,17 +3,13 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Film, Search, X, Star, SlidersHorizontal, ChevronDown, LayoutGrid, List, AlertCircle } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/Utils";
 import { searchTMDBMovie, tmdbPosterUrl } from "@/lib/entertainmentApi";
 import { EnrichedMovie, MovieStatus, TMDBMovie } from "@/types/entertainment";
 import { LOCAL_MOVIES } from "@/data/entertainmentData";
 import { MovieCardSkeleton, MovieListSkeleton } from "./EntertainmentSkeletons";
 
-const STATUS_LABEL: Record<MovieStatus, string> = {
-  watched: "👀 Ditonton",
-  watching: "▶️ Sedang Nonton",
-  wishlist: "📋 Watchlist",
-};
 const STATUS_COLOR: Record<MovieStatus, string> = {
   watched: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
   watching: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
@@ -24,6 +20,12 @@ type SortOption = "recent" | "rating_high" | "az";
 type ViewMode = "grid" | "list";
 
 export default function MoviesSection({ globalSearch }: { globalSearch?: string }) {
+  const t = useTranslations("entertainment");
+  const STATUS_LABEL: Record<MovieStatus, string> = {
+    watched:  t("movie_status_watched"),
+    watching: t("movie_status_watching"),
+    wishlist: t("movie_status_watchlist"),
+  };
   const [movies, setMovies] = useState<EnrichedMovie[]>(
     LOCAL_MOVIES.map((m) => ({ ...m, loading: true }))
   );
@@ -91,9 +93,9 @@ export default function MoviesSection({ globalSearch }: { globalSearch?: string 
     (movies.filter((m) => m.personal_rating > 0).length || 1);
 
   const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-    { value: "recent", label: "Terbaru Ditonton" },
-    { value: "rating_high", label: "Rating Tertinggi" },
-    { value: "az", label: "A–Z" },
+    { value: "recent",      label: t("sort_recent_watched") },
+    { value: "rating_high", label: t("sort_rating_high") },
+    { value: "az",         label: t("sort_az") },
   ];
 
   return (
@@ -101,9 +103,9 @@ export default function MoviesSection({ globalSearch }: { globalSearch?: string 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { icon: "👀", label: "Ditonton", value: totalWatched, color: "text-green-500" },
-          { icon: "📋", label: "Watchlist", value: totalWishlist, color: "text-purple-500" },
-          { icon: "⭐", label: "Rata-rata Rating", value: avgRating.toFixed(1), color: "text-yellow-500" },
+          { icon: "👀", label: t("stat_watched"),    value: totalWatched,               color: "text-green-500" },
+          { icon: "📋", label: t("stat_watchlist"),  value: totalWishlist,             color: "text-purple-500" },
+          { icon: "⭐", label: t("avg_rating"),    value: avgRating.toFixed(1),       color: "text-yellow-500" },
         ].map(({ icon, label, value, color }) => (
           <div key={label} className="rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-gray-800/40 p-4 flex items-center gap-3">
             <span className={cn("text-xl", color)}>{icon}</span>
@@ -124,7 +126,7 @@ export default function MoviesSection({ globalSearch }: { globalSearch?: string 
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari judul film..."
+              placeholder={t("search_movie")}
               className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accentColor/40 transition"
             />
             {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"><X size={14} /></button>}
@@ -162,7 +164,7 @@ export default function MoviesSection({ globalSearch }: { globalSearch?: string 
         <div className="flex gap-2 flex-wrap">
           {(["all", "watched", "watching", "wishlist"] as const).map((s) => (
             <button key={s} onClick={() => setFilterStatus(s)} className={cn("px-3 py-1.5 rounded-xl text-xs font-medium border transition-all", filterStatus === s ? "bg-accentColor text-white border-accentColor" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:border-accentColor/60")}>
-              {s === "all" ? "Semua" : STATUS_LABEL[s]}
+              {s === "all" ? t("all") : STATUS_LABEL[s]}
             </button>
           ))}
           {allGenres.slice(0, 8).map((g) => (
@@ -177,19 +179,19 @@ export default function MoviesSection({ globalSearch }: { globalSearch?: string 
       {filtered.length === 0 ? (
         <div className="text-center py-20 text-gray-500 dark:text-gray-400">
           <Film size={48} className="mx-auto mb-3 opacity-30" />
-          <p>Tidak ada film ditemukan.</p>
+          <p>{t("no_movies")}</p>
         </div>
       ) : viewMode === "grid" ? (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             {filtered.slice(0, visibleCount).map((m, i) =>
-              m.loading ? <MovieCardSkeleton key={i} /> : <MovieCard key={i} movie={m} />
+              m.loading ? <MovieCardSkeleton key={i} /> : <MovieCard key={i} movie={m} statusLabel={STATUS_LABEL} />
             )}
           </div>
           {visibleCount < filtered.length && (
             <div className="text-center">
               <button onClick={() => setVisibleCount((v) => v + 18)} className="px-6 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 text-sm text-gray-700 dark:text-gray-300 hover:border-accentColor hover:text-accentColor transition">
-                Muat lebih banyak ({filtered.length - visibleCount} tersisa)
+                {t("load_more_n").replace("{n}", String(filtered.length - visibleCount))}
               </button>
             </div>
           )}
@@ -197,7 +199,7 @@ export default function MoviesSection({ globalSearch }: { globalSearch?: string 
       ) : (
         <div className="space-y-3">
           {filtered.slice(0, visibleCount).map((m, i) =>
-            m.loading ? <MovieListSkeleton key={i} /> : <MovieListRow key={i} movie={m} />
+            m.loading ? <MovieListSkeleton key={i} /> : <MovieListRow key={i} movie={m} statusLabel={STATUS_LABEL} />
           )}
           {visibleCount < filtered.length && (
             <div className="text-center">
@@ -212,7 +214,7 @@ export default function MoviesSection({ globalSearch }: { globalSearch?: string 
   );
 }
 
-function MovieCard({ movie }: { movie: EnrichedMovie }) {
+function MovieCard({ movie, statusLabel }: { movie: EnrichedMovie; statusLabel: Record<MovieStatus, string> }) {
   const [imgError, setImgError] = useState(false);
   const posterUrl = movie.tmdb?.poster_path ? tmdbPosterUrl(movie.tmdb.poster_path, "w185") : null;
   const title = movie.tmdb?.title ?? movie.title;
@@ -226,7 +228,7 @@ function MovieCard({ movie }: { movie: EnrichedMovie }) {
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-900"><Film size={28} className="text-gray-500" /></div>
         )}
-        <span className={cn("absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full", STATUS_COLOR[movie.status])}>{STATUS_LABEL[movie.status].split(" ")[0]}</span>
+        <span className={cn("absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full", STATUS_COLOR[movie.status])}>{statusLabel[movie.status].split(" ")[0]}</span>
         {movie.tmdb?.vote_average ? (
           <span className="absolute top-2 right-2 bg-black/70 text-yellow-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full">⭐ {movie.tmdb.vote_average.toFixed(1)}</span>
         ) : null}
@@ -248,7 +250,7 @@ function MovieCard({ movie }: { movie: EnrichedMovie }) {
   );
 }
 
-function MovieListRow({ movie }: { movie: EnrichedMovie }) {
+function MovieListRow({ movie, statusLabel }: { movie: EnrichedMovie; statusLabel: Record<MovieStatus, string> }) {
   const [imgError, setImgError] = useState(false);
   const posterUrl = movie.tmdb?.poster_path ? tmdbPosterUrl(movie.tmdb.poster_path, "w92") : null;
   const title = movie.tmdb?.title ?? movie.title;
@@ -269,7 +271,7 @@ function MovieListRow({ movie }: { movie: EnrichedMovie }) {
             <p className="font-semibold text-sm text-gray-900 dark:text-white line-clamp-1">{title}</p>
             <p className="text-xs text-gray-400">{year} {movie.tmdb?.genres?.slice(0, 2).map((g) => g.name).join(", ")}</p>
           </div>
-          <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full flex-shrink-0", STATUS_COLOR[movie.status])}>{STATUS_LABEL[movie.status]}</span>
+          <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full flex-shrink-0", STATUS_COLOR[movie.status])}>{statusLabel[movie.status]}</span>
         </div>
         {movie.tmdb?.overview && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{movie.tmdb.overview}</p>}
         <div className="flex items-center gap-3 mt-1.5">

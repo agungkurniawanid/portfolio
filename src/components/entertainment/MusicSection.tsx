@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { Music, Play, Headphones, ExternalLink } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/Utils";
 import { SpotifyPlaylist } from "@/types/entertainment";
 import { SPOTIFY_PLAYLISTS } from "@/data/entertainmentData";
 
 export default function MusicSection() {
+  const t = useTranslations("entertainment");
   const [activePlaylist, setActivePlaylist] = useState<SpotifyPlaylist>(SPOTIFY_PLAYLISTS[0]);
 
   return (
@@ -15,9 +17,9 @@ export default function MusicSection() {
       {/* Header stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {[
-          { icon: "🎵", label: "Total Playlist", value: SPOTIFY_PLAYLISTS.length },
-          { icon: "🎧", label: "Total Lagu (est.)", value: SPOTIFY_PLAYLISTS.reduce((s, p) => s + p.track_count, 0) },
-          { icon: "🎼", label: "Genre", value: [...new Set(SPOTIFY_PLAYLISTS.flatMap((p) => p.mood_labels))].length },
+          { icon: "🎵", label: t("stat_total_playlists"), value: SPOTIFY_PLAYLISTS.length },
+          { icon: "🎧", label: t("stat_total_tracks"),   value: SPOTIFY_PLAYLISTS.reduce((s, p) => s + p.track_count, 0) },
+          { icon: "🎼", label: t("stat_genres"),         value: [...new Set(SPOTIFY_PLAYLISTS.flatMap((p) => p.mood_labels))].length },
         ].map(({ icon, label, value }) => (
           <div key={label} className="rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-gray-800/40 p-4 flex items-center gap-3">
             <span className="text-xl">{icon}</span>
@@ -34,7 +36,7 @@ export default function MusicSection() {
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
             <Headphones size={16} className="text-accentColor" />
-            Playlist Saya
+            {t("my_playlists")}
           </h3>
           {SPOTIFY_PLAYLISTS.map((p) => (
             <button
@@ -61,7 +63,7 @@ export default function MusicSection() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1">{p.name}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{p.track_count} lagu</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t("tracks_count").replace("{n}", String(p.track_count))}</p>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {p.mood_labels.slice(0, 3).map((l) => (
                     <span key={l} className="text-[9px] px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">{l}</span>
@@ -87,7 +89,7 @@ export default function MusicSection() {
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 hover:underline"
             >
-              <ExternalLink size={13} /> Buka di Spotify
+              <ExternalLink size={13} /> {t("open_in_spotify")}
             </a>
           </div>
           <div className="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700/50 shadow-sm">

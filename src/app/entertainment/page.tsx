@@ -2,6 +2,7 @@
 
 import { useState, useMemo, Suspense, lazy, useRef, useEffect } from "react";
 import { Search, X, Gamepad2, Film, Tv, Music, BookOpen, Package, LayoutDashboard } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/Utils";
 import { EntertainmentTab } from "@/types/entertainment";
 
@@ -21,32 +22,22 @@ interface Tab {
   color: string;
 }
 
-const TABS: Tab[] = [
-  { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={16} />, color: "text-gray-500" },
-  { id: "games", label: "Games", icon: <Gamepad2 size={16} />, color: "text-blue-500" },
-  { id: "movies", label: "Movies", icon: <Film size={16} />, color: "text-rose-500" },
-  { id: "anime", label: "Anime & Series", icon: <Tv size={16} />, color: "text-purple-500" },
-  { id: "music", label: "Musik", icon: <Music size={16} />, color: "text-green-500" },
-  { id: "books", label: "Buku", icon: <BookOpen size={16} />, color: "text-amber-500" },
-  { id: "collections", label: "Koleksi", icon: <Package size={16} />, color: "text-pink-500" },
-];
-
-function SectionFallback() {
-  return (
-    <div className="flex items-center justify-center py-24">
-      <div className="flex flex-col items-center gap-3 text-gray-400">
-        <div className="w-8 h-8 border-2 border-accentColor border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm">Memuat data...</p>
-      </div>
-    </div>
-  );
-}
-
 export default function EntertainmentPage() {
+  const t = useTranslations("entertainment");
   const [activeTab, setActiveTab] = useState<EntertainmentTab>("dashboard");
   const [globalSearch, setGlobalSearch] = useState("");
   const tabsRef = useRef<HTMLDivElement>(null);
   const [tabSticky, setTabSticky] = useState(false);
+
+  const TABS: Tab[] = useMemo(() => [
+    { id: "dashboard", label: t("tab_dashboard"), icon: <LayoutDashboard size={16} />, color: "text-gray-500" },
+    { id: "games",     label: t("tab_games"),     icon: <Gamepad2 size={16} />,         color: "text-blue-500" },
+    { id: "movies",    label: t("tab_movies"),    icon: <Film size={16} />,             color: "text-rose-500" },
+    { id: "anime",     label: t("tab_anime"),     icon: <Tv size={16} />,              color: "text-purple-500" },
+    { id: "music",     label: t("tab_music"),     icon: <Music size={16} />,           color: "text-green-500" },
+    { id: "books",     label: t("tab_books"),     icon: <BookOpen size={16} />,        color: "text-amber-500" },
+    { id: "collections", label: t("tab_collections"), icon: <Package size={16} />,   color: "text-pink-500" },
+  ], [t]);
 
   // Sticky tab observer
   useEffect(() => {
@@ -86,12 +77,12 @@ export default function EntertainmentPage() {
                 <div>
                   <p className="text-xs font-semibold text-accentColor uppercase tracking-widest mb-0.5">Entertainment</p>
                   <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-                    Dunia Hiburanku
+                    {t("page_title")}
                   </h1>
                 </div>
               </div>
               <p className="text-gray-500 dark:text-gray-400 max-w-xl leading-relaxed">
-                Seluruh aktivitas hiburan dalam satu halaman — game Steam, film, anime, musik Spotify, buku, hingga koleksi fisik.
+                {t("page_desc")}
               </p>
             </div>
 
@@ -101,7 +92,7 @@ export default function EntertainmentPage() {
               <input
                 value={globalSearch}
                 onChange={(e) => setGlobalSearch(e.target.value)}
-                placeholder="Cari semua kategori..."
+                placeholder={t("search_all")}
                 className="w-full pl-10 pr-10 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accentColor/40 shadow-sm transition"
               />
               {globalSearch && (
@@ -153,7 +144,14 @@ export default function EntertainmentPage() {
           </div>
         )}
 
-        <Suspense fallback={<SectionFallback />}>
+        <Suspense fallback={
+          <div className="flex items-center justify-center py-24">
+            <div className="flex flex-col items-center gap-3 text-gray-400">
+              <div className="w-8 h-8 border-2 border-accentColor border-t-transparent rounded-full animate-spin" />
+              <p className="text-sm">{t("loading")}</p>
+            </div>
+          </div>
+        }>
           {activeTab === "dashboard" && <DashboardSection onTabClick={handleTabClick} />}
           {activeTab === "games" && <GamesSection globalSearch={globalSearch} />}
           {activeTab === "movies" && <MoviesSection globalSearch={globalSearch} />}

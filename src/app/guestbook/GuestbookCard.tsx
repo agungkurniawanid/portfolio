@@ -239,14 +239,24 @@ export default function GuestbookCard({ entry, isNew = false }: Props) {
 
       {/* Contact */}
       {entry.contact && (
-        <div className="flex items-center gap-1.5 text-xs" style={{ color: entry.card_color }}>
-          {entry.contact.startsWith("@") ? (
+        entry.contact.startsWith("@") ? (
+          <a
+            href={`https://instagram.com/${entry.contact.slice(1)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-xs hover:opacity-70 transition-opacity w-fit"
+            style={{ color: entry.card_color }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <Instagram size={11} className="shrink-0" />
-          ) : (
+            <span className="truncate font-medium underline underline-offset-2">{entry.contact}</span>
+          </a>
+        ) : (
+          <div className="flex items-center gap-1.5 text-xs" style={{ color: entry.card_color }}>
             <Phone size={11} className="shrink-0" />
-          )}
-          <span className="truncate font-medium">{entry.contact}</span>
-        </div>
+            <span className="truncate font-medium">{entry.contact}</span>
+          </div>
+        )
       )}
 
       {/* Footer */}

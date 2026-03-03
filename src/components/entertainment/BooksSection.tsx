@@ -3,20 +3,16 @@
 import { useEffect, useState, useRef } from "react";
 import { BookOpen, Search, X, Star, SlidersHorizontal, ChevronDown } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/Utils";
 import { fetchGoogleBook } from "@/lib/entertainmentApi";
 import { LocalBook, BookStatus } from "@/types/entertainment";
 import { BOOKS_DATA } from "@/data/entertainmentData";
 import { BookCardSkeleton } from "./EntertainmentSkeletons";
 
-const STATUS_LABEL: Record<BookStatus, string> = {
-  finished: "✅ Selesai Dibaca",
-  reading: "📖 Sedang Dibaca",
-  wishlist: "📋 Wishlist",
-};
 const STATUS_COLOR: Record<BookStatus, string> = {
   finished: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
-  reading: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+  reading:  "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
   wishlist: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
 };
 
@@ -37,6 +33,12 @@ function StarRating({ value, max = 5 }: { value: number; max?: number }) {
 }
 
 export default function BooksSection({ globalSearch }: { globalSearch?: string }) {
+  const t = useTranslations("entertainment");
+  const STATUS_LABEL: Record<BookStatus, string> = {
+    finished: t("book_status_finished"),
+    reading:  t("book_status_reading"),
+    wishlist: t("book_status_wishlist"),
+  };
   const [books, setBooks] = useState<EnrichedBook[]>(
     BOOKS_DATA.map((b) => ({ ...b, loading: true }))
   );
@@ -103,9 +105,9 @@ export default function BooksSection({ globalSearch }: { globalSearch?: string }
   const totalPages = books.filter((b) => b.status === "finished").reduce((s, b) => s + (b.pages ?? 0), 0);
 
   const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-    { value: "rating_high", label: "Rating Tertinggi" },
-    { value: "pages", label: "Terbanyak Halaman" },
-    { value: "az", label: "A–Z" },
+    { value: "rating_high", label: t("sort_rating_high") },
+    { value: "pages",       label: t("sort_most_pages") },
+    { value: "az",         label: t("sort_az") },
   ];
 
   return (
@@ -113,9 +115,9 @@ export default function BooksSection({ globalSearch }: { globalSearch?: string }
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { icon: "📚", label: "Selesai Dibaca", value: totalFinished, color: "text-green-500" },
-          { icon: "📄", label: "Total Halaman", value: totalPages.toLocaleString(), color: "text-blue-500" },
-          { icon: "⭐", label: "Rata-rata Rating", value: avgRating.toFixed(1), color: "text-yellow-500" },
+          { icon: "📚", label: t("stat_finished_books"), value: totalFinished,                color: "text-green-500" },
+          { icon: "📄", label: t("stat_total_pages"),    value: totalPages.toLocaleString(), color: "text-blue-500" },
+          { icon: "⭐",  label: t("avg_rating"),          value: avgRating.toFixed(1),       color: "text-yellow-500" },
         ].map(({ icon, label, value, color }) => (
           <div key={label} className="rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-gray-800/40 p-4 flex items-center gap-3">
             <span className={cn("text-xl", color)}>{icon}</span>
@@ -131,13 +133,13 @@ export default function BooksSection({ globalSearch }: { globalSearch?: string }
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari judul buku atau penulis..." className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accentColor/40 transition" />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("search_book")} className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accentColor/40 transition" />
           {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"><X size={14} /></button>}
         </div>
         <div className="flex gap-2 flex-wrap">
           {(["all", "finished", "reading", "wishlist"] as const).map((s) => (
             <button key={s} onClick={() => setFilterStatus(s)} className={cn("px-3 py-2 rounded-xl text-xs font-medium border transition-all", filterStatus === s ? "bg-accentColor text-white border-accentColor" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:border-accentColor/60")}>
-              {s === "all" ? "Semua" : STATUS_LABEL[s]}
+              {s === "all" ? t("all") : STATUS_LABEL[s]}
             </button>
           ))}
         </div>
@@ -159,12 +161,12 @@ export default function BooksSection({ globalSearch }: { globalSearch?: string }
       {filtered.length === 0 ? (
         <div className="text-center py-20 text-gray-500 dark:text-gray-400">
           <BookOpen size={48} className="mx-auto mb-3 opacity-30" />
-          <p>Tidak ada buku ditemukan.</p>
+          <p>{t("no_books")}</p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((b, i) =>
-            b.loading ? <BookCardSkeleton key={b.id} /> : <BookCard key={b.id} book={b} />
+            b.loading ? <BookCardSkeleton key={b.id} /> : <BookCard key={b.id} book={b} statusLabel={STATUS_LABEL} />
           )}
         </div>
       )}
@@ -172,7 +174,8 @@ export default function BooksSection({ globalSearch }: { globalSearch?: string }
   );
 }
 
-function BookCard({ book }: { book: EnrichedBook }) {
+function BookCard({ book, statusLabel }: { book: EnrichedBook; statusLabel: Record<BookStatus, string> }) {
+  const t = useTranslations("entertainment");
   const [imgErr, setImgErr] = useState(false);
 
   return (
@@ -192,12 +195,12 @@ function BookCard({ book }: { book: EnrichedBook }) {
         <p className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 leading-snug">{book.title}</p>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{book.author}{book.year ? ` · ${book.year}` : ""}</p>
         <div className="flex flex-wrap gap-1 mt-1.5">
-          <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full", STATUS_COLOR[book.status])}>{STATUS_LABEL[book.status]}</span>
+          <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full", STATUS_COLOR[book.status])}>{statusLabel[book.status]}</span>
           {book.genre.slice(0, 1).map((g) => (
             <span key={g} className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700/60 text-gray-500 dark:text-gray-400">{g}</span>
           ))}
         </div>
-        {book.pages ? <p className="text-[10px] text-gray-400 mt-1">{book.pages} halaman</p> : null}
+        {book.pages ? <p className="text-[10px] text-gray-400 mt-1">{t("pages_count").replace("{n}", String(book.pages))}</p> : null}
         {book.personal_rating > 0 && <StarRating value={book.personal_rating} />}
         {book.review && <p className="text-[10px] text-gray-400 mt-1 line-clamp-2 italic">&ldquo;{book.review}&rdquo;</p>}
       </div>

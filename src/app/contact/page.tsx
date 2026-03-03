@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Link from "next/link";
@@ -327,6 +328,13 @@ const socialGroups: SocialGroup[] = [
 
 function SocialCard({ platform, index }: { platform: SocialPlatform; index: number }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations("contact");
+  const SUBLABEL: Record<string, string> = {
+    "Akun Utama": t("sublabel_main"),
+    "Personal": t("sublabel_personal"),
+    "Profesional": t("sublabel_professional"),
+    "🐱 Kucing": t("sublabel_cats"),
+  };
 
   useEffect(() => {
     if (!cardRef.current) return;
@@ -377,7 +385,7 @@ function SocialCard({ platform, index }: { platform: SocialPlatform; index: numb
             </div>
             {platform.sublabel && (
               <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                {platform.sublabel}
+                {SUBLABEL[platform.sublabel] ?? platform.sublabel}
               </div>
             )}
           </div>
@@ -407,13 +415,14 @@ function SocialCard({ platform, index }: { platform: SocialPlatform; index: numb
 /* ─────────────────── Star Rating ─────────────────── */
 function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   const [hover, setHover] = useState(0);
+  const t = useTranslations("contact");
   return (
-    <div className="flex gap-1" role="group" aria-label="Rating bintang">
+    <div className="flex gap-1" role="group" aria-label={t("star_rating_label")}>
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           type="button"
           key={star}
-          aria-label={`Beri ${star} bintang`}
+          aria-label={t("star_label").replace("{n}", String(star))}
           onClick={() => onChange(star)}
           onMouseEnter={() => setHover(star)}
           onMouseLeave={() => setHover(0)}
@@ -449,6 +458,7 @@ function ContactForm() {
 
   const set = (field: string, value: string | number) =>
     setForm((prev) => ({ ...prev, [field]: value }));
+  const t = useTranslations("contact");
 
   useEffect(() => {
     if (!formRef.current) return;
@@ -471,7 +481,7 @@ function ContactForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.rating) {
-      setToast({ message: "Pilih rating bintang terlebih dahulu.", type: "error" });
+      setToast({ message: t("toast_no_rating"), type: "error" });
       return;
     }
     setStatus("sending");
@@ -490,11 +500,11 @@ function ContactForm() {
     try {
       await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_PUBLIC_KEY);
       setStatus("sent");
-      setToast({ message: "Pesan berhasil dikirim! Terima kasih 🙏", type: "success" });
+      setToast({ message: t("toast_success"), type: "success" });
       setForm({ name: "", email: "", phone: "", purpose: "", rating: 0, source: "", message: "" });
     } catch {
       setStatus("idle");
-      setToast({ message: "Gagal mengirim pesan, coba lagi.", type: "error" });
+      setToast({ message: t("toast_error"), type: "error" });
     }
   };
 
@@ -511,9 +521,9 @@ function ContactForm() {
             <div className="w-16 h-16 rounded-full bg-accentColor/20 flex items-center justify-center">
               <FaPaperPlane className="text-accentColor" size={28} />
             </div>
-            <div className="text-2xl font-bold dark:text-white">Pesan Terkirim! 🎉</div>
+            <div className="text-2xl font-bold dark:text-white">{t("sent_title")}</div>
             <div className="text-gray-500 dark:text-gray-400 text-center">
-              Terima kasih telah menghubungi saya. Saya akan membalas pesan Anda segera!
+              {t("sent_desc")}
             </div>
           </div>
         ) : (
@@ -522,7 +532,7 @@ function ContactForm() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Nama Lengkap <span className="text-red-400">*</span>
+                  {t("label_fullname")} <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -551,8 +561,8 @@ function ContactForm() {
             {/* Phone */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                No. WhatsApp / HP{" "}
-                <span className="text-gray-400 dark:text-gray-500 font-normal normal-case">(opsional)</span>
+                {t("label_phone")}{" "}
+                <span className="text-gray-400 dark:text-gray-500 font-normal normal-case">({t("optional")})</span>
               </label>
               <input
                 type="tel"
@@ -566,7 +576,7 @@ function ContactForm() {
             {/* Purpose */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Keperluan / Tujuan <span className="text-red-400">*</span>
+                {t("label_purpose")} <span className="text-red-400">*</span>
               </label>
               <select
                 required
@@ -574,24 +584,24 @@ function ContactForm() {
                 value={form.purpose}
                 onChange={(e) => set("purpose", e.target.value)}
               >
-                <option value="" disabled>Pilih keperluan Anda...</option>
-                <option value="Sekadar Mampir &amp; Memberi Feedback">Sekadar Mampir &amp; Memberi Feedback</option>
-                <option value="Project Collaboration">Project Collaboration</option>
-                <option value="Freelance / Hire Me">Freelance / Hire Me</option>
-                <option value="General Question">General Question</option>
-                <option value="Other">Other</option>
+                <option value="" disabled>{t("select_purpose")}</option>
+                <option value="Just Visiting & Giving Feedback">{t("purpose_feedback")}</option>
+                <option value="Project Collaboration">{t("purpose_collab")}</option>
+                <option value="Freelance / Hire Me">{t("purpose_freelance")}</option>
+                <option value="General Question">{t("purpose_question")}</option>
+                <option value="Other">{t("purpose_other")}</option>
               </select>
             </div>
 
             {/* Star rating */}
             <div className="flex flex-col gap-2">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Rating Pengalaman Website <span className="text-red-400">*</span>
+                {t("label_rating")} <span className="text-red-400">*</span>
               </label>
               <StarRating value={form.rating} onChange={(v) => set("rating", v)} />
               {form.rating > 0 && (
                 <p className="text-xs text-accentColor font-medium">
-                  {["", "Perlu banyak perbaikan 😅", "Cukup, tapi bisa lebih baik 🤔", "Lumayan bagus! 😊", "Bagus sekali! 😄", "Luar biasa! ⭐🔥"][form.rating]}
+                  {[t("rating_1"), t("rating_2"), t("rating_3"), t("rating_4"), t("rating_5")][form.rating - 1]}
                 </p>
               )}
             </div>
@@ -599,32 +609,32 @@ function ContactForm() {
             {/* Source */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Dari mana tahu website ini?{" "}
-                <span className="text-gray-400 dark:text-gray-500 font-normal normal-case">(opsional)</span>
+                {t("label_source")}{" "}
+                <span className="text-gray-400 dark:text-gray-500 font-normal normal-case">({t("optional")})</span>
               </label>
               <select
                 className={`${inputCls} ${selectExtraCls} cursor-pointer`}
                 value={form.source}
                 onChange={(e) => set("source", e.target.value)}
               >
-                <option value="">Pilih sumber...</option>
+                <option value="">{t("select_source")}</option>
                 <option value="Google Search">Google Search</option>
                 <option value="Instagram">Instagram</option>
                 <option value="LinkedIn">LinkedIn</option>
-                <option value="Referral / Teman">Referral / Teman</option>
-                <option value="Other">Other</option>
+                <option value="Referral / Friend">{t("source_referral")}</option>
+                <option value="Other">{t("source_other")}</option>
               </select>
             </div>
 
             {/* Message */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Pesan / Kesan &amp; Saran <span className="text-red-400">*</span>
+                {t("label_message")} <span className="text-red-400">*</span>
               </label>
               <textarea
                 required
                 rows={4}
-                placeholder="Tuliskan pesan, kesan, atau saran Anda di sini..."
+                placeholder={t("placeholder_message")}
                 className={`${inputCls} resize-none`}
                 value={form.message}
                 onChange={(e) => set("message", e.target.value)}
@@ -639,12 +649,12 @@ function ContactForm() {
               {status === "sending" ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  <span>Mengirim...</span>
+                  <span>{t("btn_sending")}</span>
                 </>
               ) : (
                 <>
                   <FaPaperPlane size={14} />
-                  <span>Kirim Pesan</span>
+                  <span>{t("btn_send")}</span>
                 </>
               )}
             </button>
@@ -700,6 +710,15 @@ function SectionHeader({ emoji, title, subtitle }: { emoji: string; title: strin
 
 export default function ContactPage() {
   const heroRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations("contact");
+  const GROUP_TITLE: Record<string, string> = {
+    video: t("group_video"),
+    instagram: t("group_instagram"),
+    professional: t("group_professional"),
+    messaging: t("group_messaging"),
+    gaming: t("group_gaming"),
+    community: t("group_community"),
+  };
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -759,7 +778,7 @@ export default function ContactPage() {
             Media
           </h1>
           <p className="hero-subtitle text-gray-500 dark:text-gray-400 text-lg max-w-xl leading-relaxed">
-            Saya selalu senang untuk terhubung. Kirimkan pesan atau temukan saya di berbagai platform digital.
+            {t("hero_subtitle")}
           </p>
 
           {/* Quick stats */}
@@ -785,13 +804,13 @@ export default function ContactPage() {
         <section>
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-accentColor/30 bg-accentColor/10 text-accentColor text-xs font-semibold mb-3">
-              <SiGmail size={12} /> Kirim Pesan
+              <SiGmail size={12} /> {t("form_badge")}
             </div>
             <h2 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-3">
-              Hubungi Saya
+              {t("form_title")}
             </h2>
             <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto text-sm">
-              Ada proyek menarik? Mau kolaborasi? Atau sekadar ingin menyapa — saya siap membalas!
+              {t("form_desc")}
             </p>
           </div>
           <ContactForm />
@@ -801,7 +820,7 @@ export default function ContactPage() {
         <div className="flex items-center gap-4">
           <div className="flex-1 h-px bg-gray-200 dark:bg-white/10" />
           <span className="text-xs text-gray-400 dark:text-gray-500 font-medium px-3 py-1 rounded-full border border-gray-200 dark:border-white/10">
-            Atau temukan saya di
+            {t("or_find_me")}
           </span>
           <div className="flex-1 h-px bg-gray-200 dark:bg-white/10" />
         </div>
@@ -816,7 +835,7 @@ export default function ContactPage() {
               Find Me Online
             </h2>
             <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto text-sm">
-              Semua akun dan platform digital saya — follow, connect, atau sekedar lihat-lihat.
+              {t("social_desc")}
             </p>
           </div>
 
@@ -825,7 +844,7 @@ export default function ContactPage() {
               <div key={group.id}>
                 <SectionHeader
                   emoji={group.emoji}
-                  title={group.title}
+                  title={GROUP_TITLE[group.id] ?? group.title}
                 />
                 <div
                   className={`grid gap-4 ${
@@ -866,7 +885,7 @@ export default function ContactPage() {
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accentColor text-white text-sm font-semibold hover:opacity-90 hover:scale-105 transition-all duration-200 shadow-lg shadow-accentColor/20"
             >
               <FaArrowLeft size={12} />
-              Kembali ke Beranda
+              {t("cta_back")}
             </Link>
           </div>
         </div>

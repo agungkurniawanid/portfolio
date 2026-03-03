@@ -15,14 +15,18 @@
 
 import { NextResponse } from "next/server";
 
-const GITHUB_USERNAME  = "agungkurniawanid";
-const GITHUB_REST_URL  = `https://api.github.com/users/${GITHUB_USERNAME}`;
+const GITHUB_USERNAME    = "agungkurniawanid";
+const GITHUB_REST_URL    = `https://api.github.com/users/${GITHUB_USERNAME}`;
 const GITHUB_GRAPHQL_URL = "https://api.github.com/graphql";
+
+// NOTE: fine-grained PATs do NOT expose `total_private_repos` via GET /user.
+// Private count is obtained via GraphQL viewer.repositories(privacy:PRIVATE)
+// which only requires Repository → Metadata: Read permission.
 
 // Re-validate at most once every 6 hours — max 4 GitHub calls per day
 export const revalidate = 21600;
 
-const FALLBACK = { contributions: 0, public_repos: 0 };
+const FALLBACK = { contributions: 0, public_repos: 0, private_repos: 0 };
 
 function buildHeaders(): HeadersInit {
   const headers: Record<string, string> = {
@@ -45,6 +49,9 @@ export async function GET() {
         headers,
         next: { revalidate: 21600 },
       }),
+      // Single GraphQL call — contributions + private repo count together.
+      // viewer.repositories(privacy:PRIVATE) works with fine-grained PATs
+      // as long as Repository → Metadata: Read is granted.
       fetch(GITHUB_GRAPHQL_URL, {
         method: "POST",
         headers: { ...headers, "Content-Type": "application/json" },
@@ -56,6 +63,11 @@ export async function GET() {
                   contributionCalendar {
                     totalContributions
                   }
+                }
+              }
+              viewer {
+                repositories(privacy: PRIVATE, ownerAffiliations: OWNER) {
+                  totalCount
                 }
               }
             }
@@ -74,8 +86,9 @@ export async function GET() {
       console.error(`[github-stats] REST API responded ${restRes.status}`);
     }
 
-    // ── Total contributions ──────────────────────────────────────────────────
+    // ── Contributions + private repo count (merged GraphQL response) ─────────
     let contributions = 0;
+    let private_repos  = 0;
     if (graphqlRes.ok) {
       const graphqlData = (await graphqlRes.json()) as {
         data?: {
@@ -84,17 +97,21 @@ export async function GET() {
               contributionCalendar?: { totalContributions?: number };
             };
           };
+          viewer?: {
+            repositories?: { totalCount?: number };
+          };
         };
       };
       contributions =
         graphqlData.data?.user?.contributionsCollection?.contributionCalendar
           ?.totalContributions ?? 0;
+      private_repos = graphqlData.data?.viewer?.repositories?.totalCount ?? 0;
     } else {
       console.error(`[github-stats] GraphQL API responded ${graphqlRes.status}`);
     }
 
     return NextResponse.json(
-      { contributions, public_repos },
+      { contributions, public_repos, private_repos },
       {
         status: 200,
         headers: {

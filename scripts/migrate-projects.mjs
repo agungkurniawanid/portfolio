@@ -1,7 +1,7 @@
 // Run: npm run migrate:projects
 //
 // Script ini akan:
-//   1. Membuat tabel  projects, project_github_urls, project_images, popular_projects
+//   1. Membuat tabel  projects, project_github_urls, popular_projects
 //   2. Membuat index performa + trigger auto-update updated_at
 //   3. Mengaktifkan Row Level Security + policies (read-only public)
 //   4. Membuat Supabase Storage bucket: project-thumbnails (public)
@@ -67,7 +67,6 @@ async function runMigration() {
     console.log("   ✓ Extension: uuid-ossp")
     console.log("   ✓ Tabel: projects")
     console.log("   ✓ Tabel: project_github_urls  (FK → projects)")
-    console.log("   ✓ Tabel: project_images       (FK → projects)")
     console.log("   ✓ Tabel: popular_projects     (FK → projects)")
     console.log("   ✓ Index performa (published, category, year, popular order)")
     console.log("   ✓ Trigger: auto-update updated_at")

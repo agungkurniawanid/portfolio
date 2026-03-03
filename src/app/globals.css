@@ -253,7 +253,83 @@
   display: none;
 }
 
-/* Shimmer skeleton animation */
+/* ── GitHub README rendered markdown ───────────────────────────────────────── */
+.github-readme img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.github-readme pre {
+  background-color: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.dark .github-readme pre {
+  background-color: #161b22;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.github-readme code {
+  background-color: #f1f3f5;
+  padding: 0.15em 0.4em;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.dark .github-readme code {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #e6edf3;
+}
+
+.github-readme pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.82em;
+}
+
+.github-readme table {
+  border-collapse: collapse;
+  width: 100%;
+  overflow-x: auto;
+  display: block;
+}
+
+.github-readme th,
+.github-readme td {
+  border: 1px solid #e1e4e8;
+  padding: 0.4rem 0.8rem;
+  text-align: left;
+  font-size: 0.8rem;
+}
+
+.dark .github-readme th,
+.dark .github-readme td {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.github-readme th {
+  background-color: #f6f8fa;
+}
+
+.dark .github-readme th {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.github-readme blockquote {
+  border-left: 3px solid #0acf83;
+  padding-left: 1rem;
+  color: #6b7280;
+  margin: 0.5rem 0;
+}
+
+.dark .github-readme blockquote {
+  color: rgba(255, 255, 255, 0.5);
+}
+
 @keyframes shimmer {
   0%   { background-position: -200% center; }
   100% { background-position:  200% center; }

@@ -336,6 +336,49 @@ export async function fetchSkills(): Promise<SkillRow[]> {
 // Number of slots in the Home page Popular Projects grid
 const POPULAR_PROJECTS_LIMIT = 9;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Unpublished (private / company) projects
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Shape of a row returned by fetchUnpublishedProjects.
+ * Only the fields needed by the Projects page are selected.
+ */
+export interface UnpublishedProjectRow {
+  id: string;
+  title: string;
+  description: string;
+  tech_stack: string[];
+  category: string;
+  year: number | null;
+  platform_apps: string[];
+  live_url: string | null;
+}
+
+/**
+ * Fetches all projects where `is_published = false` (draft / private /
+ * company-confidential) ordered by display_order ascending.
+ *
+ * Used by the Projects page to populate the "Company / Private" section.
+ * Returns an empty array on error so the UI can fall back gracefully.
+ */
+export async function fetchUnpublishedProjects(): Promise<UnpublishedProjectRow[]> {
+  const { data, error } = await supabase
+    .from("projects")
+    .select("id,title,description,tech_stack,category,year,platform_apps,live_url")
+    .eq("is_published", false)
+    .order("display_order", { ascending: true });
+
+  if (error) {
+    console.error("[projectsApi] fetchUnpublishedProjects error:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as UnpublishedProjectRow[];
+}
+
+
+
 /**
  * Fetches the 9 popular projects for the Home page in display_order.
  *

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Link from "next/link";
@@ -11,26 +11,14 @@ import {
   FaGlobe, FaBrain, FaBuilding,
 } from "react-icons/fa";
 import { SiGithub } from "react-icons/si";
+import { fetchUnpublishedProjects, type UnpublishedProjectRow } from "@/lib/projectsApi";
+import type { GitHubRepo } from "@/types/github";
+import GitHubRepoDetailModal from "@/components/GitHubRepoDetailModal";
+import PrivateProjectDetailModal from "@/components/PrivateProjectDetailModal";
 
 gsap.registerPlugin(ScrollTrigger);
 
 /* ─────────────────────────── types ─────────────────────────── */
-
-interface GitHubRepo {
-  id: number;
-  name: string;
-  full_name: string;
-  html_url: string;
-  description: string | null;
-  homepage: string | null;
-  topics: string[];
-  language: string | null;
-  stargazers_count: number;
-  forks_count: number;
-  watchers_count: number;
-  updated_at: string;
-  visibility: string;
-}
 
 type Category =
   | "all"
@@ -55,52 +43,22 @@ interface ManualProject {
 
 /* ─────────────────────────── static data ───────────────────── */
 
-const COMPANY_PROJECTS: ManualProject[] = [
-  {
-    id: "c1",
-    title: "Sistem Informasi Manajemen Kepegawaian",
-    description:
-      "Internal HR management system for a government institution — handles employee attendance, payroll, performance evaluation, and document management.",
-    tech: ["Laravel", "MySQL", "Bootstrap", "REST API"],
+/** Maps a Supabase unpublished project row to the ManualProject shape used by ManualProjectCard. */
+function toManualProject(row: UnpublishedProjectRow): ManualProject {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    tech: row.tech_stack ?? [],
     category: "company",
-    type: "Web App",
-    year: "2024",
+    type: row.platform_apps?.[0] ?? "Web App",
+    year: row.year?.toString() ?? "",
     confidential: true,
-  },
-  {
-    id: "c2",
-    title: "Dashboard Monitoring IoT Pabrik",
-    description:
-      "Real-time factory floor dashboard integrating sensor data streams, showing machine status, temperature, humidity, and production metrics.",
-    tech: ["Next.js", "Node.js", "MQTT", "PostgreSQL", "Chart.js"],
-    category: "company",
-    type: "Web App",
-    year: "2024",
-    confidential: true,
-  },
-  {
-    id: "c3",
-    title: "Aplikasi POS untuk Retail",
-    description:
-      "Point-of-sale application for a retail chain with inventory management, cashier workflow, daily report generation, and multi-branch support.",
-    tech: ["Flutter", "Firebase", "Dart"],
-    category: "company",
-    type: "Mobile App",
-    year: "2023",
-    confidential: true,
-  },
-  {
-    id: "c4",
-    title: "Platform E-Learning Internal",
-    description:
-      "Internal corporate e-learning platform featuring course management, video streaming, quiz engine, employee progress tracking, and certificate generation.",
-    tech: ["Next.js", "TypeScript", "PostgreSQL", "AWS S3"],
-    category: "company",
-    type: "Web App",
-    year: "2024",
-    confidential: true,
-  },
-];
+    liveUrl: row.live_url ?? undefined,
+  };
+}
+
+
 
 const OTHER_FREELANCE: ManualProject[] = [
   {
@@ -251,6 +209,7 @@ type CategoryMeta = Record<Exclude<Category, "all">, { label: string; icon: Reac
 
 function RepoCard({ repo, categoryMeta }: { repo: GitHubRepo; categoryMeta: CategoryMeta }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -264,7 +223,7 @@ function RepoCard({ repo, categoryMeta }: { repo: GitHubRepo; categoryMeta: Cate
         ease: "power2.out",
         scrollTrigger: {
           trigger: ref.current,
-          start: "top 92%",
+          start: "top bottom",
           once: true,
         },
       }
@@ -280,6 +239,7 @@ function RepoCard({ repo, categoryMeta }: { repo: GitHubRepo; categoryMeta: Cate
   });
 
   return (
+    <>
     <div
       ref={ref}
       className="opacity-0 group flex flex-col gap-3 p-5 rounded-xl
@@ -296,19 +256,30 @@ function RepoCard({ repo, categoryMeta }: { repo: GitHubRepo; categoryMeta: Cate
             size={14}
             className="text-gray-400 dark:text-white/40 shrink-0"
           />
-          <a
-            href={repo.html_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-semibold text-gray-900 dark:text-white
-              hover:text-[#0acf83] dark:hover:text-[#0acf83]
-              transition-colors truncate"
-          >
-            {repo.name}
-          </a>
+          {repo.visibility === "private" ? (
+            <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+              {repo.name}
+            </span>
+          ) : (
+            <a
+              href={repo.html_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-semibold text-gray-900 dark:text-white
+                hover:text-[#0acf83] dark:hover:text-[#0acf83]
+                transition-colors truncate"
+            >
+              {repo.name}
+            </a>
+          )}
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
+          {repo.visibility === "private" && (
+            <span className="hidden sm:flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-900/20 text-red-400">
+              <FaLock size={9} /> Private
+            </span>
+          )}
           {meta && (
             <span
               className={`hidden sm:flex items-center gap-1 text-[10px] font-medium px-2 py-0.5
@@ -318,7 +289,7 @@ function RepoCard({ repo, categoryMeta }: { repo: GitHubRepo; categoryMeta: Cate
               {meta.label}
             </span>
           )}
-          {repo.homepage && (
+          {repo.homepage && repo.visibility !== "private" && (
             <a
               href={repo.homepage}
               target="_blank"
@@ -333,19 +304,21 @@ function RepoCard({ repo, categoryMeta }: { repo: GitHubRepo; categoryMeta: Cate
               />
             </a>
           )}
-          <a
-            href={repo.html_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/10
-              hover:bg-[#0acf83]/20 transition-colors"
-            title="GitHub"
-          >
-            <FaGithub
-              size={10}
-              className="text-gray-500 dark:text-white/60"
-            />
-          </a>
+          {repo.visibility !== "private" && (
+            <a
+              href={repo.html_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/10
+                hover:bg-[#0acf83]/20 transition-colors"
+              title="GitHub"
+            >
+              <FaGithub
+                size={10}
+                className="text-gray-500 dark:text-white/60"
+              />
+            </a>
+          )}
         </div>
       </div>
 
@@ -398,17 +371,30 @@ function RepoCard({ repo, categoryMeta }: { repo: GitHubRepo; categoryMeta: Cate
             <span>{repo.forks_count}</span>
           </div>
         </div>
-        <span className="text-[10px] text-gray-300 dark:text-white/30">
-          {updated}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-gray-300 dark:text-white/30">
+            {updated}
+          </span>
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-3 py-1 rounded-lg bg-[#0acf83] text-white text-[11px] font-medium hover:opacity-90 transition shadow-sm"
+          >
+            {t("detail_btn")}
+          </button>
+        </div>
       </div>
     </div>
+    {showModal && (
+      <GitHubRepoDetailModal repo={repo} onClose={() => setShowModal(false)} />
+    )}
+    </>
   );
 }
 
 function ManualProjectCard({ project }: { project: ManualProject }) {
   const ref = useRef<HTMLDivElement>(null);
   const t = useTranslations("projectsPage");
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -422,7 +408,7 @@ function ManualProjectCard({ project }: { project: ManualProject }) {
         ease: "power2.out",
         scrollTrigger: {
           trigger: ref.current,
-          start: "top 92%",
+          start: "top bottom",
           once: true,
         },
       }
@@ -430,6 +416,7 @@ function ManualProjectCard({ project }: { project: ManualProject }) {
   }, []);
 
   return (
+    <>
     <div
       ref={ref}
       className="opacity-0 group flex flex-col gap-3 p-5 rounded-xl
@@ -513,11 +500,23 @@ function ManualProjectCard({ project }: { project: ManualProject }) {
         <span className="text-[11px] text-gray-400 dark:text-white/40">
           {project.type}
         </span>
-        <span className="text-[10px] text-gray-300 dark:text-white/30">
-          {project.year}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-gray-300 dark:text-white/30">
+            {project.year}
+          </span>
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-3 py-1 rounded-lg bg-[#0acf83] text-white text-[11px] font-medium hover:opacity-90 transition shadow-sm"
+          >
+            {t("detail_btn")}
+          </button>
+        </div>
       </div>
     </div>
+    {showModal && (
+      <PrivateProjectDetailModal project={project} onClose={() => setShowModal(false)} />
+    )}
+    </>
   );
 }
 
@@ -555,8 +554,11 @@ export default function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Category>("all");
   const [search, setSearch] = useState("");
+  const [companyProjects, setCompanyProjects] = useState<ManualProject[]>([]);
+  const [privateRepos, setPrivateRepos] = useState<GitHubRepo[]>([]);
+  const [companyLoading, setCompanyLoading] = useState(true);
 
-  /* fetch GitHub */
+  /* fetch GitHub public repos */
   useEffect(() => {
     const IGNORE_NAMES = ["agungkurniawanid", "portfolio"];
 
@@ -564,11 +566,30 @@ export default function ProjectsPage() {
       "https://api.github.com/users/agungkurniawanid/repos?per_page=100&sort=updated&type=public"
     )
       .then((r) => r.json())
-      .then((data: GitHubRepo[]) => {
-        setRepos(data.filter((r) => !IGNORE_NAMES.includes(r.name)));
+      .then((data: unknown) => {
+        if (!Array.isArray(data)) { setLoading(false); return; }
+        setRepos((data as GitHubRepo[]).filter((r) => !IGNORE_NAMES.includes(r.name)));
         setLoading(false);
       })
       .catch(() => setLoading(false));
+  }, []);
+
+  /* fetch Supabase unpublished (private/company) projects + GitHub private repos list */
+  useEffect(() => {
+    Promise.allSettled([
+      fetchUnpublishedProjects(),
+      fetch("/api/github-private-repos").then((r) => r.json() as Promise<GitHubRepo[]>),
+    ]).then(([supabaseRes, githubRes]) => {
+      if (supabaseRes.status === "fulfilled") {
+        setCompanyProjects(supabaseRes.value.map(toManualProject));
+      } else {
+        console.error("[ProjectsPage] fetchUnpublishedProjects error:", supabaseRes.reason);
+      }
+
+      if (githubRes.status === "fulfilled" && Array.isArray(githubRes.value)) {
+        setPrivateRepos(githubRes.value);
+      }
+    }).finally(() => setCompanyLoading(false));
   }, []);
 
   /* hero entrance */
@@ -594,57 +615,72 @@ export default function ProjectsPage() {
   }, []);
 
   /* derived state */
-  const classifiedRepos = repos.filter(
-    (r) => classifyRepo(r) !== ("all" as Category)
+  const classifiedRepos = useMemo(
+    () => repos.filter((r) => classifyRepo(r) !== ("all" as Category)),
+    [repos]
   );
 
-  const filteredRepos = classifiedRepos.filter((r) => {
-    const matchCat =
-      activeTab === "all" || classifyRepo(r) === activeTab;
-    const q = search.toLowerCase();
-    const matchSearch =
-      !q ||
-      r.name.toLowerCase().includes(q) ||
-      (r.description ?? "").toLowerCase().includes(q) ||
-      r.topics.some((t) => t.includes(q)) ||
-      (r.language ?? "").toLowerCase().includes(q);
-    return matchCat && matchSearch;
-  });
+  const filteredRepos = useMemo(
+    () => classifiedRepos.filter((r) => {
+      const matchCat = activeTab === "all" || classifyRepo(r) === activeTab;
+      const q = search.toLowerCase();
+      const matchSearch =
+        !q ||
+        r.name.toLowerCase().includes(q) ||
+        (r.description ?? "").toLowerCase().includes(q) ||
+        r.topics.some((t) => t.includes(q)) ||
+        (r.language ?? "").toLowerCase().includes(q);
+      return matchCat && matchSearch;
+    }),
+    [classifiedRepos, activeTab, search]
+  );
 
-  const filteredCompany = (
-    activeTab === "all" || activeTab === "company"
-      ? COMPANY_PROJECTS
-      : []
-  ).filter((p) => {
-    const q = search.toLowerCase();
-    return (
-      !q ||
-      p.title.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q) ||
-      p.tech.some((t) => t.toLowerCase().includes(q))
-    );
-  });
+  const filteredCompany = useMemo(
+    () => (activeTab === "all" || activeTab === "company" ? companyProjects : []).filter((p) => {
+      const q = search.toLowerCase();
+      return (
+        !q ||
+        p.title.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.tech.some((t) => t.toLowerCase().includes(q))
+      );
+    }),
+    [companyProjects, activeTab, search]
+  );
 
-  const filteredFreelance = (
-    activeTab === "all" || activeTab === "freelance"
-      ? OTHER_FREELANCE
-      : []
-  ).filter((p) => {
-    const q = search.toLowerCase();
-    return (
-      !q ||
-      p.title.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q) ||
-      p.tech.some((t) => t.toLowerCase().includes(q))
-    );
-  });
+  const filteredFreelance = useMemo(
+    () => (activeTab === "all" || activeTab === "freelance" ? OTHER_FREELANCE : []).filter((p) => {
+      const q = search.toLowerCase();
+      return (
+        !q ||
+        p.title.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.tech.some((t) => t.toLowerCase().includes(q))
+      );
+    }),
+    [activeTab, search]
+  );
+
+  const filteredPrivateRepos = useMemo(
+    () => (activeTab === "all" || activeTab === "company" ? privateRepos : []).filter((r) => {
+      const q = search.toLowerCase();
+      return (
+        !q ||
+        r.name.toLowerCase().includes(q) ||
+        (r.description ?? "").toLowerCase().includes(q) ||
+        r.topics.some((t) => t.includes(q)) ||
+        (r.language ?? "").toLowerCase().includes(q)
+      );
+    }),
+    [privateRepos, activeTab, search]
+  );
 
   const totalVisible =
-    filteredRepos.length + filteredCompany.length + filteredFreelance.length;
+    filteredRepos.length + filteredCompany.length + filteredFreelance.length + filteredPrivateRepos.length;
 
   /* count per tab */
-  const tabCounts: Partial<Record<Category, number>> = {
-    all: classifiedRepos.length + COMPANY_PROJECTS.length + OTHER_FREELANCE.length,
+  const tabCounts = useMemo<Partial<Record<Category, number>>>(() => ({
+    all: classifiedRepos.length + companyProjects.length + privateRepos.length + OTHER_FREELANCE.length,
     academic: classifiedRepos.filter((r) => classifyRepo(r) === "academic").length,
     freelance:
       classifiedRepos.filter((r) => classifyRepo(r) === "freelance").length +
@@ -652,8 +688,14 @@ export default function ProjectsPage() {
     web: classifiedRepos.filter((r) => classifyRepo(r) === "web").length,
     mobile: classifiedRepos.filter((r) => classifyRepo(r) === "mobile").length,
     aiml: classifiedRepos.filter((r) => classifyRepo(r) === "aiml").length,
-    company: COMPANY_PROJECTS.length,
-  };
+    company: companyProjects.length + privateRepos.length,
+  }), [classifiedRepos, companyProjects, privateRepos]);
+
+  /* refresh ScrollTrigger whenever visible items change (layout shifts after filter/search) */
+  useEffect(() => {
+    const id = setTimeout(() => ScrollTrigger.refresh(), 80);
+    return () => clearTimeout(id);
+  }, [filteredRepos, filteredCompany, filteredFreelance, filteredPrivateRepos]);
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-[#0d1417] pt-[4.5rem]">
@@ -689,12 +731,12 @@ export default function ProjectsPage() {
           {/* stats row */}
           <div className="hero-sub flex flex-wrap gap-8">
             {[
-              { v: classifiedRepos.length, l: t("stat_repos") },
-              { v: COMPANY_PROJECTS.length, l: t("stat_company") },
-              { v: OTHER_FREELANCE.length + classifiedRepos.filter(r => r.topics.includes("paid-project")).length, l: t("stat_freelance") },
-              { v: classifiedRepos.filter(r => classifyRepo(r) === "aiml").length, l: t("stat_aiml") },
+              { id: "repos",    v: classifiedRepos.length, l: t("stat_repos") },
+              { id: "company",  v: companyProjects.length + privateRepos.length, l: t("stat_company") },
+              { id: "freelance", v: OTHER_FREELANCE.length + classifiedRepos.filter(r => r.topics.includes("paid-project")).length, l: t("stat_freelance") },
+              { id: "aiml",     v: classifiedRepos.filter(r => classifyRepo(r) === "aiml").length, l: t("stat_aiml") },
             ].map((s) => (
-              <div key={s.l} className="flex flex-col">
+              <div key={s.id} className="flex flex-col">
                 <span className="text-3xl font-bold text-gray-900 dark:text-white">
                   {s.v}
                   <span className="text-[#0acf83]">+</span>
@@ -766,7 +808,7 @@ export default function ProjectsPage() {
       <div className="max-w-[1100px] mx-auto px-[5%] py-10 space-y-14">
 
         {/* Section: GitHub Repos */}
-        {(activeTab !== "company") && (
+        {(activeTab !== "company") && (loading || filteredRepos.length > 0) && (
           <div>
             <SectionHeader
               icon={<SiGithub size={18} />}
@@ -781,8 +823,6 @@ export default function ProjectsPage() {
                   <SkeletonCard key={i} />
                 ))}
               </div>
-            ) : filteredRepos.length === 0 ? (
-              <EmptyState />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredRepos.map((repo) => (
@@ -793,13 +833,24 @@ export default function ProjectsPage() {
           </div>
         )}
 
-        {/* Section: Company Projects */}
-        {filteredCompany.length > 0 && (
+        {/* Section: Private Projects (Supabase is_published=false + GitHub private repos) */}
+        {companyLoading && (activeTab === "all" || activeTab === "company") && (
+          <div>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-4 h-4 rounded bg-gray-200 dark:bg-white/10 animate-pulse" />
+              <div className="h-5 w-48 rounded bg-gray-200 dark:bg-white/10 animate-pulse" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[...Array(3)].map((_, i) => <SkeletonCard key={i} />)}
+            </div>
+          </div>
+        )}
+        {!companyLoading && (filteredCompany.length > 0 || filteredPrivateRepos.length > 0) && (
           <div>
             <SectionHeader
-              icon={<FaBuilding size={16} />}
+              icon={<FaLock size={16} />}
               title={t("section_company_title")}
-              count={filteredCompany.length}
+              count={filteredCompany.length + filteredPrivateRepos.length}
               description={t("section_company_desc")}
               colorClass="text-green-500 dark:text-green-400"
               badge={{ label: t("section_company_badge"), color: "bg-red-50 dark:bg-red-900/20 text-red-400" }}
@@ -808,10 +859,14 @@ export default function ProjectsPage() {
               {filteredCompany.map((p) => (
                 <ManualProjectCard key={p.id} project={p} />
               ))}
+              {filteredPrivateRepos.map((repo) => (
+                <RepoCard key={repo.id} repo={repo} categoryMeta={categoryMeta} />
+              ))}
             </div>
           </div>
         )}
 
+        {/* empty overall — exclude while company is still loading */}
         {/* Section: Other Freelance */}
         {filteredFreelance.length > 0 && (
           <div>
@@ -832,7 +887,7 @@ export default function ProjectsPage() {
         )}
 
         {/* empty overall */}
-        {!loading && totalVisible === 0 && <EmptyState />}
+        {!loading && !companyLoading && totalVisible === 0 && <EmptyState />}
       </div>
 
       {/* ── CTA footer ── */}

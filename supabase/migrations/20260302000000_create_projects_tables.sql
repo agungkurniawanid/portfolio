@@ -7,7 +7,6 @@
 -- TABLE RELATIONSHIPS:
 --
 --   projects  ──< project_github_urls  (1 project → many repo links)
---   projects  ──< project_images       (1 project → many gallery images)
 --   projects  >──< popular_projects    (junction: picks ≤9 home-page slots)
 --
 -- DESIGN RATIONALE:
@@ -16,8 +15,6 @@
 --     display_order, and keep the master projects table clean.
 --   • project_github_urls is a child table because one project can have multiple
 --     repos (web, mobile, IoT, model AI, …).
---   • project_images is a child table to support a future image-gallery feature.
---     The main thumbnail_url sits on projects itself for fast single-row reads.
 --   • tech_stack and platform_apps are stored as TEXT[] arrays — fast to read,
 --     simple to filter, no join needed for the common case.
 -- ============================================================
@@ -63,24 +60,7 @@ CREATE TABLE IF NOT EXISTS public.project_github_urls (
 );
 
 -- ──────────────────────────────────────────────────
--- 3. TABLE: project_images (child — 1:N)
---    Gallery support for the future detail/modal view.
---    The primary thumbnail stays on projects.thumbnail_url
---    for fast reads without a join.
--- ──────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS public.project_images (
-  id              UUID        DEFAULT uuid_generate_v4() PRIMARY KEY,
-  project_id      UUID        NOT NULL
-                    REFERENCES public.projects(id) ON DELETE CASCADE,
-  image_url       TEXT        NOT NULL,   -- Supabase Storage public URL
-  alt_text        TEXT,
-  display_order   SMALLINT    NOT NULL DEFAULT 0,
-  is_thumbnail    BOOLEAN     NOT NULL DEFAULT false,  -- mirrors projects.thumbnail_url for gallery queries
-  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- ──────────────────────────────────────────────────
--- 4. TABLE: popular_projects (junction — N:1)
+-- 3. TABLE: popular_projects (junction — N:1)
 --    Decoupled control over which projects appear in
 --    the Home page "Popular Projects" section (max 9).
 --    display_order (0–8) drives the card layout order.
@@ -95,7 +75,7 @@ CREATE TABLE IF NOT EXISTS public.popular_projects (
 );
 
 -- ──────────────────────────────────────────────────
--- 5. INDEXES
+-- 4. INDEXES
 -- ──────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_projects_published
   ON public.projects(is_published)
@@ -110,9 +90,6 @@ CREATE INDEX IF NOT EXISTS idx_projects_year
 CREATE INDEX IF NOT EXISTS idx_project_github_urls_project_id
   ON public.project_github_urls(project_id);
 
-CREATE INDEX IF NOT EXISTS idx_project_images_project_id
-  ON public.project_images(project_id);
-
 CREATE INDEX IF NOT EXISTS idx_popular_projects_order
   ON public.popular_projects(display_order ASC);
 
@@ -120,7 +97,7 @@ CREATE INDEX IF NOT EXISTS idx_popular_projects_project_id
   ON public.popular_projects(project_id);
 
 -- ──────────────────────────────────────────────────
--- 6. AUTO-UPDATE updated_at trigger
+-- 5. AUTO-UPDATE updated_at trigger
 --    Reuses the same function created by the guestbook migration.
 -- ──────────────────────────────────────────────────
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -137,20 +114,18 @@ CREATE TRIGGER update_projects_updated_at
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ──────────────────────────────────────────────────
--- 7. ROW LEVEL SECURITY
+-- 6. ROW LEVEL SECURITY
 -- ──────────────────────────────────────────────────
 ALTER TABLE public.projects            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.project_github_urls ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.project_images      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.popular_projects    ENABLE ROW LEVEL SECURITY;
 
 -- Drop then recreate (idempotent)
 DROP POLICY IF EXISTS "projects_public_read"       ON public.projects;
 DROP POLICY IF EXISTS "project_github_public_read" ON public.project_github_urls;
-DROP POLICY IF EXISTS "project_images_public_read" ON public.project_images;
 DROP POLICY IF EXISTS "popular_projects_public_read" ON public.popular_projects;
 
--- All four tables are read-only for the public (portfolio is read-only for visitors)
+-- All three tables are read-only for the public (portfolio is read-only for visitors)
 CREATE POLICY "projects_public_read"
   ON public.projects FOR SELECT
   USING (true);
@@ -159,16 +134,12 @@ CREATE POLICY "project_github_public_read"
   ON public.project_github_urls FOR SELECT
   USING (true);
 
-CREATE POLICY "project_images_public_read"
-  ON public.project_images FOR SELECT
-  USING (true);
-
 CREATE POLICY "popular_projects_public_read"
   ON public.popular_projects FOR SELECT
   USING (true);
 
 -- ──────────────────────────────────────────────────
--- 8. STORAGE: project-thumbnails bucket
+-- 7. STORAGE: project-thumbnails bucket
 -- ──────────────────────────────────────────────────
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('project-thumbnails', 'project-thumbnails', true)
@@ -191,7 +162,7 @@ CREATE POLICY "project_thumbnails_admin_delete"
   USING (bucket_id = 'project-thumbnails');
 
 -- ──────────────────────────────────────────────────
--- 9. SEED: 9 Popular Projects (from existing static data)
+-- 8. SEED: 9 Popular Projects (from existing static data)
 --
 --    NOTE: thumbnail_url values are set to NULL here.
 --    After uploading images to the 'project-thumbnails'

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Link from "next/link";
@@ -12,135 +12,80 @@ import {
   SiOpencv, SiFlutter, SiDocker, SiGit, SiGithub, SiLinux, SiVercel,
   SiMongodb, SiMysql, SiPostgresql, SiFirebase, SiAmazon, SiGooglecloud,
   SiRedux, SiOpenai, SiGo, SiFlask, SiDjango, SiExpress, SiNestjs,
+  SiRust, SiSwift, SiKotlin, SiElixir, SiRuby, SiScala, SiCplusplus,
+  SiRedis, SiElasticsearch, SiGraphql, SiKubernetes, SiJenkins,
+  SiGitlab, SiBitbucket, SiNginx, SiApache, SiRabbitmq, SiApachekafka,
+  SiSqlite, SiMariadb,
+  SiDigitalocean, SiCloudflare, SiHeroku, SiNetlify,
 } from "react-icons/si";
-import { FaMicrochip, FaBrain } from "react-icons/fa";
+import {
+  FaMicrochip, FaBrain, FaServer, FaDatabase, FaCloud,
+  FaMobileAlt, FaTools, FaLayerGroup, FaCode,
+} from "react-icons/fa";
+import { Code2 } from "lucide-react";
 import { ReactNode } from "react";
+import { fetchSkills, type SkillRow } from "@/lib/projectsApi";
+import { fetchAboutStats } from "@/lib/statsApi";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ─────────────────────────── data ─────────────────────────── */
+/* ─────────────────────────── icon mapping ─────────────────────── */
 
-type Skill = { name: string; icon: ReactNode; level: number };
-type Category = {
+const ICON_COMPONENTS: Record<string, React.ElementType> = {
+  SiReact, SiNextdotjs, SiTypescript, SiJavascript, SiTailwindcss,
+  SiHtml5, SiCss3, SiFramer, SiNodedotjs, SiFastapi, SiLaravel,
+  SiPython, SiPhp, SiTensorflow, SiKeras, SiPytorch, SiScikitlearn,
+  SiOpencv, SiFlutter, SiDocker, SiGit, SiGithub, SiLinux, SiVercel,
+  SiMongodb, SiMysql, SiPostgresql, SiFirebase, SiAmazon, SiGooglecloud,
+  SiRedux, SiOpenai, SiGo, SiFlask, SiDjango, SiExpress, SiNestjs,
+  SiRust, SiSwift, SiKotlin, SiElixir, SiRuby, SiScala, SiCplusplus,
+  SiRedis, SiElasticsearch, SiGraphql, SiKubernetes, SiJenkins,
+  SiGitlab, SiBitbucket, SiNginx, SiApache, SiRabbitmq, SiApachekafka,
+  SiSqlite, SiMariadb,
+  SiDigitalocean, SiCloudflare, SiHeroku, SiNetlify,
+  FaMicrochip, FaBrain, FaServer, FaDatabase, FaCloud,
+  FaMobileAlt, FaTools, FaLayerGroup, FaCode,
+};
+
+function getSkillIcon(iconKey: string, color?: string, size = 20): ReactNode {
+  const Component = ICON_COMPONENTS[iconKey];
+  if (!Component) return <Code2 size={size} style={color ? { color } : {}} />;
+  return <Component size={size} style={color ? { color } : {}} />;
+}
+
+/* ─────────────────────────── category metadata ────────────────── */
+
+const CATEGORY_ORDER = ["frontend", "backend", "ai_ml", "mobile", "devops", "database", "cloud"] as const;
+type CategoryId = (typeof CATEGORY_ORDER)[number];
+
+const CATEGORY_STYLE: Record<CategoryId, { gradient: string; headerIcon: ReactNode; i18nKey: string }> = {
+  frontend:  { gradient: "from-blue-500/20 to-cyan-500/10",     headerIcon: <SiReact       className="text-blue-400"   size={22} />, i18nKey: "cat_frontend" },
+  backend:   { gradient: "from-green-500/20 to-emerald-500/10", headerIcon: <SiNodedotjs   className="text-green-500"  size={22} />, i18nKey: "cat_backend"  },
+  ai_ml:     { gradient: "from-purple-500/20 to-pink-500/10",   headerIcon: <FaBrain       className="text-purple-400" size={22} />, i18nKey: "cat_aiml"     },
+  mobile:    { gradient: "from-teal-500/20 to-cyan-500/10",     headerIcon: <SiFlutter     className="text-blue-400"   size={22} />, i18nKey: "cat_mobile"   },
+  devops:    { gradient: "from-orange-500/20 to-yellow-500/10", headerIcon: <SiDocker      className="text-blue-500"   size={22} />, i18nKey: "cat_devops"   },
+  database:  { gradient: "from-red-500/20 to-pink-500/10",      headerIcon: <SiPostgresql  className="text-blue-400"   size={22} />, i18nKey: "cat_database" },
+  cloud:     { gradient: "from-sky-500/20 to-blue-500/10",      headerIcon: <SiGooglecloud className="text-blue-400"   size={22} />, i18nKey: "cat_cloud"    },
+};
+
+/* ─────────────────────────── types ────────────────────────────── */
+
+type SkillItem = {
   id: string;
+  name: string;
+  iconKey: string;
+  iconColor: string;
+  level: number;
+};
+
+type CategoryGroup = {
+  id: CategoryId;
   title: string;
   description: string;
   gradient: string;
   icon: ReactNode;
-  skills: Skill[];
+  skills: SkillItem[];
 };
-
-function useCategories() {
-  const t = useTranslations("skillsPage");
-
-  const categories: Category[] = [
-    {
-      id: "frontend",
-      title: t("cat_frontend_title"),
-      description: t("cat_frontend_desc"),
-      gradient: "from-blue-500/20 to-cyan-500/10",
-      icon: <SiReact className="text-blue-400" size={22} />,
-      skills: [
-        { name: "React", icon: <SiReact className="text-blue-400" />, level: 92 },
-        { name: "Next.js", icon: <SiNextdotjs className="text-black dark:text-white" />, level: 90 },
-        { name: "TypeScript", icon: <SiTypescript className="text-blue-600" />, level: 85 },
-        { name: "JavaScript", icon: <SiJavascript className="text-yellow-400" />, level: 90 },
-        { name: "TailwindCSS", icon: <SiTailwindcss className="text-sky-400" />, level: 93 },
-        { name: "HTML5", icon: <SiHtml5 className="text-orange-500" />, level: 95 },
-        { name: "CSS3", icon: <SiCss3 className="text-blue-500" />, level: 90 },
-        { name: "Framer Motion", icon: <SiFramer className="text-pink-400" />, level: 76 },
-        { name: "Redux", icon: <SiRedux className="text-purple-500" />, level: 78 },
-      ],
-    },
-    {
-      id: "backend",
-      title: t("cat_backend_title"),
-      description: t("cat_backend_desc"),
-      gradient: "from-green-500/20 to-emerald-500/10",
-      icon: <SiNodedotjs className="text-green-500" size={22} />,
-      skills: [
-        { name: "Node.js", icon: <SiNodedotjs className="text-green-500" />, level: 83 },
-        { name: "Express", icon: <SiExpress className="text-gray-600 dark:text-gray-300" />, level: 82 },
-        { name: "NestJS", icon: <SiNestjs className="text-red-500" />, level: 75 },
-        { name: "FastAPI", icon: <SiFastapi className="text-teal-400" />, level: 82 },
-        { name: "Flask", icon: <SiFlask className="text-gray-600 dark:text-gray-300" />, level: 78 },
-        { name: "Django", icon: <SiDjango className="text-green-700" />, level: 74 },
-        { name: "Golang", icon: <SiGo className="text-sky-500" />, level: 70 },
-        { name: "Laravel", icon: <SiLaravel className="text-red-500" />, level: 80 },
-        { name: "Python", icon: <SiPython className="text-yellow-400" />, level: 88 },
-        { name: "PHP", icon: <SiPhp className="text-indigo-400" />, level: 75 },
-      ],
-    },
-    {
-      id: "ai-ml",
-      title: t("cat_aiml_title"),
-      description: t("cat_aiml_desc"),
-      gradient: "from-purple-500/20 to-pink-500/10",
-      icon: <FaBrain className="text-purple-400" size={22} />,
-      skills: [
-        { name: "TensorFlow", icon: <SiTensorflow className="text-orange-500" />, level: 80 },
-        { name: "Keras", icon: <SiKeras className="text-red-400" />, level: 80 },
-        { name: "PyTorch", icon: <SiPytorch className="text-orange-500" />, level: 72 },
-        { name: "Scikit-Learn", icon: <SiScikitlearn className="text-yellow-500" />, level: 82 },
-        { name: "OpenCV", icon: <SiOpencv className="text-cyan-400" />, level: 75 },
-        { name: "OpenAI API", icon: <SiOpenai className="text-gray-400" />, level: 78 },
-        { name: "Deep Learning", icon: <FaMicrochip className="text-indigo-400" />, level: 74 },
-      ],
-    },
-    {
-      id: "mobile",
-      title: t("cat_mobile_title"),
-      description: t("cat_mobile_desc"),
-      gradient: "from-teal-500/20 to-cyan-500/10",
-      icon: <SiFlutter className="text-blue-400" size={22} />,
-      skills: [
-        { name: "Flutter", icon: <SiFlutter className="text-blue-400" />, level: 78 },
-      ],
-    },
-    {
-      id: "devops",
-      title: t("cat_devops_title"),
-      description: t("cat_devops_desc"),
-      gradient: "from-orange-500/20 to-yellow-500/10",
-      icon: <SiDocker className="text-blue-500" size={22} />,
-      skills: [
-        { name: "Docker", icon: <SiDocker className="text-blue-500" />, level: 78 },
-        { name: "Git", icon: <SiGit className="text-orange-500" />, level: 90 },
-        { name: "GitHub", icon: <SiGithub className="text-black dark:text-white" />, level: 90 },
-        { name: "Linux", icon: <SiLinux className="text-black dark:text-white" />, level: 76 },
-        { name: "Vercel", icon: <SiVercel className="text-black dark:text-white" />, level: 88 },
-      ],
-    },
-    {
-      id: "database",
-      title: t("cat_database_title"),
-      description: t("cat_database_desc"),
-      gradient: "from-red-500/20 to-pink-500/10",
-      icon: <SiPostgresql className="text-blue-400" size={22} />,
-      skills: [
-        { name: "MongoDB", icon: <SiMongodb className="text-green-500" />, level: 80 },
-        { name: "MySQL", icon: <SiMysql className="text-blue-500" />, level: 82 },
-        { name: "PostgreSQL", icon: <SiPostgresql className="text-blue-400" />, level: 78 },
-        { name: "Firebase", icon: <SiFirebase className="text-yellow-500" />, level: 80 },
-      ],
-    },
-    {
-      id: "cloud",
-      title: t("cat_cloud_title"),
-      description: t("cat_cloud_desc"),
-      gradient: "from-sky-500/20 to-blue-500/10",
-      icon: <SiGooglecloud className="text-blue-400" size={22} />,
-      skills: [
-        { name: "AWS", icon: <SiAmazon className="text-orange-400" />, level: 68 },
-        { name: "GCP", icon: <SiGooglecloud className="text-blue-400" />, level: 70 },
-        { name: "Firebase", icon: <SiFirebase className="text-yellow-500" />, level: 80 },
-        { name: "Vercel", icon: <SiVercel className="text-black dark:text-white" />, level: 88 },
-      ],
-    },
-  ];
-
-  return categories;
-}
 
 const getLevelColor = (level: number) => {
   if (level >= 90) return "text-[#0acf83]";
@@ -184,7 +129,7 @@ function SkillBar({ level, delay }: { level: number; delay: number }) {
   );
 }
 
-function SkillCard({ skill, index, levelLabel }: { skill: Skill; index: number; levelLabel: string }) {
+function SkillCard({ skill, index, levelLabel }: { skill: SkillItem; index: number; levelLabel: string }) {
   return (
     <div
       className="skill-card group flex flex-col gap-3 p-4 rounded-xl
@@ -196,7 +141,7 @@ function SkillCard({ skill, index, levelLabel }: { skill: Skill; index: number; 
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <span className="text-xl">{skill.icon}</span>
+          <span className="text-xl">{getSkillIcon(skill.iconKey, skill.iconColor, 20)}</span>
           <span className="text-sm font-medium text-gray-800 dark:text-white">
             {skill.name}
           </span>
@@ -213,7 +158,7 @@ function SkillCard({ skill, index, levelLabel }: { skill: Skill; index: number; 
   );
 }
 
-function CategorySection({ cat, getLevelLabel }: { cat: Category; getLevelLabel: (level: number) => string; index?: number }) {
+function CategorySection({ cat, getLevelLabel }: { cat: CategoryGroup; getLevelLabel: (level: number) => string }) {
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -259,20 +204,117 @@ function CategorySection({ cat, getLevelLabel }: { cat: Category; getLevelLabel:
       {/* Skill cards grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {cat.skills.map((skill, i) => (
-          <SkillCard key={skill.name} skill={skill} index={i} levelLabel={getLevelLabel(skill.level)} />
+          <SkillCard key={skill.id} skill={skill} index={i} levelLabel={getLevelLabel(skill.level)} />
         ))}
       </div>
     </div>
   );
 }
+/* Skeleton loader — shown while data is fetching */
+function SkeletonCard() {
+  return (
+    <div className="flex flex-col gap-3 p-4 rounded-xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 animate-pulse">
+      <div className="flex items-center gap-2.5">
+        <div className="w-5 h-5 rounded bg-gray-200 dark:bg-white/10" />
+        <div className="h-3 w-24 rounded bg-gray-200 dark:bg-white/10" />
+      </div>
+      <div className="w-full h-1.5 rounded-full bg-gray-200 dark:bg-white/10" />
+      <div className="h-2.5 w-8 rounded bg-gray-200 dark:bg-white/10 self-end" />
+    </div>
+  );
+}
 
+function SkeletonSection() {
+  return (
+    <div>
+      <div className="flex items-start gap-4 mb-6 animate-pulse">
+        <div className="w-11 h-11 rounded-xl bg-gray-200 dark:bg-white/10 shrink-0" />
+        <div className="flex flex-col gap-2 pt-1">
+          <div className="h-4 w-28 rounded bg-gray-200 dark:bg-white/10" />
+          <div className="h-3 w-48 rounded bg-gray-200 dark:bg-white/10" />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+      </div>
+    </div>
+  );
+}
 /* ─────────────────────────── page ───────────────────────────── */
 
 export default function SkillsPage() {
   const t = useTranslations("skillsPage");
-  const categories = useCategories();
   const heroRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
+
+  const [skills, setSkills] = useState<SkillRow[]>([]);
+  const [yearsExperience, setYearsExperience] = useState(4);
+  const [isLoading, setIsLoading] = useState(true);
+
+  /* ── Data fetching ─────────────────────────────────────────── */
+  useEffect(() => {
+    let cancelled = false;
+
+    Promise.allSettled([fetchSkills(), fetchAboutStats()]).then(([skillsRes, statsRes]) => {
+      if (cancelled) return;
+
+      if (skillsRes.status === "fulfilled") {
+        setSkills(skillsRes.value);
+      } else {
+        console.error("[SkillsPage] fetchSkills error:", skillsRes.reason);
+      }
+
+      if (statsRes.status === "fulfilled") {
+        setYearsExperience(statsRes.value.yearsExperience);
+      } else {
+        console.error("[SkillsPage] fetchAboutStats error:", statsRes.reason);
+      }
+
+      setIsLoading(false);
+    });
+
+    return () => { cancelled = true; };
+  }, []);
+
+  /* ── Group skills into categories ─────────────────────────── */
+  const categories = useMemo<CategoryGroup[]>(() => {
+    const grouped: Partial<Record<CategoryId, SkillItem[]>> = {};
+
+    for (const skill of skills) {
+      const catId = skill.category as CategoryId;
+      if (!grouped[catId]) grouped[catId] = [];
+      grouped[catId]!.push({
+        id: skill.id,
+        name: skill.name,
+        iconKey: skill.icon_key,
+        iconColor: skill.icon_color,
+        level: skill.level,
+      });
+    }
+
+    return CATEGORY_ORDER
+      .filter((catId) => grouped[catId] && grouped[catId]!.length > 0)
+      .map((catId) => {
+        const style = CATEGORY_STYLE[catId];
+        return {
+          id: catId,
+          title: t(`${style.i18nKey}_title` as Parameters<typeof t>[0]),
+          description: t(`${style.i18nKey}_desc` as Parameters<typeof t>[0]),
+          gradient: style.gradient,
+          icon: style.headerIcon,
+          skills: grouped[catId]!,
+        };
+      });
+  }, [skills, t]);
+
+  /* ── Derived stats — all sourced from Supabase ───────────────── */
+  // count(*) WHERE is_published = true  FROM skills
+  const totalTechnologies = skills.length;
+  // distinct category values present in the fetched skills
+  const totalCategories   = categories.length;
+  // skills with level >= 90 (Expert tier)
+  const expertCount       = skills.filter((s) => s.level >= 90).length;
+  // yearsExperience → portfolio_stats.years_experience via fetchAboutStats
 
   const getLevelLabel = (level: number) => {
     if (level >= 90) return t("level_expert");
@@ -281,8 +323,9 @@ export default function SkillsPage() {
     return t("level_familiar");
   };
 
+  /* ── Hero GSAP animation — fires once Supabase data is ready ───── */
   useEffect(() => {
-    // Hero entrance
+    if (isLoading) return;
     const ctx = gsap.context(() => {
       gsap.fromTo(
         ".hero-title span",
@@ -299,7 +342,6 @@ export default function SkillsPage() {
         { x: -20, opacity: 0 },
         { x: 0, opacity: 1, duration: 0.5, delay: 0.2, ease: "power2.out" }
       );
-      // stat counters
       document.querySelectorAll(".stat-num").forEach((el) => {
         const target = parseInt((el as HTMLElement).dataset.target || "0", 10);
         gsap.fromTo(
@@ -316,12 +358,14 @@ export default function SkillsPage() {
       });
     }, heroRef);
     return () => ctx.revert();
-  }, []);
+  }, [isLoading]);
 
-  const totalSkills = categories.reduce((a, c) => a + c.skills.length, 0);
-  const expertCount = categories
-    .flatMap((c) => c.skills)
-    .filter((s) => s.level >= 90).length;
+  const stats = [
+    { id: "technologies", label: t("stat_technologies"), value: totalTechnologies },
+    { id: "categories",   label: t("stat_categories"),   value: totalCategories   },
+    { id: "expert",       label: t("stat_expert"),        value: expertCount       },
+    { id: "experience",   label: t("stat_experience"),    value: yearsExperience   },
+  ];
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-[#0d1417] pt-[4.5rem]">
@@ -349,27 +393,18 @@ export default function SkillsPage() {
             {t("hero_sub")}
           </p>
 
-          {/* quick stats */}
-          <div
-            ref={statsRef}
-            className="flex flex-wrap gap-6 sm:gap-10"
-          >
-            {[
-              { label: t("stat_technologies"), value: totalSkills },
-              { label: t("stat_categories"), value: categories.length },
-              { label: t("stat_expert"), value: expertCount },
-              { label: t("stat_experience"), value: 4 },
-            ].map((stat) => (
-              <div key={stat.label} className="flex flex-col">
-                <span className="text-3xl font-bold text-gray-900 dark:text-white">
-                  <span
-                    className="stat-num"
-                    data-target={stat.value}
-                  >
-                    0
+          {/* quick stats — all values from Supabase */}
+          <div ref={statsRef} className="flex flex-wrap gap-6 sm:gap-10">
+            {stats.map((stat) => (
+              <div key={stat.id} className="flex flex-col">
+                {isLoading ? (
+                  <div className="h-9 w-16 rounded bg-gray-200 dark:bg-white/10 animate-pulse mb-1" />
+                ) : (
+                  <span className="text-3xl font-bold text-gray-900 dark:text-white">
+                    <span className="stat-num" data-target={stat.value}>0</span>
+                    <span className="text-[#0acf83]">+</span>
                   </span>
-                  <span className="text-[#0acf83]">+</span>
-                </span>
+                )}
                 <span className="text-xs text-gray-400 dark:text-white/40 mt-0.5 font-medium tracking-wide uppercase">
                   {stat.label}
                 </span>
@@ -383,10 +418,10 @@ export default function SkillsPage() {
       <div className="max-w-[1100px] mx-auto px-[5%] pt-10 pb-2">
         <div className="flex flex-wrap gap-4">
           {[
-            { label: t("level_expert"), color: "bg-[#0acf83]", min: "90%+" },
-            { label: t("level_advanced"), color: "bg-blue-400", min: "80%+" },
-            { label: t("level_proficient"), color: "bg-yellow-400", min: "70%+" },
-            { label: t("level_familiar"), color: "bg-gray-400", min: "<70%" },
+            { label: t("level_expert"),     color: "bg-[#0acf83]", min: "90%+" },
+            { label: t("level_advanced"),   color: "bg-blue-400",  min: "80%+" },
+            { label: t("level_proficient"), color: "bg-yellow-400",min: "70%+" },
+            { label: t("level_familiar"),   color: "bg-gray-400",  min: "<70%" },
           ].map((item) => (
             <div
               key={item.label}
@@ -407,9 +442,11 @@ export default function SkillsPage() {
 
       {/* ── Category sections ── */}
       <div className="max-w-[1100px] mx-auto px-[5%] py-12 flex flex-col gap-14">
-        {categories.map((cat, i) => (
-          <CategorySection key={cat.id} cat={cat} index={i} getLevelLabel={getLevelLabel} />
-        ))}
+        {isLoading
+          ? CATEGORY_ORDER.map((id) => <SkeletonSection key={id} />)
+          : categories.map((cat) => (
+              <CategorySection key={cat.id} cat={cat} getLevelLabel={getLevelLabel} />
+            ))}
       </div>
 
       {/* ── CTA footer ── */}

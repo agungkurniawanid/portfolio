@@ -1,10 +1,13 @@
 "use client"
 
 import { formatDistanceToNow } from "date-fns"
-import { id as localeId } from "date-fns/locale"
+import { id as localeId, enUS as localeEn, de as localeDe } from "date-fns/locale"
 import { MapPin, Briefcase, Star, ExternalLink, Clock, Instagram, Phone } from "lucide-react"
 import Image from "next/image"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
+import { useTranslations } from "next-intl"
+import { useLanguageStore } from "@/stores/LanguageStore"
+import TranslateWidget from "@/components/TranslateWidget"
 
 export interface GuestbookEntry {
   id: string
@@ -106,7 +109,11 @@ export function StarRating({ rating }: { rating: number }) {
 }
 
 export default function GuestbookCard({ entry, isNew = false }: Props) {
+  const t = useTranslations("guestbookPage")
+  const { locale } = useLanguageStore()
+  const dateFnsLocale = locale === "de" ? localeDe : locale === "en" ? localeEn : localeId
   const cardRef = useRef<HTMLDivElement>(null)
+  const [translatedMessage, setTranslatedMessage] = useState<string | null>(null)
   const rgb = hexToRgb(entry.card_color)
   const bgStyle = rgb
     ? {
@@ -187,7 +194,7 @@ export default function GuestbookCard({ entry, isNew = false }: Props) {
             </span>
             <span
               className="text-base leading-none"
-              title={moodInfo.label}
+              title={t(`mood_${entry.mood.toLowerCase()}`)}
             >
               {moodInfo.emoji}
             </span>
@@ -211,14 +218,24 @@ export default function GuestbookCard({ entry, isNew = false }: Props) {
       </div>
 
       {/* Message */}
-      <blockquote className="relative">
-        <span className="absolute -top-1 -left-0.5 text-3xl leading-none text-gray-200 dark:text-gray-700 font-serif select-none">
-          "
-        </span>
-        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-4 pl-4">
-          {entry.message}
-        </p>
-      </blockquote>
+      <div className="relative">
+        <blockquote className="relative">
+          <span className="absolute -top-1 -left-0.5 text-3xl leading-none text-gray-200 dark:text-gray-700 font-serif select-none">
+            "
+          </span>
+          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-4 pl-4">
+            {translatedMessage ?? entry.message}
+          </p>
+        </blockquote>
+        <div className="mt-1.5 flex justify-end">
+          <TranslateWidget
+            fields={{ message: entry.message }}
+            onTranslated={(out) => setTranslatedMessage(out.message)}
+            onReverted={() => setTranslatedMessage(null)}
+            size="sm"
+          />
+        </div>
+      </div>
 
       {/* Contact */}
       {entry.contact && (
@@ -252,7 +269,7 @@ export default function GuestbookCard({ entry, isNew = false }: Props) {
           <span>
             {formatDistanceToNow(new Date(entry.created_at), {
               addSuffix: true,
-              locale: localeId,
+              locale: dateFnsLocale,
             })}
           </span>
         </div>

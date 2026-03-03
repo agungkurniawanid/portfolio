@@ -9,6 +9,8 @@ export type GalleryCategory =
 
 export type SortOption = "Terbaru" | "Terlama" | "A–Z"
 
+export type GalleryOwnerType = "personal" | "guest"
+
 export interface GalleryPhoto {
   id: number
   title: string
@@ -26,6 +28,8 @@ export interface GalleryPhoto {
   height: number
   isFeatured: boolean
   tags: string[]
+  ownerType?: GalleryOwnerType
+  uploaderName?: string | null
 }
 
 export interface GalleryAlbum {
@@ -36,4 +40,5 @@ export interface GalleryAlbum {
   coverUrl: string
   period: string
   photoCount: number
+  ownerType?: GalleryOwnerType
 }

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Masonry from "react-masonry-css"
+import { useTranslations } from "next-intl"
 import {
   BookOpen,
   Users,
@@ -23,13 +24,6 @@ import GuestbookCard, { GuestbookEntry } from "./GuestbookCard"
 import GuestbookFormModal, { MOODS } from "./GuestbookFormModal"
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-
-const SORT_OPTIONS = [
-  { value: "newest", label: "Terbaru" },
-  { value: "oldest", label: "Terlama" },
-  { value: "rating_high", label: "Rating Tertinggi" },
-  { value: "name_az", label: "A–Z" },
-]
 
 const BREAKPOINT_COLS = {
   default: 3,
@@ -126,6 +120,7 @@ function AnimatedStat({
 // ─── Not-Submitted Callout ───────────────────────────────────────────────────
 
 function NotSubmittedCallout({ onOpen }: { onOpen: () => void }) {
+  const t = useTranslations("guestbookPage")
   return (
     <div className="relative overflow-hidden rounded-2xl border border-amber-200 dark:border-amber-500/30 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/10 px-5 py-4">
       {/* Decorative blob */}
@@ -145,11 +140,10 @@ function NotSubmittedCallout({ onOpen }: { onOpen: () => void }) {
           <div className="flex flex-col gap-1">
             <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
               <Sparkles size={13} className="shrink-0" />
-              Kamu belum mengisi buku tamu!
+              {t("callout_title")}
             </p>
             <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed">
-              Luangkan 1 menit untuk meninggalkan jejak kamu di sini.
-              Nama kamu akan tampil di antara tamu-tamu lainnya 👇
+              {t("callout_desc")}
             </p>
           </div>
         </div>
@@ -160,7 +154,7 @@ function NotSubmittedCallout({ onOpen }: { onOpen: () => void }) {
           className="group shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-400 text-white text-xs font-semibold transition-all duration-200 shadow-sm hover:shadow-amber-400/30 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 self-start sm:self-center"
         >
           <Pencil size={13} className="transition-transform group-hover:rotate-12" />
-          Isi Sekarang
+          {t("callout_btn")}
         </button>
       </div>
     </div>
@@ -170,6 +164,14 @@ function NotSubmittedCallout({ onOpen }: { onOpen: () => void }) {
 // ─── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function GuestbookPage() {
+  const t = useTranslations("guestbookPage")
+  const SORT_OPTIONS = useMemo(() => [
+    { value: "newest", label: t("sort_newest") },
+    { value: "oldest", label: t("sort_oldest") },
+    { value: "rating_high", label: t("sort_rating_high") },
+    { value: "name_az", label: t("sort_name_az") },
+  ], [t])
+
   const [entries, setEntries] = useState<GuestbookEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [hasSubmitted, setHasSubmitted] = useState(false)
@@ -280,7 +282,7 @@ export default function GuestbookPage() {
       setEntries((prev) => [entry, ...prev])
       setNewEntryIds((prev) => new Set([...prev, entry.id]))
       triggerConfetti()
-      showToast("✅ Terima kasih sudah mengisi buku tamu! Kamu luar biasa 🙏")
+      showToast(t("toast_success"))
     },
     [triggerConfetti, showToast]
   )
@@ -371,19 +373,19 @@ export default function GuestbookPage() {
           <div className="flex items-center justify-center gap-2 mb-4">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accentColor/10 text-accentColor text-xs font-medium border border-accentColor/20">
               <BookOpen size={12} />
-              Guestbook
+              {t("tag")}
             </span>
           </div>
 
           {/* Title */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight mb-4">
-            Buku Tamu
-            <span className="block text-accentColor">Digital</span>
+            {t("title")}
+            <span className="block text-accentColor">{t("title_accent")}</span>
           </h1>
 
           {/* Subtitle */}
           <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed mb-8">
-            Tinggalkan jejak kamu di sini — setiap kunjungan berarti bagi saya 🙏
+            {t("subtitle")}
           </p>
 
           {/* CTA Button */}
@@ -394,7 +396,7 @@ export default function GuestbookPage() {
                 className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 text-sm font-medium cursor-not-allowed border border-gray-200 dark:border-gray-700"
               >
                 <CheckCircle2 size={17} />
-                Kamu sudah mengisi buku tamu
+                {t("cta_filled")}
               </button>
             ) : (
               <button
@@ -402,7 +404,7 @@ export default function GuestbookPage() {
                 className="group inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl bg-accentColor text-white text-sm font-semibold border-2 border-accentColor hover:bg-transparent hover:text-accentColor transition-all duration-200 shadow-lg hover:shadow-accentColor/20 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
               >
                 <Edit3 size={16} className="transition-transform group-hover:rotate-12" />
-                ✍️ Isi Daftar Tamu
+                {t("cta_fill")}
               </button>
             )}
           </div>
@@ -412,23 +414,23 @@ export default function GuestbookPage() {
             <div className="flex flex-wrap items-center justify-center gap-3">
               <AnimatedStat
                 icon={<Users size={20} />}
-                label="Total Tamu"
+                label={t("stat_total")}
                 value={entries.length}
               />
               <AnimatedStat
                 icon={<MapPin size={20} />}
-                label="Dari Kota"
+                label={t("stat_cities")}
                 value={stats.uniqueCities}
               />
               <AnimatedStat
                 icon={<Star size={20} className="fill-amber-400 text-amber-400" />}
-                label="Rata-rata Rating"
+                label={t("stat_avg_rating")}
                 value={stats.avgRating}
               />
               {stats.latest && (
                 <AnimatedStat
                   icon={<Clock size={20} />}
-                  label="Tamu Terbaru"
+                  label={t("stat_latest")}
                   value={stats.latest.name}
                   sub={new Date(stats.latest.created_at).toLocaleDateString("id-ID", {
                     day: "numeric",
@@ -464,7 +466,7 @@ export default function GuestbookPage() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Cari nama, kota, profesi, atau pesan..."
+                placeholder={t("search_placeholder")}
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-accentColor/30 focus:border-accentColor transition-all"
               />
               {search && (
@@ -488,7 +490,7 @@ export default function GuestbookPage() {
               )}
             >
               <SlidersHorizontal size={14} />
-              Filter
+              {t("filter_btn")}
               {activeFilterCount > 0 && (
                 <span className="w-5 h-5 rounded-full bg-accentColor text-white text-[10px] font-bold flex items-center justify-center">
                   {activeFilterCount}
@@ -519,21 +521,22 @@ export default function GuestbookPage() {
             <div className="flex flex-wrap gap-3 p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
               {/* Mood filter */}
               <div className="flex flex-wrap gap-2 items-center">
-                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Mood:</span>
-                {["All", ...MOODS.map((m) => m.label)].map((mood) => {
-                  const moodObj = MOODS.find((m) => m.label === mood)
+                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">{t("filter_mood")}:</span>
+                {[null, ...MOODS].map((moodItem) => {
+                  const key = moodItem?.label ?? "All"
+                  const isActive = filterMood === key
                   return (
                     <button
-                      key={mood}
-                      onClick={() => setFilterMood(mood)}
+                      key={key}
+                      onClick={() => setFilterMood(key)}
                       className={cn(
                         "px-3 py-1 rounded-full text-xs font-medium transition-all border",
-                        filterMood === mood
+                        isActive
                           ? "bg-accentColor text-white border-accentColor"
                           : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-accentColor/50"
                       )}
                     >
-                      {moodObj ? `${moodObj.emoji} ${mood}` : mood}
+                      {moodItem ? `${moodItem.emoji} ${t(`mood_${moodItem.label.toLowerCase()}`)}` : t("filter_all")}
                     </button>
                   )
                 })}
@@ -543,12 +546,12 @@ export default function GuestbookPage() {
 
               {/* Rating filter */}
               <div className="flex flex-wrap gap-2 items-center">
-                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Rating:</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">{t("filter_rating")}:</span>
                 {[
-                  { value: "All", label: "Semua" },
-                  { value: "5", label: "⭐⭐⭐⭐⭐ (5)" },
-                  { value: "4", label: "⭐⭐⭐⭐+ (4+)" },
-                  { value: "lte3", label: "⭐⭐⭐ ke bawah" },
+                  { value: "All", label: t("filter_all") },
+                  { value: "5", label: t("filter_rating_5") },
+                  { value: "4", label: t("filter_rating_4") },
+                  { value: "lte3", label: t("filter_rating_lte3") },
                 ].map((r) => (
                   <button
                     key={r.value}
@@ -569,7 +572,7 @@ export default function GuestbookPage() {
 
               {/* City filter */}
               <div className="flex flex-wrap gap-2 items-center">
-                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Asal:</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">{t("filter_city")}:</span>
                 <div className="relative">
                   <select
                     value={filterCity}
@@ -577,7 +580,7 @@ export default function GuestbookPage() {
                     className="appearance-none pl-3 pr-7 py-1 rounded-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs text-gray-700 dark:text-gray-300 outline-none focus:ring-1 focus:ring-accentColor/30 cursor-pointer"
                   >
                     {uniqueCities.map((c) => (
-                      <option key={c} value={c}>{c}</option>
+                      <option key={c} value={c}>{c === "All" ? t("filter_all") : c}</option>
                     ))}
                   </select>
                   <ChevronDown
@@ -597,7 +600,7 @@ export default function GuestbookPage() {
                   }}
                   className="ml-auto text-xs text-red-500 hover:text-red-600 underline"
                 >
-                  Reset filter
+                  {t("filter_reset")}
                 </button>
               )}
             </div>
@@ -621,22 +624,22 @@ export default function GuestbookPage() {
               />
             </div>
             <span className="text-xs text-gray-400 dark:text-gray-500">
-              Menampilkan {displayed.length} dari {entries.length} tamu
+              {t("showing")} {displayed.length} {t("of")} {entries.length} {t("guests")}
             </span>
           </div>
 
           {/* Counter (desktop) */}
           <div className="hidden sm:flex items-center justify-between">
             <span className="text-xs text-gray-400 dark:text-gray-500">
-              Menampilkan{" "}
+              {t("showing")}{" "}
               <span className="font-semibold text-gray-600 dark:text-gray-300">
                 {displayed.length}
               </span>{" "}
-              dari{" "}
+              {t("of")}{" "}
               <span className="font-semibold text-gray-600 dark:text-gray-300">
                 {entries.length}
               </span>{" "}
-              tamu
+              {t("guests")}
             </span>
           </div>
         </div>
@@ -660,13 +663,13 @@ export default function GuestbookPage() {
             <div className="text-center">
               <p className="font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 {entries.length === 0
-                  ? "Belum ada tamu yang mengisi."
-                  : "Tidak ada hasil ditemukan."}
+                  ? t("empty_no_guests")
+                  : t("empty_no_results")}
               </p>
               <p className="text-sm text-gray-400 dark:text-gray-500">
                 {entries.length === 0
-                  ? "Jadilah yang pertama! 🎉"
-                  : "Coba ubah kata kunci atau filter kamu."}
+                  ? t("empty_be_first")
+                  : t("empty_try_filter")}
               </p>
             </div>
             {entries.length === 0 && !hasSubmitted && (
@@ -675,7 +678,7 @@ export default function GuestbookPage() {
                 className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accentColor text-white text-sm font-medium hover:bg-accentColor/90 transition-all"
               >
                 <Edit3 size={14} />
-                Isi Sekarang
+                {t("empty_fill_now")}
               </button>
             )}
           </div>

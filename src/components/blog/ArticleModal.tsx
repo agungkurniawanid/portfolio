@@ -7,6 +7,7 @@ import { useBlogStore } from "@/stores/BlogStore"
 import { supabase } from "@/lib/supabase"
 import { cn } from "@/lib/Utils"
 import dynamic from "next/dynamic"
+import { useTranslations } from "next-intl"
 
 const RichTextEditor = dynamic(() => import("./RichTextEditor"), { ssr: false })
 
@@ -39,6 +40,7 @@ function estimateReadingTime(html: string): number {
 type Step = "form" | "preview"
 
 export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
+  const t = useTranslations("articleModal")
   const { fetchBlogs } = useBlogStore()
   const [step, setStep] = useState<Step>("form")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -63,12 +65,12 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {}
-    if (!authorName.trim()) newErrors.authorName = "Nama lengkap wajib diisi"
-    if (!authorEmail.trim()) newErrors.authorEmail = "Email wajib diisi"
+    if (!authorName.trim()) newErrors.authorName = t("err_authorName")
+    if (!authorEmail.trim()) newErrors.authorEmail = t("err_authorEmail")
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authorEmail))
-      newErrors.authorEmail = "Format email tidak valid"
-    if (!title.trim()) newErrors.title = "Judul artikel wajib diisi"
-    if (!content || content === "<p></p>") newErrors.content = "Konten artikel wajib diisi"
+      newErrors.authorEmail = t("err_emailFormat")
+    if (!title.trim()) newErrors.title = t("err_title")
+    if (!content || content === "<p></p>") newErrors.content = t("err_content")
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -207,12 +209,10 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700/60 bg-gray-50 dark:bg-[#0d1616] shrink-0">
           <div>
             <h2 className="text-lg font-semibold dark:text-white">
-              {step === "form" ? "✍️ Tulis Artikel Baru" : "👀 Preview Artikel"}
+              {step === "form" ? t("title_form") : t("title_preview")}
             </h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              {step === "form"
-                ? "Isi informasi penulis dan konten artikel"
-                : "Pastikan artikel sudah sesuai sebelum dipublikasikan"}
+              {step === "form" ? t("subtitle_form") : t("subtitle_preview")}
             </p>
           </div>
           <button
@@ -231,20 +231,20 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
               <div className="flex gap-3 p-3.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 rounded-lg text-sm">
                 <AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" />
                 <p className="text-amber-700 dark:text-amber-300 leading-relaxed">
-                  <strong>Perhatian:</strong> Informasi yang Anda isi akan ditampilkan publik bersama artikel Anda sebagai identitas penulis. Pastikan data yang Anda masukkan benar.
+                  <strong>{t("disclaimer_label")}</strong> {t("disclaimer_text")}
                 </p>
               </div>
 
               {/* Author Section */}
               <div>
                 <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3 flex items-center gap-2">
-                  <User size={15} /> Informasi Penulis
+                  <User size={15} /> {t("section_author")}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Profile Picture (optional) */}
                   <div className="md:col-span-2">
                     <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-                      <span className="flex items-center gap-1.5"><UserCircle size={13} /> Foto Profil <span className="text-gray-400">(opsional)</span></span>
+                      <span className="flex items-center gap-1.5"><UserCircle size={13} /> {t("label_avatar")} <span className="text-gray-400">{t("label_optional")}</span></span>
                     </label>
                     <div className="flex items-center gap-4">
                       {/* Avatar preview */}
@@ -265,7 +265,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                           onClick={() => avatarInputRef.current?.click()}
                           className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-accentColor hover:text-accentColor transition-colors dark:text-gray-300"
                         >
-                          {authorAvatarPreview ? "Ganti Foto" : "Upload Foto"}
+                          {authorAvatarPreview ? t("btn_change_photo") : t("btn_upload_photo")}
                         </button>
                         {authorAvatarPreview && (
                           <button
@@ -273,10 +273,10 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                             onClick={() => { setAuthorAvatarFile(null); setAuthorAvatarPreview("") }}
                             className="ml-2 text-xs px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-800/50 text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                           >
-                            Hapus
+                            {t("btn_remove")}
                           </button>
                         )}
-                        <p className="text-[11px] text-gray-400 mt-1">Jika tidak diupload, akan menggunakan inisial nama. PNG, JPG (max 2MB)</p>
+                        <p className="text-[11px] text-gray-400 mt-1">{t("avatar_hint")}</p>
                       </div>
                     </div>
                     <input
@@ -290,7 +290,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
 
                   <div>
                     <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-                      Nama Lengkap <span className="text-red-500">*</span>
+                      {t("label_full_name")} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -311,7 +311,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-                      Email <span className="text-red-500">*</span>
+                      {t("label_email")} <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -335,7 +335,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-                      Nomor Telepon <span className="text-gray-400">(opsional)</span>
+                      {t("label_phone")} <span className="text-gray-400">{t("label_optional")}</span>
                     </label>
                     <div className="relative">
                       <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -354,18 +354,18 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
               {/* Article Content Section */}
               <div>
                 <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3 flex items-center gap-2">
-                  <FileText size={15} /> Konten Artikel
+                  <FileText size={15} /> {t("section_content")}
                 </h3>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-                      Judul Artikel <span className="text-red-500">*</span>
+                      {t("label_title")} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      placeholder="Masukkan judul artikel yang menarik..."
+                      placeholder={t("placeholder_title")}
                       className={cn(
                         "w-full px-3 py-2 text-sm rounded-lg border bg-white dark:bg-gray-800 dark:text-white outline-none transition-colors",
                         "focus:border-accentColor",
@@ -381,7 +381,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
 
                   <div>
                     <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-                      <span className="flex items-center gap-1.5"><Tag size={13} /> Kategori</span>
+                      <span className="flex items-center gap-1.5"><Tag size={13} /> {t("label_category")}</span>
                     </label>
                     <select
                       value={category}
@@ -398,7 +398,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
 
                   <div>
                     <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-                      <span className="flex items-center gap-1.5"><ImageIcon size={13} /> Thumbnail / Cover Image</span>
+                      <span className="flex items-center gap-1.5"><ImageIcon size={13} /> {t("label_thumbnail")}</span>
                     </label>
                     <div
                       onClick={() => fileInputRef.current?.click()}
@@ -415,7 +415,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                         <>
                           <Upload size={22} className="text-gray-400" />
                           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                            Klik untuk upload gambar cover artikel
+                            {t("thumbnail_hint")}
                             <br />
                             <span className="text-gray-400">PNG, JPG, WebP (max 5MB)</span>
                           </p>
@@ -430,7 +430,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                       onChange={handleImageUpload}
                     />
                     <p className="text-xs text-gray-400 mt-1">
-                      Atau masukkan URL gambar:{" "}
+                      {t("thumbnail_url_hint")}{" "}
                       <input
                         type="url"
                         value={thumbnail}
@@ -448,7 +448,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
 
                   <div>
                     <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-                      Konten Artikel <span className="text-red-500">*</span>
+                      {t("label_content")} <span className="text-red-500">*</span>
                     </label>
                     <RichTextEditor
                       content={content}
@@ -478,7 +478,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                     {category}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {estimateReadingTime(content)} min read
+                    {estimateReadingTime(content)} {t("min_read")}
                   </span>
                 </div>
                 <h1 className="text-2xl font-bold dark:text-white mb-3">{title}</h1>
@@ -520,7 +520,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                 onClick={() => setStep("form")}
                 className="px-4 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-gray-300"
               >
-                ← Edit
+                {t("btn_edit")}
               </button>
             )}
           </div>
@@ -531,7 +531,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
               onClick={handleClose}
               className="px-4 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-gray-300"
             >
-              Batal
+              {t("btn_cancel")}
             </button>
             {step === "form" ? (
               <button
@@ -539,7 +539,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                 onClick={handlePreview}
                 className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-accentColor text-accentColor hover:bg-accentColor/10 transition-colors"
               >
-                <Eye size={15} /> Preview
+                <Eye size={15} /> {t("btn_preview")}
               </button>
             ) : (
               <button
@@ -551,15 +551,15 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                 } ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}`}
               >
                 {success ? (
-                  "✓ Artikel Dipublikasikan!"
+                  t("btn_published")
                 ) : isSubmitting ? (
                   <>
                     <span className="animate-spin inline-block w-3 h-3 border-2 border-white/60 border-t-white rounded-full" />
-                    Mempublikasikan...
+                    {t("btn_publishing")}
                   </>
                 ) : (
                   <>
-                    <Send size={15} /> Publikasikan
+                    <Send size={15} /> {t("btn_publish")}
                   </>
                 )}
               </button>

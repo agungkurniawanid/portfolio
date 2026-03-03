@@ -15,9 +15,12 @@ import {
   Camera,
   Copy,
   Check,
+  User,
 } from "lucide-react"
 import { FaWhatsapp, FaTwitter, FaInstagram } from "react-icons/fa"
 import { cn } from "@/lib/Utils"
+import { useTranslations } from "next-intl"
+import TranslateWidget from "@/components/TranslateWidget"
 
 interface GalleryLightboxProps {
   photos: GalleryPhoto[]
@@ -38,16 +41,26 @@ export default function GalleryLightbox({
   initialIndex,
   onClose,
 }: GalleryLightboxProps) {
+  const t = useTranslations("galleryPage")
   const [index, setIndex] = useState(initialIndex)
   const [showShare, setShowShare] = useState(false)
   const [copied, setCopied] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [imgTransition, setImgTransition] = useState(true)
 
+  // Translation state
+  const [translatedTitle, setTranslatedTitle] = useState<string | null>(null)
+  const [translatedDescription, setTranslatedDescription] = useState<string | null>(null)
+
   const photo = photos[index]
 
+  // Reset translation when photo changes
   useEffect(() => {
-    // Animate in
+    setTranslatedTitle(null)
+    setTranslatedDescription(null)
+  }, [index])
+
+  useEffect(() => {
     requestAnimationFrame(() => setIsVisible(true))
     document.body.style.overflow = "hidden"
     return () => {
@@ -72,7 +85,6 @@ export default function GalleryLightbox({
     [photos.length]
   )
 
-  // Keyboard navigation
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") close()
@@ -125,7 +137,7 @@ export default function GalleryLightbox({
         onClick={close}
       />
 
-      {/* Container */}
+      {/* Container: stacked on mobile, side-by-side on md+ */}
       <div
         className={cn(
           "relative z-10 w-full h-full flex flex-col md:flex-row max-w-7xl mx-auto transition-all duration-250",
@@ -134,11 +146,12 @@ export default function GalleryLightbox({
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── Image Area ─────────────────────────────────────────── */}
-        <div className="flex-1 flex items-center justify-center relative min-h-0 p-4 md:p-6">
-          {/* Close button */}
+        <div className="flex-1 flex items-center justify-center relative min-h-0 p-4 md:p-6 pb-0 md:pb-6">
+          {/* Single close button — top-right of the whole modal */}
           <button
             onClick={close}
             className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/50 hover:bg-white/20 backdrop-blur-sm text-white flex items-center justify-center transition-all duration-200 hover:scale-110 border border-white/20"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -158,10 +171,10 @@ export default function GalleryLightbox({
             <Image
               key={photo.id}
               src={photo.imageUrl}
-              alt={photo.title}
+              alt={translatedTitle ?? photo.title}
               width={photo.width}
               height={photo.height}
-              className="max-h-[calc(100vh-8rem)] md:max-h-[calc(100vh-2rem)] w-auto h-auto object-contain rounded-lg shadow-2xl"
+              className="max-h-[calc(100vw*0.75)] md:max-h-[calc(100vh-2rem)] w-full md:w-auto h-auto object-contain rounded-lg shadow-2xl"
               priority
               sizes="(max-width: 768px) 100vw, 70vw"
             />
@@ -187,41 +200,64 @@ export default function GalleryLightbox({
         </div>
 
         {/* ── Info Panel ─────────────────────────────────────────── */}
-        <div className="shrink-0 w-full md:w-80 lg:w-96 bg-gray-900/95 backdrop-blur-xl md:rounded-r-none border-t md:border-t-0 md:border-l border-white/10 overflow-y-auto">
-          <div className="p-5 space-y-5">
-            {/* Title */}
+        {/* Mobile: fixed height at bottom, scrollable. Desktop: full right panel */}
+        <div className="shrink-0 w-full md:w-80 lg:w-96 max-h-[45vh] md:max-h-none bg-white dark:bg-gray-900 md:bg-gray-900/95 md:dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 md:border-t-0 md:border-l overflow-y-auto">
+          <div className="p-5 space-y-4">
+            {/* Title + TranslateWidget */}
             <div>
-              <h3 className="text-white font-bold text-lg leading-snug mb-1">
-                {photo.title}
-              </h3>
-              <p className="text-white/60 text-sm leading-relaxed">{photo.description}</p>
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <h3 className="text-gray-900 dark:text-white font-bold text-base md:text-lg leading-snug">
+                  {translatedTitle ?? photo.title}
+                </h3>
+              </div>
+              <p className="text-gray-600 dark:text-white/60 text-sm leading-relaxed mb-2">
+                {translatedDescription ?? photo.description}
+              </p>
+              {/* Translate widget for title + description */}
+              <div className="flex justify-end">
+                <TranslateWidget
+                  fields={{
+                    title: photo.title,
+                    description: photo.description,
+                  }}
+                  onTranslated={(out) => {
+                    setTranslatedTitle(out.title ?? null)
+                    setTranslatedDescription(out.description ?? null)
+                  }}
+                  onReverted={() => {
+                    setTranslatedTitle(null)
+                    setTranslatedDescription(null)
+                  }}
+                  size="sm"
+                />
+              </div>
             </div>
 
             {/* Divider */}
-            <div className="border-t border-white/10" />
+            <div className="border-t border-gray-200 dark:border-white/10" />
 
             {/* Meta */}
             <div className="space-y-3">
               <div className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-accentColor shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-white/40 text-xs mb-0.5">Lokasi</p>
-                  <p className="text-white/90 text-sm">{photo.location}</p>
+                  <p className="text-gray-400 dark:text-white/40 text-xs mb-0.5">{t("lightbox_location")}</p>
+                  <p className="text-gray-800 dark:text-white/90 text-sm">{photo.location}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
                 <Calendar className="w-4 h-4 text-accentColor shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-white/40 text-xs mb-0.5">Tanggal</p>
-                  <p className="text-white/90 text-sm">{formatDate(photo.date)}</p>
+                  <p className="text-gray-400 dark:text-white/40 text-xs mb-0.5">{t("lightbox_date")}</p>
+                  <p className="text-gray-800 dark:text-white/90 text-sm">{formatDate(photo.date)}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
                 <Tag className="w-4 h-4 text-accentColor shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-white/40 text-xs mb-0.5">Kategori</p>
+                  <p className="text-gray-400 dark:text-white/40 text-xs mb-0.5">{t("lightbox_category")}</p>
                   <span className="inline-flex text-xs px-2.5 py-1 rounded-full bg-accentColor/20 text-accentColor border border-accentColor/30 font-medium">
                     {photo.category}
                   </span>
@@ -232,8 +268,18 @@ export default function GalleryLightbox({
                 <div className="flex items-start gap-3">
                   <Camera className="w-4 h-4 text-accentColor shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-white/40 text-xs mb-0.5">Device</p>
-                    <p className="text-white/90 text-sm">{photo.device}</p>
+                    <p className="text-gray-400 dark:text-white/40 text-xs mb-0.5">{t("lightbox_device")}</p>
+                    <p className="text-gray-800 dark:text-white/90 text-sm">{photo.device}</p>
+                  </div>
+                </div>
+              )}
+
+              {photo.uploaderName && (
+                <div className="flex items-start gap-3">
+                  <User className="w-4 h-4 text-accentColor shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-gray-400 dark:text-white/40 text-xs mb-0.5">{t("lightbox_uploader")}</p>
+                    <p className="text-gray-800 dark:text-white/90 text-sm">{photo.uploaderName}</p>
                   </div>
                 </div>
               )}
@@ -242,14 +288,14 @@ export default function GalleryLightbox({
             {/* Tags */}
             {photo.tags.length > 0 && (
               <>
-                <div className="border-t border-white/10" />
+                <div className="border-t border-gray-200 dark:border-white/10" />
                 <div>
-                  <p className="text-white/40 text-xs mb-2">Tags</p>
+                  <p className="text-gray-400 dark:text-white/40 text-xs mb-2">{t("lightbox_tags")}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {photo.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="text-xs px-2 py-0.5 rounded-full bg-white/8 text-white/60 border border-white/10"
+                        className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/8 text-gray-600 dark:text-white/60 border border-gray-200 dark:border-white/10"
                       >
                         #{tag}
                       </span>
@@ -260,13 +306,14 @@ export default function GalleryLightbox({
             )}
 
             {/* Album */}
-            <div className="border-t border-white/10" />
-            <div className="text-sm text-white/50">
-              Album: <span className="text-white/80 font-medium">{photo.album}</span>
+            <div className="border-t border-gray-200 dark:border-white/10" />
+            <div className="text-sm text-gray-500 dark:text-white/50">
+              {t("lightbox_album")}:{" "}
+              <span className="text-gray-800 dark:text-white/80 font-medium">{photo.album}</span>
             </div>
 
             {/* Actions */}
-            <div className="border-t border-white/10" />
+            <div className="border-t border-gray-200 dark:border-white/10" />
             <div className="space-y-2">
               {/* Download */}
               <button
@@ -274,16 +321,16 @@ export default function GalleryLightbox({
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-accentColor hover:bg-accentColor/80 text-white text-sm font-semibold transition-all duration-200 hover:scale-[1.02]"
               >
                 <Download className="w-4 h-4" />
-                Download Foto
+                {t("lightbox_download")}
               </button>
 
               {/* Share */}
               <button
                 onClick={() => setShowShare((v) => !v)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-sm font-semibold transition-all duration-200 hover:scale-[1.02] border border-white/10"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-800 dark:text-white text-sm font-semibold transition-all duration-200 hover:scale-[1.02] border border-gray-200 dark:border-white/10"
               >
                 <Share2 className="w-4 h-4" />
-                Bagikan
+                {t("lightbox_share")}
               </button>
 
               {/* Share options */}
@@ -291,10 +338,14 @@ export default function GalleryLightbox({
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <button
                     onClick={handleCopyLink}
-                    className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium transition-all duration-200 border border-white/10"
+                    className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-800 dark:text-white text-xs font-medium transition-all duration-200 border border-gray-200 dark:border-white/10"
                   >
-                    {copied ? <Check className="w-3.5 h-3.5 text-accentColor" /> : <Copy className="w-3.5 h-3.5" />}
-                    {copied ? "Tersalin!" : "Copy Link"}
+                    {copied ? (
+                      <Check className="w-3.5 h-3.5 text-accentColor" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )}
+                    {copied ? t("lightbox_copied") : t("lightbox_copy_link")}
                   </button>
                   <button
                     onClick={shareWhatsApp}
@@ -311,9 +362,7 @@ export default function GalleryLightbox({
                     Twitter/X
                   </button>
                   <button
-                    onClick={() =>
-                      window.open("https://www.instagram.com/", "_blank")
-                    }
+                    onClick={() => window.open("https://www.instagram.com/", "_blank")}
                     className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-br from-purple-600/80 to-pink-600/80 hover:from-purple-600 hover:to-pink-600 text-white text-xs font-medium transition-all duration-200"
                   >
                     <FaInstagram className="w-3.5 h-3.5" />
@@ -328,3 +377,5 @@ export default function GalleryLightbox({
     </div>
   )
 }
+
+

@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useRef, useState } from "react"
+import { useTranslations } from "next-intl"
 import { createPortal } from "react-dom"
 import { X, Upload, ChevronRight, ChevronLeft, Send, Star, Check, ImageIcon } from "lucide-react"
 import { cn } from "@/lib/Utils"
@@ -93,7 +94,9 @@ function StarRatingInput({
   value: number
   onChange: (v: number) => void
 }) {
+  const t = useTranslations("guestbookPage")
   const [hover, setHover] = useState(0)
+  const ratingLabels = ["", t("rating_1"), t("rating_2"), t("rating_3"), t("rating_4"), t("rating_5")]
   return (
     <div className="flex items-center gap-1">
       {Array.from({ length: 5 }).map((_, i) => {
@@ -121,7 +124,7 @@ function StarRatingInput({
       })}
       {value > 0 && (
         <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-          {["", "Cukup", "Lumayan", "Bagus", "Sangat Bagus", "Luar Biasa!"][value]}
+          {ratingLabels[value]}
         </span>
       )}
     </div>
@@ -139,6 +142,7 @@ function AvatarUpload({
   onFile: (file: File) => void
   onClear: () => void
 }) {
+  const t = useTranslations("guestbookPage")
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState("")
@@ -146,11 +150,11 @@ function AvatarUpload({
   const handleFile = (file: File) => {
     setError("")
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      setError("Hanya format JPG, PNG, atau WEBP yang didukung.")
+      setError(t("avatar_err_format"))
       return
     }
     if (file.size > 2 * 1024 * 1024) {
-      setError("Ukuran file maksimal 2MB.")
+      setError(t("avatar_err_size"))
       return
     }
     onFile(file)
@@ -170,13 +174,13 @@ function AvatarUpload({
           <Image src={preview} alt="Avatar preview" fill className="object-cover" sizes="80px" />
         </div>
         <div className="flex flex-col gap-2">
-          <p className="text-sm text-gray-600 dark:text-gray-400">Foto dipilih ✓</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{t("avatar_selected")}</p>
           <button
             type="button"
             onClick={onClear}
             className="text-xs text-red-500 hover:text-red-600 underline"
           >
-            Hapus foto
+            {t("avatar_remove")}
           </button>
         </div>
       </div>
@@ -203,10 +207,10 @@ function AvatarUpload({
           </div>
           <div>
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Drag & drop atau{" "}
-              <span className="text-accentColor underline">klik untuk upload</span>
+              {t("avatar_drag")}{" "}
+              <span className="text-accentColor underline">{t("avatar_click")}</span>
             </p>
-            <p className="text-xs text-gray-400 mt-0.5">JPG, PNG, WEBP • Maks 2MB • Opsional</p>
+            <p className="text-xs text-gray-400 mt-0.5">{t("avatar_hint")}</p>
           </div>
         </div>
         <input
@@ -228,12 +232,13 @@ function AvatarUpload({
 // ─── Card Preview (Step 3) ─────────────────────────────────────────────────────
 
 function PreviewCard({ form }: { form: FormData }) {
+  const t = useTranslations("guestbookPage")
   const fakeEntry: GuestbookEntry = {
     id: "preview",
-    name: form.name || "Nama Kamu",
-    city: form.city || "Kota",
-    profession: form.profession || "Profesi",
-    message: form.message || "Pesan kamu akan muncul di sini...",
+    name: form.name || t("preview_name_ph"),
+    city: form.city || t("preview_city_ph"),
+    profession: form.profession || t("preview_profession_ph"),
+    message: form.message || t("preview_message_ph"),
     mood: form.mood || "Senang",
     rating: form.rating || 5,
     card_color: form.card_color,
@@ -253,6 +258,7 @@ function PreviewCard({ form }: { form: FormData }) {
 // ─── Main Modal ────────────────────────────────────────────────────────────────
 
 export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props) {
+  const t = useTranslations("guestbookPage")
   const [step, setStep] = useState(1)
   const [form, setForm] = useState<FormData>(INITIAL_FORM)
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({})
@@ -276,20 +282,20 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
 
   const validateStep1 = () => {
     const e: typeof errors = {}
-    if (!form.name.trim()) e.name = "Nama wajib diisi."
-    if (!form.city.trim()) e.city = "Kota / negara wajib diisi."
-    if (!form.profession.trim()) e.profession = "Profesi wajib diisi."
-    if (!form.referral_source) e.referral_source = "Pilih salah satu."
+    if (!form.name.trim()) e.name = t("err_name")
+    if (!form.city.trim()) e.city = t("err_city")
+    if (!form.profession.trim()) e.profession = t("err_profession")
+    if (!form.referral_source) e.referral_source = t("err_referral")
     setErrors(e)
     return Object.keys(e).length === 0
   }
 
   const validateStep2 = () => {
     const e: typeof errors = {}
-    if (!form.mood) e.mood = "Pilih mood kamu."
-    if (!form.rating) e.rating = "Berikan rating."
-    if (!form.message.trim()) e.message = "Pesan wajib diisi."
-    if (form.message.trim().length < 10) e.message = "Pesan minimal 10 karakter."
+    if (!form.mood) e.mood = t("err_mood")
+    if (!form.rating) e.rating = t("err_rating")
+    if (!form.message.trim()) e.message = t("err_message")
+    if (form.message.trim().length < 10) e.message = t("err_message_min")
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -326,7 +332,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
 
       if (existing) {
         localStorage.setItem("guestbook_submitted", "true")
-        throw new Error("Kamu sudah pernah mengisi buku tamu sebelumnya.")
+        throw new Error(t("err_already_submitted"))
       }
 
       // Upload avatar if provided
@@ -343,7 +349,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
           })
 
         if (uploadError) {
-          throw new Error(`Gagal mengunggah foto: ${uploadError.message}`)
+          throw new Error(`${t("err_upload")} ${uploadError.message}`)
         }
 
         if (uploadData) {
@@ -384,7 +390,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
       if (err instanceof Error) {
         setSubmitError(err.message)
       } else {
-        setSubmitError("Terjadi kesalahan. Coba lagi.")
+        setSubmitError(t("err_generic"))
       }
     } finally {
       setIsSubmitting(false)
@@ -393,7 +399,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
 
   if (!isOpen) return null
 
-  const STEPS = ["Identitas", "Pesan", "Preview"]
+  const STEPS = [t("step_identity"), t("step_message"), t("step_preview")]
   const progress = ((step - 1) / (STEPS.length - 1)) * 100
 
   return createPortal(
@@ -423,7 +429,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
             <div>
               <h2 className="font-semibold text-gray-900 dark:text-white text-base">
-                Isi Buku Tamu
+                {t("form_title")}
               </h2>
               <div className="flex items-center gap-2 mt-1">
                 {STEPS.map((label, i) => (
@@ -465,7 +471,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
             <button
               onClick={handleClose}
               className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Tutup"
+              aria-label={t("btn_close")}
             >
               <X size={18} />
             </button>
@@ -479,7 +485,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
               <div className="space-y-5">
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
-                    🖼️ Foto Profil <span className="text-gray-400 font-normal">(opsional)</span>
+                    {t("label_avatar")} <span className="text-gray-400 font-normal">{t("label_optional")}</span>
                   </label>
                   <AvatarUpload
                     preview={form.avatarPreview}
@@ -490,32 +496,32 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
-                    � Instagram / WhatsApp <span className="text-gray-400 font-normal">(opsional)</span>
+                    {t("label_contact")} <span className="text-gray-400 font-normal">{t("label_optional")}</span>
                   </label>
                   <div className="relative">
                     <input
                       type="text"
                       value={form.contact}
                       onChange={(e) => update("contact", e.target.value)}
-                      placeholder="@username atau 08xxxxxxxxxx"
+                      placeholder={t("contact_placeholder")}
                       maxLength={60}
                       className="w-full px-3.5 py-2.5 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 outline-none transition-all border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-accentColor/30 focus:border-accentColor"
                     />
                   </div>
                   <p className="text-[11px] text-gray-400 mt-1">
-                    Ketik <span className="font-semibold">@username</span> untuk Instagram atau nomor HP untuk WhatsApp
+                    {t("contact_hint")}
                   </p>
                 </div>
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
-                    �👤 Nama Lengkap <span className="text-red-500">*</span>
+                    {t("label_name")} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={form.name}
                     onChange={(e) => update("name", e.target.value)}
-                    placeholder="Nama kamu..."
+                    placeholder={t("name_placeholder")}
                     maxLength={100}
                     className={cn(
                       "w-full px-3.5 py-2.5 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 outline-none transition-all",
@@ -528,13 +534,13 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
-                    📍 Asal Kota / Negara <span className="text-red-500">*</span>
+                    {t("label_city")} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={form.city}
                     onChange={(e) => update("city", e.target.value)}
-                    placeholder="Jakarta, Indonesia"
+                    placeholder={t("city_placeholder")}
                     maxLength={100}
                     className={cn(
                       "w-full px-3.5 py-2.5 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 outline-none transition-all",
@@ -547,13 +553,13 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
-                    💼 Pekerjaan / Profesi <span className="text-red-500">*</span>
+                    {t("label_profession")} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={form.profession}
                     onChange={(e) => update("profession", e.target.value)}
-                    placeholder="Software Engineer, Designer, dll."
+                    placeholder={t("profession_placeholder")}
                     maxLength={100}
                     className={cn(
                       "w-full px-3.5 py-2.5 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 outline-none transition-all",
@@ -568,7 +574,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
-                    🔍 Dari mana tahu website ini? <span className="text-red-500">*</span>
+                    {t("label_referral")} <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={form.referral_source}
@@ -579,7 +585,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
                       errors.referral_source ? "border-red-400" : "border-gray-200 dark:border-gray-700"
                     )}
                   >
-                    <option value="">-- Pilih --</option>
+                    <option value="">{t("referral_select")}</option>
                     {REFERRAL_SOURCES.map((s) => (
                       <option key={s} value={s}>{s}</option>
                     ))}
@@ -596,7 +602,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
               <div className="space-y-5">
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
-                    😊 Mood kamu saat berkunjung <span className="text-red-500">*</span>
+                    {t("label_mood")} <span className="text-red-500">*</span>
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {MOODS.map((m) => (
@@ -612,7 +618,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
                         )}
                       >
                         <span className="text-base">{m.emoji}</span>
-                        <span>{m.label}</span>
+                        <span>{t(`mood_${m.label.toLowerCase()}`)}</span>
                       </button>
                     ))}
                   </div>
@@ -621,7 +627,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
-                    ⭐ Rating website <span className="text-red-500">*</span>
+                    {t("label_rating")} <span className="text-red-500">*</span>
                   </label>
                   <StarRatingInput value={form.rating} onChange={(v) => update("rating", v)} />
                   {errors.rating && <p className="text-xs text-red-500 mt-1.5">{errors.rating}</p>}
@@ -629,12 +635,12 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
-                    💬 Pesan / Kesan <span className="text-red-500">*</span>
+                    {t("label_message")} <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     value={form.message}
                     onChange={(e) => update("message", e.target.value)}
-                    placeholder="Tulis pesan atau kesanmu di sini... (min 10 karakter)"
+                    placeholder={t("message_placeholder")}
                     rows={4}
                     maxLength={500}
                     className={cn(
@@ -655,7 +661,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
-                    🎨 Warna Card
+                    {t("label_color")}
                   </label>
                   <div className="flex flex-wrap gap-2.5">
                     {COLOR_PRESETS.map((c) => (
@@ -680,7 +686,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
                       style={{ backgroundColor: form.card_color }}
                     />
                     <span className="text-xs text-gray-500 dark:text-gray-400">
-                      Warna terpilih: {form.card_color}
+                      {t("color_selected")} {form.card_color}
                     </span>
                   </div>
                 </div>
@@ -692,10 +698,10 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
               <div className="space-y-5">
                 <div className="text-center">
                   <h3 className="font-semibold text-gray-900 dark:text-white text-base mb-1">
-                    Preview Card Kamu
+                    {t("preview_title")}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Begini tampilan kamu di halaman buku tamu
+                    {t("preview_desc")}
                   </p>
                 </div>
 
@@ -709,8 +715,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
 
                 <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center">
                   <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">
-                    ℹ️ Data kamu akan ditampilkan publik di halaman ini. Pastikan informasi yang
-                    kamu masukkan sudah benar.
+                    {t("preview_disclaimer")}
                   </p>
                 </div>
               </div>
@@ -727,7 +732,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all disabled:opacity-50"
               >
                 <ChevronLeft size={15} />
-                Kembali
+                {t("btn_back")}
               </button>
             ) : (
               <div />
@@ -739,7 +744,7 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
                 onClick={handleNext}
                 className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-medium bg-accentColor text-white hover:bg-accentColor/90 transition-all shadow-sm"
               >
-                Lanjut
+                {t("btn_next")}
                 <ChevronRight size={15} />
               </button>
             ) : (
@@ -757,12 +762,12 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
                 {isSubmitting ? (
                   <>
                     <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                    Mengirim...
+                    {t("btn_submitting")}
                   </>
                 ) : (
                   <>
                     <Send size={14} />
-                    Konfirmasi & Kirim
+                    {t("btn_submit")}
                   </>
                 )}
               </button>

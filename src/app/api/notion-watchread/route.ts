@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 const NOTION_API_KEY = process.env.NOTION_API_KEY ?? "";
 const NOTION_DB_ID = process.env.NOTION_WATCHREAD_DB_ID ?? "12056271e05f80739ef0f0b34d8e1f23";
 
-// 1. UBAH DI SINI: Paksa API untuk dinamis dan tidak menggunakan cache bawaan Vercel
-export const dynamic = "force-dynamic";
+// 1. UBAH DI SINI: Kita nyalakan kembali cache selama 60 detik (ISR)
+export const revalidate = 60; 
 
 export async function GET() {
   if (!NOTION_API_KEY) {
@@ -27,8 +27,8 @@ export async function GET() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
-        // 2. UBAH DI SINI: Matikan cache untuk request fetch ini
-        cache: "no-store",
+        // 2. UBAH DI SINI: Gunakan revalidate 60 detik alih-alih no-store
+        next: { revalidate: 60 },
       });
 
       if (!res.ok) {
@@ -45,7 +45,6 @@ export async function GET() {
       const p = page as Record<string, unknown>;
       const props = p.properties as Record<string, any>;
 
-      // Helper untuk mengambil data Notion
       const getTitle = (prop: any) => {
         if (!prop) return "";
         const arr = prop.title || prop.rich_text;
@@ -63,7 +62,6 @@ export async function GET() {
 
       const getDate = (prop: any) => prop?.date?.start ?? null;
 
-      // Pemetaan kolom
       const title = getTitle(props["Name"]) || "Untitled";
       const progress = getTitle(props["Episode"]); 
       const categoryRaw = getSelect(props["Category"]);
@@ -73,7 +71,6 @@ export async function GET() {
       const lastSeen = getDate(props["Last Seen"]);
       const createdTime = p.created_time as string;
 
-      // Normalisasi Kategori
       const normalizeCategory = (c: string | null): string => {
         if (!c) return "Movie";
         const lower = c.toLowerCase();
@@ -88,26 +85,22 @@ export async function GET() {
 
       const category = normalizeCategory(categoryRaw);
 
-      // Normalisasi Status Pintar (Tanpa Paused)
       const normalizeStatus = (): string => {
         const s = (statusRaw || "").toLowerCase();
         const t = tagsRaw.join(" ").toLowerCase();
 
-        // Jika eksplisit belum ditonton atau akan ditonton
         if (s === "not watched" || t.includes("will watch") || t.includes("soon")) {
           return "plan_to_watch";
         }
         
-        // Jika sedang ditonton
         if (s === "watched") {
-          // Ongoing dan Waiting Confirmation masuk ke Sedang Tonton/Baca
           if (t.includes("ongoing") || t.includes("waiting confirmation")) {
             return (category === "Manga" || category === "Manhwa") ? "reading" : "watching";
           }
           if (t.includes("end")) {
             return "completed";
           }
-          return "completed"; // Default kalau "Watched" tapi ga ada tag
+          return "completed";
         }
 
         return "plan_to_watch";

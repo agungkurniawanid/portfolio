@@ -31,13 +31,6 @@
     "wip": "Einige Artikel sind noch in Bearbeitung. Bleib dran! 🚀",
     "follow": "Folge mir auf TikTok"
   },
-  "contact": {
-    "collaborate": "Zusammenarbeiten?",
-    "title": "Kontakt!",
-    "desc": "Ich freue mich immer darüber, mit Gleichgesinnten und potenziellen Kollaborateuren in Kontakt zu treten. Ob du ein Projekt besprechen möchtest, Hilfe benötigst oder einfach Hallo sagen willst — zögere nicht, mich zu kontaktieren!",
-    "tagline": "Make your happy ❤️ Today.",
-    "role": "Designer, Entwickler & Liebhaber"
-  },
   "nav": {
     "language": "Sprache"
   },
@@ -646,7 +639,12 @@
     "toast_error": "Nachricht konnte nicht gesendet werden, bitte erneut versuchen.",
     "sent_title": "Nachricht gesendet! \ud83c\udf89",
     "sent_desc": "Danke, dass du dich gemeldet hast. Ich werde deine Nachricht bald beantworten!",
-    "cta_back": "Zur\u00fcck zur Startseite"
+    "cta_back": "Zur\u00fcck zur Startseite",
+    "collaborate": "Zusammenarbeiten?",
+    "title": "Kontakt!",
+    "desc": "Ich freue mich immer darüber, mit Gleichgesinnten und potenziellen Kollaborateuren in Kontakt zu treten. Ob du ein Projekt besprechen möchtest, Hilfe benötigst oder einfach Hallo sagen willst — zögere nicht, mich zu kontaktieren!",
+    "tagline": "Make your happy ❤️ Today.",
+    "role": "Designer, Entwickler & Liebhaber"
   },
   "certificatePage": {
     "badge": "Zertifikate & Errungenschaften",

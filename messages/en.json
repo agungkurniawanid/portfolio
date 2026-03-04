@@ -31,13 +31,6 @@
     "wip": "Some articles are still being written. Stay tuned for the next post! 🚀",
     "follow": "Follow me on TikTok"
   },
-  "contact": {
-    "collaborate": "Want to Collaborate?",
-    "title": "Contact Me!",
-    "desc": "I'm always happy to connect with like-minded professionals and potential collaborators. Whether you have a project to discuss, need help, or just want to say hello — don't hesitate to reach out!",
-    "tagline": "Make your happy ❤️ Today.",
-    "role": "Designer, Developer & Lover"
-  },
   "nav": {
     "language": "Language"
   },
@@ -646,7 +639,12 @@
     "toast_error": "Failed to send message, please try again.",
     "sent_title": "Message Sent! \ud83c\udf89",
     "sent_desc": "Thank you for reaching out. I'll reply to your message soon!",
-    "cta_back": "Back to Home"
+    "cta_back": "Back to Home",
+    "collaborate": "Want to Collaborate?",
+    "title": "Contact Me!",
+    "desc": "I'm always happy to connect with like-minded professionals and potential collaborators. Whether you have a project to discuss, need help, or just want to say hello — don't hesitate to reach out!",
+    "tagline": "Make your happy ❤️ Today.",
+    "role": "Designer, Developer & Lover"
   },
   "certificatePage": {
     "badge": "Certificates & Achievements",

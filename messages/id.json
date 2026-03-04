@@ -31,13 +31,6 @@
     "wip": "Beberapa artikel masih dalam proses penulisan. Nantikan tulisan berikutnya! 🚀",
     "follow": "Follow saya di TikTok"
   },
-  "contact": {
-    "collaborate": "Mau Kolaborasi?",
-    "title": "Contact Saya!",
-    "desc": "Saya selalu senang untuk terhubung dengan para profesional yang memiliki pemikiran serupa dan calon kolaborator. Apakah Anda memiliki proyek yang ingin didiskusikan, membutuhkan bantuan, atau sekadar ingin menyapa, jangan ragu untuk menghubungi saya!",
-    "tagline": "Make your happy ❤️ Today.",
-    "role": "Designer, Developer & Lover"
-  },
   "nav": {
     "language": "Bahasa"
   },
@@ -646,7 +639,12 @@
     "toast_error": "Gagal mengirim pesan, coba lagi.",
     "sent_title": "Pesan Terkirim! \ud83c\udf89",
     "sent_desc": "Terima kasih telah menghubungi saya. Saya akan membalas pesan Anda segera!",
-    "cta_back": "Kembali ke Beranda"
+    "cta_back": "Kembali ke Beranda",
+    "collaborate": "Mau Kolaborasi?",
+    "title": "Contact Saya!",
+    "desc": "Saya selalu senang untuk terhubung dengan para profesional yang memiliki pemikiran serupa dan calon kolaborator. Apakah Anda memiliki proyek yang ingin didiskusikan, membutuhkan bantuan, atau sekadar ingin menyapa, jangan ragu untuk menghubungi saya!",
+    "tagline": "Make your happy ❤️ Today.",
+    "role": "Designer, Developer & Lover"
   },
   "certificatePage": {
     "badge": "Sertifikat & Pencapaian",

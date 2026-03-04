@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Gamepad2, Film, Tv, Music, BookOpen, Package, Clock } from "lucide-react";
+import { Gamepad2, MonitorPlay, Music, BookOpen, Clock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/Utils";
 import { EntertainmentTab } from "@/types/entertainment";
-import { BOOKS_DATA, COLLECTIONS_DATA, ANIME_SERIES_DATA, SPOTIFY_PLAYLISTS, STEAM_GAMES_FALLBACK, LOCAL_MOVIES } from "@/data/entertainmentData";
+import { STEAM_GAMES_FALLBACK } from "@/data/entertainmentData";
 import { StatCardSkeleton } from "./EntertainmentSkeletons";
 
 interface StatCardProps {
@@ -83,7 +83,11 @@ export default function DashboardSection({ onTabClick }: { onTabClick: (tab: Ent
   const [steamLoaded, setSteamLoaded] = useState(false);
   const [totalGames, setTotalGames] = useState(0);
   const [totalHours, setTotalHours] = useState(0);
+  const [watchReadCount, setWatchReadCount] = useState(0);
+  const [musicCount, setMusicCount] = useState(0);
+  const [booksCount, setBooksCount] = useState(0);
 
+  // Steam games
   useEffect(() => {
     fetch("/api/steam-games")
       .then((r) => r.json())
@@ -99,6 +103,22 @@ export default function DashboardSection({ onTabClick }: { onTabClick: (tab: Ent
       .finally(() => setSteamLoaded(true));
   }, []);
 
+  // Other tabs
+  useEffect(() => {
+    fetch("/api/notion-watchread")
+      .then((r) => r.json())
+      .then((d) => setWatchReadCount((d.items ?? []).length))
+      .catch(() => {});
+    fetch("/api/music-data")
+      .then((r) => r.json())
+      .then((d) => setMusicCount((d.tracks ?? []).length))
+      .catch(() => {});
+    fetch("/api/books-data")
+      .then((r) => r.json())
+      .then((d) => setBooksCount((d.books ?? []).filter((b: { status: string }) => b.status === "finished").length))
+      .catch(() => {});
+  }, []);
+
   const stats: Omit<StatCardProps, "onTabClick">[] = [
     {
       icon: <Gamepad2 size={20} />, label: t("stat_total_games"), value: totalGames,
@@ -106,34 +126,24 @@ export default function DashboardSection({ onTabClick }: { onTabClick: (tab: Ent
       description: t("desc_game_collection"),
     },
     {
-      icon: <Clock size={20} />, label: t("stat_play_hours"), value: totalHours, suffix: "j",
+      icon: <Clock size={20} />, label: t("stat_play_hours"), value: totalHours, suffix: "h",
       color: "text-cyan-500", bgColor: "bg-cyan-500", tab: "games",
       description: t("desc_game_stats"),
     },
     {
-      icon: <Film size={20} />, label: t("stat_movies_watched"), value: LOCAL_MOVIES.filter((m) => m.status === "watched").length,
-      color: "text-rose-500", bgColor: "bg-rose-500", tab: "movies",
-      description: t("desc_movies"),
+      icon: <MonitorPlay size={20} />, label: t("stat_total_watchread"), value: watchReadCount,
+      color: "text-rose-500", bgColor: "bg-rose-500", tab: "watchread",
+      description: t("desc_watchread"),
     },
     {
-      icon: <Tv size={20} />, label: t("stat_anime_completed"), value: ANIME_SERIES_DATA.filter((s) => s.status === "completed").length,
-      color: "text-purple-500", bgColor: "bg-purple-500", tab: "anime",
-      description: t("desc_anime"),
-    },
-    {
-      icon: <Music size={20} />, label: t("stat_playlists"), value: SPOTIFY_PLAYLISTS.length,
+      icon: <Music size={20} />, label: t("stat_total_tracks"), value: musicCount,
       color: "text-green-500", bgColor: "bg-green-500", tab: "music",
       description: t("desc_music"),
     },
     {
-      icon: <BookOpen size={20} />, label: t("stat_books_read"), value: BOOKS_DATA.filter((b) => b.status === "finished").length,
+      icon: <BookOpen size={20} />, label: t("stat_books_read"), value: booksCount,
       color: "text-amber-500", bgColor: "bg-amber-500", tab: "books",
       description: t("desc_books"),
-    },
-    {
-      icon: <Package size={20} />, label: t("stat_collections"), value: COLLECTIONS_DATA.length,
-      color: "text-pink-500", bgColor: "bg-pink-500", tab: "collections",
-      description: t("desc_collections"),
     },
   ];
 
@@ -158,7 +168,7 @@ export default function DashboardSection({ onTabClick }: { onTabClick: (tab: Ent
         </h3>
         {!steamLoaded ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 7 }).map((_, i) => <StatCardSkeleton key={i} />)}
+            {Array.from({ length: 5 }).map((_, i) => <StatCardSkeleton key={i} />)}
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -175,57 +185,36 @@ export default function DashboardSection({ onTabClick }: { onTabClick: (tab: Ent
           {t("dash_highlights_heading")}
         </h3>
         <div className="grid md:grid-cols-3 gap-4">
-          {/* Last watched movie */}
-          {(() => {
-            const last = [...LOCAL_MOVIES].filter(m => m.watched_date).sort((a, b) => (b.watched_date ?? "").localeCompare(a.watched_date ?? ""))[0];
-            return last ? (
-              <HighlightCard
-                emoji="🎬"
-                category={t("hl_last_movie")}
-                title={last.title}
-                sub={last.watched_date ? new Date(last.watched_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : ""}
-                rating={last.personal_rating}
-                color="text-rose-500"
-                bg="bg-rose-500/10 dark:bg-rose-500/5"
-                borderColor="border-rose-200 dark:border-rose-800/30"
-                onClick={() => onTabClick("movies")}
-              />
-            ) : null;
-          })()}
-          {/* Top rated anime */}
-          {(() => {
-            const top = [...ANIME_SERIES_DATA].filter(s => s.personal_rating > 0).sort((a, b) => b.personal_rating - a.personal_rating)[0];
-            return top ? (
-              <HighlightCard
-                emoji="🎌"
-                category={t("hl_fav_anime")}
-                title={top.title}
-                sub={top.status === "completed" ? t("hl_completed") : top.status === "ongoing" ? t("hl_watching") : t("hl_wishlisted")}
-                rating={top.personal_rating}
-                color="text-purple-500"
-                bg="bg-purple-500/10 dark:bg-purple-500/5"
-                borderColor="border-purple-200 dark:border-purple-800/30"
-                onClick={() => onTabClick("anime")}
-              />
-            ) : null;
-          })()}
-          {/* Top book */}
-          {(() => {
-            const top = [...BOOKS_DATA].filter(b => b.status === "reading")[0] ?? [...BOOKS_DATA].filter(b => b.personal_rating > 0).sort((a, b) => b.personal_rating - a.personal_rating)[0];
-            return top ? (
-              <HighlightCard
-                emoji="📚"
-                category={top.status === "reading" ? t("hl_reading") : t("hl_top_book")}
-                title={top.title}
-                sub={top.author}
-                rating={top.personal_rating}
-                color="text-amber-500"
-                bg="bg-amber-500/10 dark:bg-amber-500/5"
-                borderColor="border-amber-200 dark:border-amber-800/30"
-                onClick={() => onTabClick("books")}
-              />
-            ) : null;
-          })()}
+          <HighlightCard
+            emoji="🎮"
+            category={t("tab_games")}
+            title={t("dash_hl_games_title")}
+            sub={t("dash_hl_games_sub")}
+            color="text-blue-500"
+            bg="bg-blue-500/10 dark:bg-blue-500/5"
+            borderColor="border-blue-200 dark:border-blue-800/30"
+            onClick={() => onTabClick("games")}
+          />
+          <HighlightCard
+            emoji="🎬"
+            category={t("tab_watchread")}
+            title={t("dash_hl_watchread_title")}
+            sub={t("dash_hl_watchread_sub")}
+            color="text-rose-500"
+            bg="bg-rose-500/10 dark:bg-rose-500/5"
+            borderColor="border-rose-200 dark:border-rose-800/30"
+            onClick={() => onTabClick("watchread")}
+          />
+          <HighlightCard
+            emoji="📚"
+            category={t("tab_books")}
+            title={t("dash_hl_books_title")}
+            sub={t("dash_hl_books_sub")}
+            color="text-amber-500"
+            bg="bg-amber-500/10 dark:bg-amber-500/5"
+            borderColor="border-amber-200 dark:border-amber-800/30"
+            onClick={() => onTabClick("books")}
+          />
         </div>
       </div>
     </div>

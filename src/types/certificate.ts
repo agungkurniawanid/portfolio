@@ -9,10 +9,12 @@ export type CertificateCategory =
 
 export type CertificateStatus = "Valid" | "Expired" | "Lifetime"
 
-export type SortOption = "Terbaru" | "Terlama" | "A–Z" | "Z–A"
+/** Internal sort-option keys — display labels come from i18n. */
+export type SortOption = "newest" | "oldest" | "az" | "za"
 
 export interface Certificate {
-  id: number
+  /** UUID from Supabase */
+  id: string
   title: string
   description: string
   category: Exclude<CertificateCategory, "Semua">

@@ -20,17 +20,65 @@ export interface SteamGamesResponse {
   };
 }
 
-// ─── Movies ───────────────────────────────────────────────────────────────────
-export type MovieStatus = "watched" | "watching" | "wishlist";
+// ─── Mobile / Non-Steam Games ─────────────────────────────────────────────────
+export interface MobileGame {
+  id: number;
+  title: string;
+  platform: string;
+  genre: string[];
+  status: "playing" | "completed" | "wishlist";
+  cover_url?: string | null;
+  description?: string | null;
+  developer?: string | null;
+  release_year?: number | null;
+  personal_rating?: number | null;
+  review?: string | null;
+  hours_played?: number;
+  created_at?: string;
+}
 
+// ─── Watch & Read (Notion → TMDB) ─────────────────────────────────────────────
+export type WatchReadCategory =
+  | "Movie"
+  | "Anime"
+  | "Manhwa"
+  | "Donghua"
+  | "Manga"
+  | "Cartoon";
+
+export type WatchReadStatus =
+  | "watching"
+  | "reading"
+  | "completed"
+  | "paused"
+  | "dropped"
+  | "plan_to_watch";
+
+export interface WatchReadItem {
+  id: string;
+  title: string;
+  category: WatchReadCategory;
+  status: WatchReadStatus;
+  progress?: string | null;
+  personal_rating?: number | null;
+  notes?: string | null;
+  tmdb_id?: number | null;
+  tmdb_poster?: string | null;
+  tmdb_overview?: string | null;
+  tmdb_rating?: number | null;
+  tmdb_loading?: boolean;
+  tmdb_error?: boolean;
+}
+
+// ─── Movies / AnimeSeries kept for backwards compat in DashboardSection ───────
+export type MovieStatus = "watched" | "watching" | "wishlist";
 export interface LocalMovie {
   title: string;
   status: MovieStatus;
-  personal_rating: number; // 1–5
+  personal_rating: number;
   review?: string;
   watched_date?: string;
 }
-
 export interface TMDBMovie {
   id: number;
   title: string;
@@ -41,16 +89,12 @@ export interface TMDBMovie {
   genre_ids?: number[];
   genres?: { id: number; name: string }[];
 }
-
 export interface EnrichedMovie extends LocalMovie {
   tmdb?: TMDBMovie;
   loading?: boolean;
   error?: boolean;
 }
-
-// ─── Anime / Series ───────────────────────────────────────────────────────────
 export type SeriesStatus = "completed" | "ongoing" | "wishlist";
-
 export interface AnimeSeries {
   id: number;
   title: string;
@@ -59,7 +103,7 @@ export interface AnimeSeries {
   total_episodes?: number;
   total_seasons?: number;
   status: SeriesStatus;
-  personal_rating: number; // 1–5
+  personal_rating: number;
   review?: string;
   genres: string[];
   studio?: string;
@@ -79,24 +123,50 @@ export interface SpotifyPlaylist {
   embed_url: string;
 }
 
-// ─── Books ────────────────────────────────────────────────────────────────────
-export type BookStatus = "finished" | "reading" | "wishlist";
+export interface MusicTrack {
+  id: number;
+  title: string;
+  artist: string;
+  spotify_track_id?: string | null;
+  notes?: string | null;
+  spotify_embed_url?: string | null;
+  loading?: boolean;
+  error?: boolean;
+}
 
-export interface LocalBook {
+export interface CustomAlbum {
+  id: number;
+  name: string;
+  description?: string | null;
+  cover_url?: string | null;
+  tracks?: MusicTrack[];
+}
+
+// ─── Books ────────────────────────────────────────────────────────────────────
+export type BookStatus = "finished" | "wishlist" | "favorite";
+
+export interface SupabaseBook {
   id: number;
   title: string;
   author: string;
-  year?: number;
-  genre: string[];
+  isbn?: string | null;
+  open_library_key?: string | null;
   status: BookStatus;
-  personal_rating: number; // 1–5
-  review?: string;
-  pages?: number;
-  cover_url?: string; // fetched from Google Books
-  google_books_id?: string;
+  personal_rating?: number | null;
+  review?: string | null;
+  genre: string[];
+  year?: number | null;
+  pages?: number | null;
+  cover_url?: string | null;
+  ol_description?: string | null;
+  ol_loading?: boolean;
+  ol_error?: boolean;
 }
 
-// ─── Collections ─────────────────────────────────────────────────────────────
+// LocalBook kept for type compat
+export type LocalBook = SupabaseBook;
+
+// ─── Collections (deprecated / kept for type compat) ─────────────────────────
 export type CollectionCondition = "mint" | "good" | "used";
 export type CollectionCategory =
   | "Action Figure"
@@ -105,7 +175,6 @@ export type CollectionCategory =
   | "Funko Pop"
   | "Trading Card"
   | "Lainnya";
-
 export interface CollectionItem {
   id: number;
   name: string;
@@ -117,23 +186,19 @@ export interface CollectionItem {
   image_url?: string;
 }
 
-// ─── Dashboard Stats ─────────────────────────────────────────────────────────
+// ─── Dashboard Stats ──────────────────────────────────────────────────────────
 export interface EntertainmentStats {
   total_games: number;
   total_hours: number;
-  total_movies_watched: number;
-  total_anime_completed: number;
+  total_watchread: number;
   total_playlists: number;
   total_books_read: number;
-  total_collections: number;
 }
 
-// ─── Tab navigation ──────────────────────────────────────────────────────────
+// ─── Tab navigation ───────────────────────────────────────────────────────────
 export type EntertainmentTab =
   | "dashboard"
   | "games"
-  | "movies"
-  | "anime"
+  | "watchread"
   | "music"
-  | "books"
-  | "collections";
+  | "books";

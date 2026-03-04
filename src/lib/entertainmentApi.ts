@@ -1,4 +1,4 @@
-import { SteamGame, TMDBMovie, LocalBook } from "@/types/entertainment";
+import { SteamGame, TMDBMovie } from "@/types/entertainment";
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 const STEAM_API_KEY = process.env.NEXT_PUBLIC_STEAM_API_KEY ?? "";
@@ -125,4 +125,82 @@ export function formatPlaytime(minutes: number): string {
   if (minutes < 60) return `${minutes} menit`;
   const hours = Math.floor(minutes / 60);
   return `${hours} jam`;
+}
+
+// ─── Open Library ─────────────────────────────────────────────────────────────
+export interface OpenLibraryResult {
+  cover_url: string | null;
+  description: string | null;
+  open_library_key: string | null;
+  pages: number | null;
+  year: number | null;
+}
+
+export async function fetchOpenLibraryBook(
+  title: string,
+  author?: string
+): Promise<OpenLibraryResult | null> {
+  try {
+    const q = author
+      ? `title:${encodeURIComponent(title)}+author:${encodeURIComponent(author)}`
+      : `title:${encodeURIComponent(title)}`;
+    const res = await fetch(
+      `https://openlibrary.org/search.json?q=${q}&limit=1&fields=key,cover_i,number_of_pages_median,first_publish_year`
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const doc = data.docs?.[0];
+    if (!doc) return null;
+    const coverId = doc.cover_i;
+    return {
+      cover_url: coverId
+        ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`
+        : null,
+      description: null, // requires separate works API call
+      open_library_key: doc.key ?? null,
+      pages: doc.number_of_pages_median ?? null,
+      year: doc.first_publish_year ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+// ─── TMDB for WatchRead (generic search) ────────────────────────────────────
+export async function searchTMDBByTitle(
+  title: string,
+  category: string
+): Promise<{
+  id: number;
+  poster_url: string | null;
+  overview: string;
+  vote_average: number;
+} | null> {
+  if (!TMDB_API_KEY) return null;
+  // TV-type categories: Anime, Cartoon, Donghua/Donhua
+  const tvCategories = ["Anime", "Cartoon", "Donghua", "Donhua"];
+  const endpoint = tvCategories.includes(category)
+    ? "tv"
+    : category === "Movie"
+    ? "movie"
+    : "multi";
+  try {
+    const res = await fetch(
+      `https://api.themoviedb.org/3/search/${endpoint}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&language=id-ID`,
+      { next: { revalidate: 3600 } }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const hit = data.results?.[0];
+    if (!hit) return null;
+    const posterPath: string | null = hit.poster_path ?? null;
+    return {
+      id: hit.id,
+      poster_url: posterPath ? `https://image.tmdb.org/t/p/w342${posterPath}` : null,
+      overview: hit.overview ?? "",
+      vote_average: hit.vote_average ?? 0,
+    };
+  } catch {
+    return null;
+  }
 }

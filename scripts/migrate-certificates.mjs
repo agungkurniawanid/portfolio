@@ -30,17 +30,24 @@ if (!connStr) {
 }
 
 // ─── Baca SQL migration ───────────────────────────────────────────────────────
-const SQL_FILE = path.join(
+const SQL_CREATE = path.join(
   __dirname,
   "../supabase/migrations/20260306000000_create_certificates_table.sql"
 )
+const SQL_CLEAR = path.join(
+  __dirname,
+  "../supabase/migrations/20260315000000_update_certificates_clear_seed.sql"
+)
 
-if (!fs.existsSync(SQL_FILE)) {
-  console.error("❌ File SQL tidak ditemukan:", SQL_FILE)
-  process.exit(1)
+for (const f of [SQL_CREATE, SQL_CLEAR]) {
+  if (!fs.existsSync(f)) {
+    console.error("❌ File SQL tidak ditemukan:", f)
+    process.exit(1)
+  }
 }
 
-const sql = fs.readFileSync(SQL_FILE, "utf-8")
+const sqlCreate = fs.readFileSync(SQL_CREATE, "utf-8")
+const sqlClear  = fs.readFileSync(SQL_CLEAR,  "utf-8")
 
 // ─── Jalankan migration ────────────────────────────────────────────────────────
 async function runMigration() {
@@ -60,28 +67,25 @@ async function runMigration() {
     await client.connect()
     console.log("✅ Terhubung!\n")
 
-    console.log("🚀 Menjalankan migration certificates...\n")
-    await client.query(sql)
+    console.log("🚀 [1/2] Menjalankan migration: create_certificates_table...")
+    await client.query(sqlCreate)
+    console.log("✅ Tabel & storage bucket siap.\n")
+
+    console.log("🧹 [2/2] Menjalankan migration: clear_seed_data...")
+    await client.query(sqlClear)
+    console.log("✅ Data seed dihapus — tabel sekarang kosong.\n")
 
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     console.log("✅ Migration selesai!\n")
-    console.log("📋 Yang sudah dibuat:")
+    console.log("📋 Yang sudah dilakukan:")
     console.log("   ✓ Extension: uuid-ossp")
-    console.log("   ✓ Tabel: certificates")
+    console.log("   ✓ Tabel: certificates (CREATE TABLE IF NOT EXISTS)")
     console.log("   ✓ Index performa (category, status, is_published, issue_date)")
     console.log("   ✓ Trigger: auto-update updated_at")
     console.log("   ✓ Row Level Security (read-only public policies)")
     console.log("   ✓ Storage bucket: certificates (public, 20 MB, PDF + image)")
     console.log("   ✓ Storage policies (public read, service_role write)")
-    console.log("")
-    console.log("📦 Data seed:")
-    console.log("   ✓  2 Bootcamp")
-    console.log("   ✓  3 Course Online")
-    console.log("   ✓  2 Webinar / Seminar")
-    console.log("   ✓  3 Sertifikasi Resmi")
-    console.log("   ✓  1 Magang / Internship")
-    console.log("   ✓  1 Kompetisi / Lomba")
-    console.log("   ✓ Total: 12 sertifikat")
+    console.log("   ✓ Semua data seed dihapus — tabel kosong")
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
   } catch (err) {
     console.error("\n❌ Migration gagal:", err.message)

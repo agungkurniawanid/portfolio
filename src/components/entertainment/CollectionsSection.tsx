@@ -8,6 +8,8 @@ import { cn } from "@/lib/Utils";
 import { CollectionItem, CollectionCategory, CollectionCondition } from "@/types/entertainment";
 import { COLLECTIONS_DATA } from "@/data/entertainmentData";
 
+const t = useTranslations("entertainment");
+
 const CONDITION_LABEL: Record<CollectionCondition, string> = {
   mint: "✨ Mint",
   good: "👍 Good",

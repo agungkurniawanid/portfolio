@@ -143,7 +143,7 @@ export interface CustomAlbum {
 }
 
 // ─── Books ────────────────────────────────────────────────────────────────────
-export type BookStatus = "finished" | "wishlist" | "favorite";
+export type BookStatus = "finished" | "wishlist" | "favorite" | "reading";
 
 export interface SupabaseBook {
   id: number;

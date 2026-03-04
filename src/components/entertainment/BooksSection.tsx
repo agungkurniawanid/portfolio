@@ -9,10 +9,12 @@ import { fetchOpenLibraryBook } from "@/lib/entertainmentApi";
 import { SupabaseBook, BookStatus } from "@/types/entertainment";
 import { BookCardSkeleton } from "./EntertainmentSkeletons";
 
+// 1. TAMBAHKAN WARNA UNTUK "reading" DI SINI
 const STATUS_COLOR: Record<BookStatus, string> = {
   finished: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
   wishlist: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
   favorite: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
+  reading: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
 };
 
 type SortOption = "rating_high" | "az" | "pages";
@@ -29,10 +31,13 @@ function StarRating({ value, max = 5 }: { value: number; max?: number }) {
 
 export default function BooksSection({ globalSearch }: { globalSearch?: string }) {
   const t = useTranslations("entertainment");
+  
+  // 2. TAMBAHKAN LABEL UNTUK "reading" DI SINI
   const STATUS_LABEL: Record<BookStatus, string> = {
     finished: t("book_status_finished"),
     wishlist: t("book_status_wishlist"),
     favorite: t("book_status_favorite"),
+    reading: t("book_status_reading") || "Sedang Dibaca", // Pastikan kamu menambahkan "book_status_reading" di file terjemahan JSON kamu nanti
   };
 
   const [books, setBooks] = useState<SupabaseBook[]>([]);
@@ -141,13 +146,16 @@ export default function BooksSection({ globalSearch }: { globalSearch?: string }
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("search_book")} className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accentColor/40 transition" />
           {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"><X size={14} /></button>}
         </div>
+        
+        {/* 3. TAMBAHKAN "reading" KE DALAM DAFTAR FILTER DI BAWAH INI */}
         <div className="flex gap-2 flex-wrap">
-          {(["all", "finished", "wishlist", "favorite"] as const).map((s) => (
+          {(["all", "reading", "finished", "wishlist", "favorite"] as const).map((s) => (
             <button key={s} onClick={() => setFilterStatus(s)} className={cn("px-3 py-2 rounded-xl text-xs font-medium border transition-all", filterStatus === s ? "bg-accentColor text-white border-accentColor" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:border-accentColor/60")}>
               {s === "all" ? t("all") : STATUS_LABEL[s]}
             </button>
           ))}
         </div>
+
         <div className="relative" ref={sortRef}>
           <button onClick={() => setShowSort((v) => !v)} className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 text-sm text-gray-700 dark:text-gray-300 hover:border-accentColor/60 transition">
             <SlidersHorizontal size={14} />{SORT_OPTIONS.find((o) => o.value === sortBy)?.label}<ChevronDown size={13} />

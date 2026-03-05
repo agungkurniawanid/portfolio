@@ -23,7 +23,8 @@
     "migrate:visitor-ip-log-guestbook": "node scripts/migrate-visitor-ip-log-guestbook.mjs",
     "migrate:visitor-ip-log-fingerprint": "node scripts/migrate-visitor-ip-log-fingerprint.mjs",
     "migrate:visitor-ip-log-fix-index": "node scripts/migrate-visitor-ip-log-fix-index.mjs",
-    "migrate:guestbook-fix-rls": "node scripts/migrate-guestbook-fix-rls.mjs"
+    "migrate:guestbook-fix-rls": "node scripts/migrate-guestbook-fix-rls.mjs",
+    "migrate:all": "node scripts/migrate-all.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

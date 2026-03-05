@@ -84,6 +84,12 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('guestbook-avatars', 'guestbook-avatars', true)
 ON CONFLICT (id) DO NOTHING;
 
+-- ⬇️ TAMBAHKAN 3 BARIS INI UNTUK MENGHAPUS POLICY LAMA ⬇️
+DROP POLICY IF EXISTS "Public read guestbook avatar" ON storage.objects;
+DROP POLICY IF EXISTS "Anyone can upload guestbook avatar" ON storage.objects;
+DROP POLICY IF EXISTS "Anyone can delete own guestbook avatar" ON storage.objects;
+
+-- ⬇️ KODE LAMA KAMU TETAP DI BAWAHNYA ⬇️
 CREATE POLICY "Public read guestbook avatar"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'guestbook-avatars');

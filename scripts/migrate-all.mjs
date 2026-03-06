@@ -90,6 +90,15 @@ async function run() {
     }
     console.log("🎉 Migrate Fresh selesai total!\n")
 
+    // 👇 PROSES SETUP STORAGE BUCKET
+    console.log("📦 Menjalankan Setup Storage (Guestbook Storage)...")
+    try {
+      execSync("node scripts/migrate-guestbook-storage.mjs", { stdio: "inherit" })
+      console.log("✅ Setup Storage Guestbook berhasil diselesaikan!\n")
+    } catch (err) {
+      console.error("❌ Setup Storage Guestbook gagal dijalankan.")
+    }
+
     // 👇 PROSES AUTO SEEDING DATA
     console.log("🌱 Menjalankan Seeding Data (Timeline)...")
     try {
@@ -116,6 +125,15 @@ async function run() {
       console.error("❌ Auto-Seeding Deployed Projects gagal dijalankan.")
     }
     // 👆 SAMPAI SINI
+
+    // 👇 PROSES SEEDING STORAGE (Upload file ke bucket)
+    console.log("📸 Menjalankan Seeding Storage (Project Thumbnails)...")
+    try {
+      execSync("node scripts/migrate-projects-thumbnails.mjs", { stdio: "inherit" })
+      console.log("✅ Seeding Storage Project Thumbnails berhasil diselesaikan!\n")
+    } catch (err) {
+      console.error("❌ Seeding Storage Project Thumbnails gagal dijalankan.")
+    }
 
   } catch (err) {
     console.error("❌ Migration gagal:", err.message)

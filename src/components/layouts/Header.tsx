@@ -121,7 +121,7 @@ export default function Header() {
                     {/* Dropdown */}
                     <div
                       className={cn(
-                        "absolute top-full right-0 mt-2 w-[480px] origin-top-right",
+                        "absolute top-full right-0 mt-2 w-[700px] origin-top-right",
                         "bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700/60",
                         "transition-all duration-200",
                         dropdownOpen

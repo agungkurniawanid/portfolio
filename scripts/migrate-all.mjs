@@ -4,7 +4,7 @@ import path from "path"
 import { fileURLToPath } from "url"
 import dotenv from "dotenv"
 import { createClient } from "@supabase/supabase-js"
-import { execSync } from "child_process" // 👈 Tambahkan import ini
+import { execSync } from "child_process"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.join(__dirname, "../.env.local") })
@@ -38,7 +38,8 @@ const targetBuckets = [
   "guestbook-avatars",
   "author-avatars",
   "blog-thumbnails",
-  "timeline"
+  "timeline",
+  "project-files" // 👈 Bucket untuk fitur Deployed Projects sudah ditambahkan
 ]
 
 async function cleanAllStorageBuckets() {
@@ -104,6 +105,15 @@ async function run() {
       console.log("✅ Auto-Seeding Tech Tools berhasil diselesaikan!\n")
     } catch (err) {
       console.error("❌ Auto-Seeding Tech Tools gagal dijalankan.")
+    }
+
+    // 👈 TAMBAHAN UNTUK DEPLOYED PROJECTS
+    console.log("🌱 Menjalankan Seeding Data (Deployed Projects)...")
+    try {
+      execSync("node scripts/migrate-deployed-projects.mjs", { stdio: "inherit" })
+      console.log("✅ Auto-Seeding Deployed Projects berhasil diselesaikan!\n")
+    } catch (err) {
+      console.error("❌ Auto-Seeding Deployed Projects gagal dijalankan.")
     }
     // 👆 SAMPAI SINI
 

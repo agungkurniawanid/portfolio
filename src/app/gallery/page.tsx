@@ -15,6 +15,7 @@ import {
   User,
   Users,
   Plus,
+  MousePointerClick,
 } from "lucide-react"
 import { cn } from "@/lib/Utils"
 import { GalleryPhoto, GalleryAlbum, GalleryCategory, GalleryGuest, SortOption } from "@/types/gallery"
@@ -197,7 +198,13 @@ export default function GalleryPage() {
                 )}
               >
                 <User className="w-4 h-4" />
-                {t("tab_personal")}
+                <span>{t("tab_personal")}</span>
+                {ownerTab !== "personal" && (
+                  <span className="ml-1 flex items-center gap-1 text-[10px] font-normal opacity-70 bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded-md border border-black/5 dark:border-white/10">
+                    <MousePointerClick className="w-3 h-3" />
+                    {t("click_hint")}
+                  </span>
+                )}
               </button>
               <button
                 onClick={() => switchOwnerTab("guest")}
@@ -209,7 +216,13 @@ export default function GalleryPage() {
                 )}
               >
                 <Users className="w-4 h-4" />
-                {t("tab_guest")}
+                <span>{t("tab_guest")}</span>
+                {ownerTab !== "guest" && (
+                  <span className="ml-1 flex items-center gap-1 text-[10px] font-normal opacity-70 bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded-md border border-black/5 dark:border-white/10">
+                    <MousePointerClick className="w-3 h-3" />
+                    {t("click_hint")}
+                  </span>
+                )}
               </button>
             </div>
           </div>

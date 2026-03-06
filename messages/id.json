@@ -482,7 +482,8 @@
     "guest_dir_title": "Daftar Tamu",
     "guest_dir_empty": "Belum ada foto tamu. Jadilah yang pertama!",
     "guest_dir_empty_sub": "Klik tombol \"Tambah ke Gallery\" untuk mulai.",
-    "guest_back": "Kembali ke Daftar Tamu"
+    "guest_back": "Kembali ke Daftar Tamu",
+    "click_hint": "Klik"
   },
   "entertainment": {
     "page_title": "Dunia Hiburanku",

@@ -369,7 +369,19 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
     try {
       const fingerprint = await generateFingerprint()
 
-      // Check fingerprint in Supabase
+      // Cek server-side (fingerprint + IP fallback) — mencegah bypass meskipun localStorage dihapus
+      const visitorRes = await fetch(
+        `/api/visitor-check?type=guestbook_submitted&fp=${fingerprint}`
+      ).catch(() => null)
+      if (visitorRes?.ok) {
+        const visitorData = await visitorRes.json().catch(() => null)
+        if (visitorData?.checked) {
+          localStorage.setItem("guestbook_submitted", "true")
+          throw new Error(t("err_already_submitted"))
+        }
+      }
+
+      // Check fingerprint langsung di tabel guestbook (layer kedua)
       const { data: existing } = await supabase
         .from("guestbook")
         .select("id")
@@ -406,10 +418,11 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
         }
       }
 
-      // Insert entry
-      const { data: newEntry, error: insertError } = await supabase
-        .from("guestbook")
-        .insert({
+      // Insert entry via server-side API (bypass RLS dengan service role key)
+      const insertRes = await fetch("/api/guestbook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           browser_fingerprint: fingerprint,
           name: form.name.trim(),
           city: form.city.trim(),
@@ -421,11 +434,12 @@ export default function GuestbookFormModal({ isOpen, onClose, onSuccess }: Props
           avatar_url: avatarUrl,
           referral_source: form.referral_source,
           contact: form.contact.trim() || null,
-        })
-        .select()
-        .single()
+        }),
+      })
 
-      if (insertError) throw new Error(insertError.message)
+      const insertJson = await insertRes.json()
+      if (!insertRes.ok) throw new Error(insertJson.error ?? t("err_generic"))
+      const newEntry = insertJson.data
 
       // Save flag to localStorage
       localStorage.setItem("guestbook_submitted", "true")

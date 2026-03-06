@@ -210,9 +210,11 @@ export default function GalleryLightbox({
                   {translatedTitle ?? photo.title}
                 </h3>
               </div>
-              <p className="text-gray-600 dark:text-white/60 text-sm leading-relaxed mb-2">
-                {translatedDescription ?? photo.description}
-              </p>
+              {(translatedDescription ?? photo.description) && (
+                <p className="text-gray-600 dark:text-white/60 text-sm leading-relaxed mb-2">
+                  {translatedDescription ?? photo.description}
+                </p>
+              )}
               {/* Translate widget for title + description */}
               <div className="flex justify-end">
                 <TranslateWidget

@@ -1,14 +1,15 @@
 "use client"
 
-import { use, useMemo, useState, useCallback } from "react"
+import { use, useState, useCallback, useEffect } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import dynamic from "next/dynamic"
 import Masonry from "react-masonry-css"
-import { ArrowLeft, MapPin, Calendar, Images } from "lucide-react"
+import { ArrowLeft, MapPin, Calendar, Images, Loader2 } from "lucide-react"
 import { galleryPhotos, galleryAlbums } from "@/data/galleryData"
-import { GalleryPhoto } from "@/types/gallery"
+import { GalleryPhoto, GalleryAlbum } from "@/types/gallery"
+import { fetchAlbumBySlug, fetchPhotosByAlbum } from "@/lib/galleryApi"
 import GalleryPhotoCard from "@/components/gallery/GalleryPhotoCard"
 
 const GalleryLightbox = dynamic(() => import("@/components/gallery/GalleryLightbox"), {
@@ -20,7 +21,8 @@ const masonryBreakpoints = {
   1280: 4,
   1024: 3,
   768: 2,
-  480: 1,
+  640: 2,
+  480: 2,
 }
 
 interface PageProps {
@@ -30,14 +32,40 @@ interface PageProps {
 export default function AlbumDetailPage({ params }: PageProps) {
   const { slug } = use(params)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [album, setAlbum] = useState<GalleryAlbum | null | undefined>(undefined)
+  const [photos, setPhotos] = useState<GalleryPhoto[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const album = galleryAlbums.find((a) => a.slug === slug)
-  const photos = useMemo(
-    () => galleryPhotos.filter((p) => p.albumSlug === slug),
-    [slug]
-  )
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true)
 
-  if (!album) notFound()
+      // 1. Try static data first (personal albums)
+      const staticAlbum = galleryAlbums.find((a) => a.slug === slug)
+      if (staticAlbum) {
+        const staticPhotos = galleryPhotos.filter((p) => p.albumSlug === slug)
+        setAlbum(staticAlbum)
+        setPhotos(staticPhotos)
+        setIsLoading(false)
+        return
+      }
+
+      // 2. Fetch dynamic album from Supabase (guest albums)
+      const dbAlbum = await fetchAlbumBySlug(slug)
+      if (!dbAlbum) {
+        setAlbum(null)
+        setIsLoading(false)
+        return
+      }
+
+      const dbPhotos = await fetchPhotosByAlbum(slug)
+      setAlbum(dbAlbum)
+      setPhotos(dbPhotos)
+      setIsLoading(false)
+    }
+
+    loadData()
+  }, [slug])
 
   const openLightbox = useCallback(
     (photo: GalleryPhoto) => {
@@ -54,6 +82,22 @@ export default function AlbumDetailPage({ params }: PageProps) {
     a.target = "_blank"
     a.rel = "noopener noreferrer"
     a.click()
+  }
+
+  // Loading skeleton
+  if (isLoading || album === undefined) {
+    return (
+      <main className="min-h-screen bg-baseBackground pt-[4.5rem]">
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="w-8 h-8 animate-spin text-accentColor" />
+        </div>
+      </main>
+    )
+  }
+
+  // Album not found
+  if (album === null) {
+    notFound()
   }
 
   return (
@@ -104,7 +148,7 @@ export default function AlbumDetailPage({ params }: PageProps) {
       {photos.length > 0 && (
         <section className="px-[5%] max-w-7xl mx-auto py-6">
           <div className="flex flex-wrap gap-2">
-            {[...new Set(photos.map((p) => p.location))].map((loc) => (
+            {[...new Set(photos.map((p) => p.location).filter(Boolean))].map((loc) => (
               <span
                 key={loc}
                 className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
@@ -127,8 +171,8 @@ export default function AlbumDetailPage({ params }: PageProps) {
         ) : (
           <Masonry
             breakpointCols={masonryBreakpoints}
-            className="flex -ml-4 w-[calc(100%+1rem)]"
-            columnClassName="pl-4"
+            className="flex -ml-2 sm:-ml-4 w-[calc(100%+0.5rem)] sm:w-[calc(100%+1rem)]"
+            columnClassName="pl-2 sm:pl-4"
           >
             {photos.map((photo) => (
               <GalleryPhotoCard

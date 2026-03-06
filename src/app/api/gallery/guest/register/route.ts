@@ -67,14 +67,14 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Insert tamu baru
+    // Insert tamu baru (ip_address tidak lagi disimpan di gallery_guests,
+    // melainkan di visitor_ip_log sebagai bagian tracking terpusat)
     const { data: guest, error: insertErr } = await supabaseAdmin
       .from("gallery_guests")
       .insert({
         name: name.trim(),
         avatar_url: avatarUrl || null,
         browser_fingerprint: fingerprint,
-        ip_address: ip,
         album_count: 0,
         photo_count: 0,
       })
@@ -85,6 +85,19 @@ export async function POST(req: NextRequest) {
       console.error("[gallery/guest/register] insert error:", insertErr.message)
       return NextResponse.json({ error: insertErr.message }, { status: 500 })
     }
+
+    // Catat ke visitor_ip_log (tracking terpusat, sama seperti banner/guestbook)
+    // Gunakan '0.0.0.0' sebagai fallback jika IP tidak tersedia (dev/local)
+    await supabaseAdmin
+      .from("visitor_ip_log")
+      .insert({
+        ip_address: ip || "0.0.0.0",
+        action_type: "gallery_guest_registered",
+        browser_fingerprint: fingerprint,
+      })
+      .then(({ error }) => {
+        if (error) console.warn("[gallery/guest/register] visitor_ip_log insert warn:", error.message)
+      })
 
     return NextResponse.json({
       guest: {

@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       is_featured: false,
       tags: [],
       owner_type: "guest",
-      is_approved: false, // pending review oleh admin
+      is_approved: true, // auto-approved: langsung tampil di gallery tamu
       uploader_name: guestName,
       guest_id: guestId,
     }))

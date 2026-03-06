@@ -24,7 +24,6 @@ import { fetchGalleryPhotos, fetchGalleryAlbums, fetchGalleryGuests } from "@/li
 import FeaturedCarousel from "@/components/gallery/FeaturedCarousel"
 import GalleryPhotoCard from "@/components/gallery/GalleryPhotoCard"
 import GalleryAlbumCard from "@/components/gallery/GalleryAlbumCard"
-import GuestDirectory from "@/components/gallery/GuestDirectory"
 import GuestRegistrationModal from "@/components/gallery/GuestRegistrationModal"
 
 // Dynamically import lightbox to avoid SSR issues
@@ -42,7 +41,8 @@ const masonryBreakpoints = {
   1280: 4,
   1024: 3,
   768: 2,
-  480: 1,
+  640: 2,
+  480: 2,
 }
 
 export default function GalleryPage() {
@@ -528,8 +528,8 @@ export default function GalleryPage() {
                   <>
                     <Masonry
                       breakpointCols={masonryBreakpoints}
-                      className="flex -ml-4 w-[calc(100%+1rem)]"
-                      columnClassName="pl-4"
+                      className="flex -ml-2 sm:-ml-4 w-[calc(100%+0.5rem)] sm:w-[calc(100%+1rem)]"
+                      columnClassName="pl-2 sm:pl-4"
                     >
                       {visiblePhotos.map((photo) => (
                         <GalleryPhotoCard
@@ -562,42 +562,31 @@ export default function GalleryPage() {
             ) : (
               /* ── Album View ── */
               <>
-                {/* For guest tab: show A-Z guest directory */}
-                {ownerTab === "guest" ? (
-                  <GuestDirectory
-                    guests={tabGuests}
-                    albums={tabAlbums}
-                    loading={loading}
-                  />
+                {/* Both personal and guest tabs: show flat album grid */}
+                {tabAlbums.filter(
+                  (a) => activeCategory === "Semua" || a.category === activeCategory
+                ).length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-24 gap-4 text-gray-400">
+                    <FolderOpen className="w-16 h-16 opacity-30" />
+                    <p className="text-lg font-medium">{t("empty_albums")}</p>
+                  </div>
                 ) : (
-                  /* For personal tab: regular album grid */
-                  <>
-                    {tabAlbums.filter(
-                      (a) => activeCategory === "Semua" || a.category === activeCategory
-                    ).length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-24 gap-4 text-gray-400">
-                        <FolderOpen className="w-16 h-16 opacity-30" />
-                        <p className="text-lg font-medium">{t("empty_albums")}</p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                        {tabAlbums
-                          .filter(
-                            (a) => activeCategory === "Semua" || a.category === activeCategory
-                          )
-                          .filter((a) => {
-                            if (!search.trim()) return true
-                            return (
-                              a.name.toLowerCase().includes(search.toLowerCase()) ||
-                              a.description.toLowerCase().includes(search.toLowerCase())
-                            )
-                          })
-                          .map((album) => (
-                            <GalleryAlbumCard key={album.slug} album={album} />
-                          ))}
-                      </div>
-                    )}
-                  </>
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
+                    {tabAlbums
+                      .filter(
+                        (a) => activeCategory === "Semua" || a.category === activeCategory
+                      )
+                      .filter((a) => {
+                        if (!search.trim()) return true
+                        return (
+                          a.name.toLowerCase().includes(search.toLowerCase()) ||
+                          a.description.toLowerCase().includes(search.toLowerCase())
+                        )
+                      })
+                      .map((album) => (
+                        <GalleryAlbumCard key={album.slug} album={album} />
+                      ))}
+                  </div>
                 )}
               </>
             )}
@@ -619,7 +608,12 @@ export default function GalleryPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSuccess={(updatedGuest) => {
-          // Refresh guests list after successful submission
+          // Re-fetch photos & albums agar data terbaru langsung muncul tanpa refresh
+          Promise.all([fetchGalleryPhotos(), fetchGalleryAlbums()]).then(([photos, albums]) => {
+            setAllPhotos(photos)
+            setAllAlbums(albums)
+          })
+          // Update data guest di state
           setAllGuests((prev) => {
             const idx = prev.findIndex((g) => g.id === updatedGuest.id)
             if (idx !== -1) {
@@ -630,7 +624,7 @@ export default function GalleryPage() {
             return [...prev, updatedGuest]
           })
           setIsAddModalOpen(false)
-          // Switch to guest tab and album view to show the new content
+          // Switch ke guest tab & album view agar album baru langsung terlihat
           setOwnerTab("guest")
           setViewMode("album")
         }}

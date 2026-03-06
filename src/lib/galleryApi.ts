@@ -170,7 +170,6 @@ export async function fetchPhotosByAlbum(albumSlug: string): Promise<GalleryPhot
   const { data, error } = await supabase
     .from("gallery_photos")
     .select("*")
-    .eq("is_approved", true)
     .eq("album_slug", albumSlug)
     .order("date", { ascending: false })
 
@@ -180,6 +179,25 @@ export async function fetchPhotosByAlbum(albumSlug: string): Promise<GalleryPhot
   }
 
   return (data as GalleryPhotoRow[]).map(mapPhoto)
+}
+
+/**
+ * Fetch a single album by slug.
+ * Returns null if not found.
+ */
+export async function fetchAlbumBySlug(slug: string): Promise<GalleryAlbum | null> {
+  const { data, error } = await supabase
+    .from("gallery_albums")
+    .select("*")
+    .eq("slug", slug)
+    .maybeSingle()
+
+  if (error) {
+    console.error("[galleryApi] fetchAlbumBySlug error:", error.message)
+    return null
+  }
+
+  return data ? mapAlbum(data as GalleryAlbumRow) : null
 }
 
 /**

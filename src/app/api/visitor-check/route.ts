@@ -40,6 +40,20 @@ function getClientIP(req: NextRequest): string {
 }
 
 /**
+ * Periksa apakah IP adalah private/lokal (tidak berguna sebagai identifier unik).
+ */
+function isPrivateIP(ip: string): boolean {
+  return (
+    ip === "unknown" ||
+    ip === "::1" ||
+    ip === "127.0.0.1" ||
+    ip.startsWith("192.168.") ||
+    ip.startsWith("10.") ||
+    ip.startsWith("172.")
+  );
+}
+
+/**
  * GET /api/visitor-check?type=<action_type>&fp=<browser_fingerprint>
  *
  * Strategi pengecekan (berurutan, berhenti di yang pertama cocok):
@@ -102,12 +116,27 @@ export async function GET(req: NextRequest) {
         }
       }
 
+      // ── Fallback: IP address (kasus fp baru karena localStorage dihapus) ───
+      // Fingerprint tidak ditemukan di DB, tapi IP mungkin pernah tercatat
+      // saat submit sebelumnya dengan fp yang berbeda.
+      const ip = getClientIP(req);
+      if (!isPrivateIP(ip)) {
+        const { data: ipData } = await supabase
+          .from("visitor_ip_log")
+          .select("id")
+          .eq("ip_address", ip)
+          .eq("action_type", type)
+          .maybeSingle();
+
+        if (ipData) return NextResponse.json({ checked: true, matchedBy: "ip" });
+      }
+
       return NextResponse.json({ checked: false });
     }
 
-    // ── Prioritas 2: IP address (fallback jika fp tidak ada) ─────────────────
+    // ── Prioritas 2: IP address (fallback jika fp tidak diberikan sama sekali) ─
     const ip = getClientIP(req);
-    if (ip === "unknown" || ip === "::1" || ip === "127.0.0.1") {
+    if (isPrivateIP(ip)) {
       return NextResponse.json({ checked: false });
     }
 

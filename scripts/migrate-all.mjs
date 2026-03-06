@@ -117,6 +117,14 @@ async function run() {
     }
     // 👆 SAMPAI SINI
 
+    console.log("🌱 Menjalankan Seeding Storage (Project Thumbnails)...")
+    try {
+      execSync("node scripts/migrate-projects-thumbnails.mjs", { stdio: "inherit" })
+      console.log("✅ Auto-Seeding Project Thumbnails berhasil diselesaikan!\n")
+    } catch (err) {
+      console.error("❌ Auto-Seeding Project Thumbnails gagal dijalankan.")
+    }
+
   } catch (err) {
     console.error("❌ Migration gagal:", err.message)
   } finally {

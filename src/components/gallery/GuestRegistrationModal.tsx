@@ -27,6 +27,7 @@ interface PhotoItem {
   file: File
   preview: string
   title: string
+  description: string
   location: string
   date: string
   width: number
@@ -41,8 +42,10 @@ interface Props {
   onSuccess?: (guest: GalleryGuest) => void
 }
 
-// ─── Local Storage Key ────────────────────────────────────────────────────────
+// ─── Local Storage & Cookie Keys ─────────────────────────────────────────────
 const LS_KEY = "gallery_guest_profile"
+const COOKIE_KEY = "gallery_guest_id"
+const COOKIE_MAX_AGE = 365 * 24 * 60 * 60 // 1 year
 
 function loadLocalGuest(): GalleryGuest | null {
   if (typeof window === "undefined") return null
@@ -56,6 +59,16 @@ function loadLocalGuest(): GalleryGuest | null {
 
 function saveLocalGuest(guest: GalleryGuest) {
   localStorage.setItem(LS_KEY, JSON.stringify(guest))
+}
+
+function saveGuestCookie(id: number) {
+  document.cookie = `${COOKIE_KEY}=${id}; max-age=${COOKIE_MAX_AGE}; path=/; SameSite=Lax`
+}
+
+function loadGuestCookie(): string | null {
+  if (typeof document === "undefined") return null
+  const match = document.cookie.match(new RegExp(`(?:^|; )${COOKIE_KEY}=([^;]*)`))
+  return match ? decodeURIComponent(match[1]) : null
 }
 
 // ─── Initials Avatar ─────────────────────────────────────────────────────────
@@ -131,6 +144,7 @@ export default function GuestRegistrationModal({ isOpen, onClose, onSuccess }: P
   // Step 3 — Photos
   const [photos, setPhotos] = useState<PhotoItem[]>([])
   const [photoError, setPhotoError] = useState("")
+  const [showTitleErrors, setShowTitleErrors] = useState(false)
 
   // Misc
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -166,7 +180,24 @@ export default function GuestRegistrationModal({ isOpen, onClose, onSuccess }: P
       return
     }
 
-    // 2. Generate fingerprint & check API
+    // 2. Check cookie (survives localStorage clearing)
+    const cookieId = loadGuestCookie()
+    if (cookieId) {
+      try {
+        const res = await fetch(`/api/gallery/guest/check?id=${encodeURIComponent(cookieId)}`)
+        const data = await res.json()
+        if (data.guest) {
+          setGuest(data.guest)
+          saveLocalGuest(data.guest)
+          setStep("album")
+          return
+        }
+      } catch {
+        // ignore, try fingerprint next
+      }
+    }
+
+    // 3. Generate fingerprint & check API
     try {
       const fp = await generateFingerprint()
       const res = await fetch(`/api/gallery/guest/check?fp=${fp}`)
@@ -174,6 +205,7 @@ export default function GuestRegistrationModal({ isOpen, onClose, onSuccess }: P
       if (data.guest) {
         setGuest(data.guest)
         saveLocalGuest(data.guest)
+        saveGuestCookie(data.guest.id)
         setStep("album")
         return
       }
@@ -199,6 +231,7 @@ export default function GuestRegistrationModal({ isOpen, onClose, onSuccess }: P
       setAlbumErrors({})
       setSubmitError("")
       setPhotoError("")
+      setShowTitleErrors(false)
     }, 250)
   }, [onClose])
 
@@ -253,6 +286,7 @@ export default function GuestRegistrationModal({ isOpen, onClose, onSuccess }: P
 
       setGuest(data.guest)
       saveLocalGuest(data.guest)
+      saveGuestCookie(data.guest.id)
       setStep("album")
     } catch (e: unknown) {
       setSubmitError(e instanceof Error ? e.message : "Terjadi kesalahan")
@@ -307,11 +341,11 @@ export default function GuestRegistrationModal({ isOpen, onClose, onSuccess }: P
       ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(f.type)
     )
     const items: PhotoItem[] = arr.map((file) => {
-      const titleFromName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ")
       return {
         file,
         preview: URL.createObjectURL(file),
-        title: titleFromName,
+        title: "",
+        description: "",
         location: "",
         date: new Date().toISOString().split("T")[0],
         width: 1200,
@@ -349,6 +383,14 @@ export default function GuestRegistrationModal({ isOpen, onClose, onSuccess }: P
       setPhotoError("Tambahkan setidaknya 1 foto")
       return
     }
+    // Validasi semua judul foto wajib diisi
+    const emptyTitles = photos.filter((p) => !p.title.trim())
+    if (emptyTitles.length > 0) {
+      setShowTitleErrors(true)
+      setPhotoError(`${emptyTitles.length} foto belum memiliki judul. Judul wajib diisi.`)
+      return
+    }
+    setShowTitleErrors(false)
     if (!guest || !createdAlbum) return
     setIsSubmitting(true)
     setSubmitError("")
@@ -378,7 +420,7 @@ export default function GuestRegistrationModal({ isOpen, onClose, onSuccess }: P
           imageUrl: data.publicUrl,
           thumbnailUrl: data.publicUrl,
           title: photo.title,
-          description: "",
+          description: photo.description,
           location: photo.location,
           date: photo.date,
           width: photo.width,
@@ -771,6 +813,7 @@ export default function GuestRegistrationModal({ isOpen, onClose, onSuccess }: P
                       idx={idx}
                       onRemove={removePhoto}
                       onUpdate={updatePhotoField}
+                      titleError={showTitleErrors && !photo.title.trim()}
                     />
                   ))}
                 </div>
@@ -902,27 +945,48 @@ function PhotoRow({
   idx,
   onRemove,
   onUpdate,
+  titleError,
 }: {
   photo: PhotoItem
   idx: number
   onRemove: (idx: number) => void
   onUpdate: (idx: number, field: keyof PhotoItem, value: string) => void
+  titleError?: boolean
 }) {
   return (
     <div className="flex gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700">
       {/* Thumbnail */}
       <div className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
-        <Image src={photo.preview} alt={photo.title} fill className="object-cover" sizes="64px" />
+        <Image src={photo.preview} alt={photo.title || "foto"} fill className="object-cover" sizes="64px" />
       </div>
 
       {/* Fields */}
       <div className="flex-1 min-w-0 space-y-1.5">
-        <input
-          type="text"
-          value={photo.title}
-          onChange={(e) => onUpdate(idx, "title", e.target.value)}
-          placeholder="Judul foto..."
-          className="w-full px-2 py-1 text-xs rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white outline-none focus:border-accentColor"
+        <div>
+          <input
+            type="text"
+            value={photo.title}
+            onChange={(e) => onUpdate(idx, "title", e.target.value)}
+            placeholder="Judul foto... (wajib diisi)"
+            className={cn(
+              "w-full px-2 py-1 text-xs rounded-lg bg-white dark:bg-gray-700 border text-gray-900 dark:text-white outline-none transition-colors",
+              titleError && !photo.title.trim()
+                ? "border-red-400 focus:border-red-400"
+                : "border-gray-200 dark:border-gray-600 focus:border-accentColor"
+            )}
+          />
+          {titleError && !photo.title.trim() && (
+            <p className="mt-0.5 text-[10px] text-red-400 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" /> Judul wajib diisi
+            </p>
+          )}
+        </div>
+        <textarea
+          value={photo.description}
+          onChange={(e) => onUpdate(idx, "description", e.target.value)}
+          rows={2}
+          placeholder="Deskripsi foto (opsional)..."
+          className="w-full px-2 py-1 text-xs rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white outline-none focus:border-accentColor resize-none"
         />
         <div className="flex gap-1.5">
           <input

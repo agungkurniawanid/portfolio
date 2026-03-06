@@ -25,7 +25,7 @@ export default function GalleryPhotoCard({
         "bg-gray-100 dark:bg-gray-800",
         "ring-1 ring-black/5 dark:ring-white/5",
         "transition-all duration-300 hover:ring-accentColor/40 hover:shadow-xl hover:shadow-accentColor/10",
-        "mb-4 break-inside-avoid"
+        "mb-2 sm:mb-4 break-inside-avoid"
       )}
       onClick={() => onView(photo)}
     >
@@ -40,7 +40,7 @@ export default function GalleryPhotoCard({
           loading="lazy"
           placeholder="blur"
           blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMzMzIi8+PC9zdmc+"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
         />
 
         {/* Overlay */}

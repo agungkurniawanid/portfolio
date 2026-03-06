@@ -17,15 +17,15 @@
 
 > **Homepage Design Template**
 >
-> Desain dan layout halaman utama (Home / Beranda) pada portofolio ini terinspirasi dan mengambil referensi template dari karya milik [**@devshinthant**](https://github.com/devshinthant). Apresiasi sebesar-besarnya atas desain yang luar biasa tersebut.
+> The design and layout of the homepage (Home / Landing Page) on this portfolio was inspired by and references the template created by [**@devshinthant**](https://github.com/devshinthant). Huge appreciation for the incredible design work.
 >
-> Seluruh halaman lain selain halaman beranda — termasuk Skills, Projects, Blog, Guestbook, Gallery, Certificates, Timeline, Entertainment, Tech Stack, dan Contact — merupakan **improvisasi dan pengembangan mandiri** yang dirancang dan dibangun sendiri.
+> All pages other than the homepage — including Skills, Projects, Blog, Guestbook, Gallery, Certificates, Timeline, Entertainment, Tech Stack, and Contact — are **independently improvised and developed** from scratch.
 
 ---
 
 ## ✨ Overview
 
-Portfolio personal ini dibangun sebagai representasi lengkap dari identitas, kemampuan, dan perjalanan karier seorang Software Engineer. Tidak hanya menampilkan proyek dan skill, situs ini dilengkapi dengan blog, guestbook real-time, galeri foto, daftar sertifikat, timeline karier, dan entertainment hub — semuanya dianimasikan menggunakan GSAP dan mendukung tiga bahasa (Indonesia, Inggris, Jerman).
+This personal portfolio was built as a complete representation of a Software Engineer's identity, skills, and career journey. Beyond showcasing projects and skills, the site features a blog, real-time guestbook, photo gallery, certificate list, career timeline, and entertainment hub — all animated with GSAP and supporting three languages (Indonesian, English, German).
 
 ---
 
@@ -33,7 +33,7 @@ Portfolio personal ini dibangun sebagai representasi lengkap dari identitas, kem
 
 ### Core
 
-| Teknologi | Keterangan |
+| Technology | Description |
 |---|---|
 | **Next.js 15** | App Router (SSR + Client Components) |
 | **React 18** | UI Library |
@@ -42,242 +42,242 @@ Portfolio personal ini dibangun sebagai representasi lengkap dari identitas, kem
 
 ### Backend & Database
 
-| Teknologi | Keterangan |
+| Technology | Description |
 |---|---|
-| **Supabase** | PostgreSQL backend untuk konten dinamis |
-| **Next.js API Routes** | Proxy endpoints untuk Steam, Spotify, Notion, GitHub |
+| **Supabase** | PostgreSQL backend for dynamic content |
+| **Next.js API Routes** | Proxy endpoints for Steam, Spotify, Notion, GitHub |
 
-### Animasi & UI
+### Animation & UI
 
-| Library | Keterangan |
+| Library | Description |
 |---|---|
-| **GSAP + ScrollTrigger** | Animasi scroll dan entrance per section |
+| **GSAP + ScrollTrigger** | Scroll and entrance animations per section |
 | **SplitType** | Text character reveal effect |
-| **Lottie React** | JSON animation pada hero |
-| **Canvas Confetti** | Confetti burst pada guestbook |
-| **react-rough-notation** | Anotasi bergaya tulisan tangan |
-| **yet-another-react-lightbox** | Lightbox untuk galeri foto |
+| **Lottie React** | JSON animation on hero section |
+| **Canvas Confetti** | Confetti burst on guestbook submission |
+| **react-rough-notation** | Handwriting-style annotations |
+| **yet-another-react-lightbox** | Lightbox for photo gallery |
 | **react-masonry-css** | Masonry grid layout |
 
 ### State & i18n
 
-| Library | Keterangan |
+| Library | Description |
 |---|---|
 | **Zustand 5** | Global state management |
-| **next-intl 4** | Internasionalisasi (id / en / de) |
+| **next-intl 4** | Internationalization (id / en / de) |
 
-### Lainnya
+### Others
 
-| Library | Keterangan |
+| Library | Description |
 |---|---|
 | **EmailJS** | Contact form & welcome popup |
-| **TipTap** | Rich text editor untuk blog |
-| **react-pdf** | PDF viewer untuk sertifikat |
-| **ShadCN UI + Radix UI** | Komponen UI yang aksesibel |
+| **TipTap** | Rich text editor for blog |
+| **react-pdf** | PDF viewer for certificates |
+| **ShadCN UI + Radix UI** | Accessible UI components |
 
 ---
 
-## 📄 Halaman & Fitur
+## 📄 Pages & Features
 
-### 🏠 Homepage (`/`) *(Design template dari [@devshinthant](https://github.com/devshinthant))*
+### 🏠 Homepage (`/`) *(Design template by [@devshinthant](https://github.com/devshinthant))*
 
-Halaman utama yang terdiri dari beberapa section:
+The main landing page consisting of several sections:
 
-- **Mouse Section** — efek kursor interaktif
-- **Hero Section** — nama, role, tagline, dua spinning disk image, Lottie animation, CTA WhatsApp, social links, GSAP text reveal
-- **About Section** — foto profil dengan dekorasi SVG, 3 animated counter (years of experience, total projects, contributions), infinite horizontal scrolling tech strip
-- **Projects Section** — preview proyek unggulan
-- **Blog Section** — preview artikel terbaru
-- **Contact Section** — form EmailJS + social media links
-
----
-
-### 🧑‍💻 Skills (`/skills`) *(Improvisasi mandiri)*
-
-Halaman daftar kemampuan teknis yang diambil dari Supabase.
-
-- **7 Kategori**: Frontend, Backend, AI/ML, Mobile, DevOps, Database, Cloud
-- Setiap skill menampilkan ikon, nama, proficiency bar animasi (GSAP `0% → N%`), dan persentase
-- Level coding: Expert (hijau ≥90%), Advanced (biru ≥80%), Proficient (kuning ≥70%), Familiar (abu)
-- Stat hero: total teknologi, jumlah kategori, jumlah expert, tahun pengalaman
+- **Mouse Section** — interactive cursor effect
+- **Hero Section** — name, role, tagline, two spinning disk images, Lottie animation, WhatsApp CTA, social links, GSAP text reveal
+- **About Section** — profile photo with SVG decorations, 3 animated counters (years of experience, total projects, contributions), infinite horizontal scrolling tech strip
+- **Projects Section** — featured project previews
+- **Blog Section** — latest article previews
+- **Contact Section** — EmailJS form + social media links
 
 ---
 
-### 💼 Projects (`/projects`) *(Improvisasi mandiri)*
+### 🧑‍💻 Skills (`/skills`) *(Independently developed)*
 
-Halaman portofolio proyek dari tiga sumber data:
+A page listing technical skills fetched from Supabase.
 
-1. **GitHub Public Repos** — diambil langsung via GitHub REST API
-2. **Private / Company Projects** — disimpan di Supabase (tidak dipublikasikan di GitHub)
-3. **Freelance Projects** — hard-coded dengan detail lengkap
+- **7 Categories**: Frontend, Backend, AI/ML, Mobile, DevOps, Database, Cloud
+- Each skill displays an icon, name, animated proficiency bar (GSAP `0% → N%`), and percentage
+- Proficiency levels: Expert (green ≥90%), Advanced (blue ≥80%), Proficient (yellow ≥70%), Familiar (gray)
+- Hero stats: total technologies, number of categories, expert count, years of experience
 
-**Fitur:**
-- Filter tab: All, Academic, Freelance, Web, Mobile, AI/ML, Company + jumlah per kategori
-- Search bar realtime (nama, deskripsi, topik, bahasa)
-- Modal detail per proyek (`GitHubRepoDetailModal` / `PrivateProjectDetailModal`)
-- Language color dots, star, fork count
+---
+
+### 💼 Projects (`/projects`) *(Independently developed)*
+
+A portfolio page pulling data from three sources:
+
+1. **GitHub Public Repos** — fetched directly via the GitHub REST API
+2. **Private / Company Projects** — stored in Supabase (not published on GitHub)
+3. **Freelance Projects** — hard-coded with full details
+
+**Features:**
+- Filter tabs: All, Academic, Freelance, Web, Mobile, AI/ML, Company + count per category
+- Real-time search bar (name, description, topics, language)
+- Per-project detail modal (`GitHubRepoDetailModal` / `PrivateProjectDetailModal`)
+- Language color dots, star count, fork count
 - Sticky filter bar
 
 ---
 
-### 📝 Blog (`/blogs`, `/blogs/[id]`) *(Improvisasi mandiri)*
+### 📝 Blog (`/blogs`, `/blogs/[id]`) *(Independently developed)*
 
-Blog lengkap dengan editor TipTap.
+A full-featured blog powered by TipTap editor.
 
-- **Kategori**: Technology, Tutorial, Tips & Tricks, Programming, Design, General, News, Career
-- Search bar, toggle tampilan grid/list, pagination (9 artikel per halaman)
-- Artikel dibuka dalam modal (`ArticleModal`) dengan fitur terjemahan
-- Admin dapat menulis artikel baru via write modal (gated dengan `ShieldCheck`)
-- State dikelola via Zustand `BlogStore`
+- **Categories**: Technology, Tutorial, Tips & Tricks, Programming, Design, General, News, Career
+- Search bar, grid/list view toggle, pagination (9 articles per page)
+- Articles open in a modal (`ArticleModal`) with translation support
+- Admin can write new articles via a write modal (gated with `ShieldCheck`)
+- State managed via Zustand `BlogStore`
 
 ---
 
-### 📓 Guestbook (`/guestbook`) *(Improvisasi mandiri)*
+### 📓 Guestbook (`/guestbook`) *(Independently developed)*
 
-Buku tamu digital dengan pembaruan real-time.
+A digital guestbook with real-time updates.
 
-- **Real-time** via Supabase subscription — pesan baru langsung muncul tanpa refresh
-- Anti-spam menggunakan browser fingerprinting + localStorage check
-- **Canvas confetti** setelah berhasil submit
+- **Real-time** via Supabase subscription — new messages appear instantly without page refresh
+- Anti-spam using browser fingerprinting + localStorage check
+- **Canvas confetti** on successful submission
 - Masonry grid layout
-- Filter: mood, rating bintang (1–5), kota; sort: terbaru/terlama/rating/nama
-- Animated stat counter: total tamu, kota, rata-rata rating, tamu terakhir
-- `GuestbookFormModal` dengan validasi form
+- Filters: mood, star rating (1–5), city; sort: newest/oldest/rating/name
+- Animated stat counters: total guests, cities, average rating, latest guest
+- `GuestbookFormModal` with form validation
 
 ---
 
-### 🖼️ Gallery (`/gallery`, `/gallery/album/[slug]`) *(Improvisasi mandiri)*
+### 🖼️ Gallery (`/gallery`, `/gallery/album/[slug]`) *(Independently developed)*
 
-Galeri foto personal dan tamu.
+A personal and guest photo gallery.
 
-- **Dua seksi**: foto personal (dari Supabase) + Guest Gallery (foto yang diunggah pengunjung)
-- Featured carousel di bagian atas
-- Masonry grid dengan lightbox (yet-another-react-lightbox)
-- Filter berdasarkan kategori, tahun, dan sort options
-- Pengunjung dapat mendaftar sebagai tamu dan mengunggah foto sendiri via API
-
----
-
-### 🏆 Certificates (`/certificate`) *(Improvisasi mandiri)*
-
-Daftar sertifikat profesional dengan fitur preview PDF.
-
-- Data dari Supabase
-- **react-pdf** viewer untuk membuka sertifikat langsung di browser
-- Filter berdasarkan kategori, status (Valid/Expired/Lifetime), tahun
-- Toggle tampilan grid / list
-- Tombol download dan preview per sertifikat
-- TranslateWidget per kartu sertifikat
+- **Two sections**: personal photos (from Supabase) + Guest Gallery (photos uploaded by visitors)
+- Featured carousel at the top
+- Masonry grid with lightbox (yet-another-react-lightbox)
+- Filter by category, year, and sort options
+- Visitors can register as guests and upload their own photos via API
 
 ---
 
-### 🗓️ Timeline (`/timeline`) *(Improvisasi mandiri)*
+### 🏆 Certificates (`/certificate`) *(Independently developed)*
 
-Perjalanan karier dan pendidikan secara kronologis.
+A professional certificate list with PDF preview functionality.
 
-- Data dari Supabase `timelines` table
-- **5 Kategori**: Education, Career & Internship, Course & Bootcamp, Achievement & Award, Organization & Community
-- Layout alternating kiri-kanan di desktop, single column di mobile
-- **Animated vertical line** yang terisi saat scroll
-- Efek typing di hero (4 frasa bergantian dengan backspace animation)
-- Animated stat counter di hero
-- Grid foto dengan lightbox per item timeline
-- TranslateWidget per kartu untuk terjemahan on-the-fly
-- Sort ascending/descending, filter pills per kategori dengan jumlah item
-- Pulsing badge "Sedang Berlangsung" untuk item yang masih aktif
+- Data from Supabase
+- **react-pdf** viewer to open certificates directly in the browser
+- Filter by category, status (Valid/Expired/Lifetime), year
+- Grid / list view toggle
+- Download and preview button per certificate
+- TranslateWidget per certificate card
 
 ---
 
-### 🎮 Entertainment (`/entertainment`) *(Improvisasi mandiri)*
+### 🗓️ Timeline (`/timeline`) *(Independently developed)*
 
-Hub hiburan personal.
+A chronological view of career and educational journey.
 
-- **Tab**: Dashboard, Games, Watch/Read, Music, Books
-- **Lazy loaded** per tab untuk performa optimal
-- Integrasi dengan:
-  - **Steam API** — daftar game PC
-  - **Spotify** — musik favorit
-  - **Notion** — daftar tontonan/bacaan
-  - **Mobile Games API** — game mobile
-  - **Books API** — daftar buku
-- Global search lintas tab
-
----
-
-### 🛠️ Tech Stack Page (`/tech-stack`) *(Improvisasi mandiri)*
-
-Katalog personal tools dan teknologi yang digunakan.
-
-- **66 item tools** yang dikelompokkan dalam **11 kategori**: IDE, Design, Frameworks, Databases, DevOps, Browsers, Desktop Apps, Online Services, Entertainment, AI, Hardware
-- Setiap item: nama, ikon berwarna, deskripsi, usage rating (1–5), badge (Favorite/Daily Use/Recommended/Pernah Dicoba), tags
-- Computed stats: total tools, favorites, daily use count, jumlah kategori
+- Data from Supabase `timelines` table
+- **5 Categories**: Education, Career & Internship, Course & Bootcamp, Achievement & Award, Organization & Community
+- Alternating left-right layout on desktop, single column on mobile
+- **Animated vertical fill line** triggered on scroll
+- Typing effect in hero (4 alternating phrases with backspace animation)
+- Animated stat counters in hero
+- Photo grid with lightbox per timeline item
+- TranslateWidget per card for on-the-fly translation
+- Ascending/descending sort, filter pills per category with item count
+- Pulsing "In Progress" badge for currently active items
 
 ---
 
-### 📬 Contact (`/contact`) *(Improvisasi mandiri)*
+### 🎮 Entertainment (`/entertainment`) *(Independently developed)*
 
-Halaman kontak dengan form dan semua social media.
+A personal entertainment hub.
 
-- Form lengkap terintegrasi dengan **EmailJS**
-- Link ke: YouTube, TikTok, Spotify, Instagram, LinkedIn, WhatsApp, Telegram, Steam, Pinterest, Facebook, Gmail, Twitter/X
+- **Tabs**: Dashboard, Games, Watch/Read, Music, Books
+- **Lazy loaded** per tab for optimal performance
+- Integrations with:
+  - **Steam API** — PC games list
+  - **Spotify** — favorite music
+  - **Notion** — watch/reading list
+  - **Mobile Games API** — mobile games
+  - **Books API** — book list
+- Global search across all tabs
 
 ---
 
-## 🌍 Internasionalisasi (i18n)
+### 🛠️ Tech Stack Page (`/tech-stack`) *(Independently developed)*
 
-Mendukung **3 bahasa** menggunakan `next-intl`:
+A personal catalog of tools and technologies used.
 
-| Kode | Bahasa |
+- **66 tools** grouped into **11 categories**: IDE, Design, Frameworks, Databases, DevOps, Browsers, Desktop Apps, Online Services, Entertainment, AI, Hardware
+- Each item: name, colored icon, description, usage rating (1–5), badge (Favorite/Daily Use/Recommended/Tried), tags
+- Computed stats: total tools, favorites, daily use count, number of categories
+
+---
+
+### 📬 Contact (`/contact`) *(Independently developed)*
+
+A contact page with a form and all social media links.
+
+- Full form integrated with **EmailJS**
+- Links to: YouTube, TikTok, Spotify, Instagram, LinkedIn, WhatsApp, Telegram, Steam, Pinterest, Facebook, Gmail, Twitter/X
+
+---
+
+## 🌍 Internationalization (i18n)
+
+Supports **3 languages** using `next-intl`:
+
+| Code | Language |
 |---|---|
-| `id` | Indonesia (default) |
+| `id` | Indonesian (default) |
 | `en` | English |
 | `de` | Deutsch (German) |
 
-Preferensi bahasa disimpan di `localStorage` dan dikelola via Zustand `LanguageStore`. Language switcher tersedia di header. Halaman Timeline dan Certificate juga memiliki **TranslateWidget** untuk menerjemahkan konten kartu secara langsung via `/api/translate`.
+Language preference is stored in `localStorage` and managed via Zustand `LanguageStore`. A language switcher is available in the header. The Timeline and Certificate pages also include a **TranslateWidget** for on-the-fly card content translation via `/api/translate`.
 
 ---
 
-## 🎨 Desain & Animasi
+## 🎨 Design & Animation
 
-| Fitur | Detail |
+| Feature | Details |
 |---|---|
 | **Brand Color** | `#0EBD7A` / `#0acf83` (accent green) |
 | **Font** | Jost (Google Fonts) |
-| **Theme** | Dark mode default, toggle ke light mode |
-| **GSAP ScrollTrigger** | Entrance animation di setiap section utama |
-| **SplitType** | Character-by-character text reveal pada About section |
-| **Lottie** | JSON animation di hero (layar xl) |
-| **Spinning Disks** | Dua gambar webp berputar dengan GSAP infinite rotation |
-| **Infinite Scroll Strip** | Banner tech logos di About section |
-| **Skill Bars** | Animasi `width: 0% → N%` dipicu saat scroll |
-| **Timeline Fill Line** | Garis vertikal aksen yang memanjang saat scroll |
-| **Toast Notifications** | GSAP slide-up toast untuk form feedback |
+| **Theme** | Dark mode by default, toggleable to light mode |
+| **GSAP ScrollTrigger** | Entrance animations for every main section |
+| **SplitType** | Character-by-character text reveal on About section |
+| **Lottie** | JSON animation in hero (xl screens) |
+| **Spinning Disks** | Two webp images rotating infinitely via GSAP |
+| **Infinite Scroll Strip** | Tech logo banner in About section |
+| **Skill Bars** | `width: 0% → N%` animation triggered on scroll |
+| **Timeline Fill Line** | Accent vertical line that extends on scroll |
+| **Toast Notifications** | GSAP slide-up toast for form feedback |
 
 ---
 
-## 🧩 Komponen Global
+## 🧩 Global Components
 
-- **Header** — fixed navbar dengan backdrop blur, active link indicator, dropdown "Lainnya", hamburger mobile nav, resume download, theme toggle, language switcher
-- **GuestbookBanner** — dismissible banner di atas header dengan shimmer animation, tinggi dikelola Zustand
-- **WelcomePopup** — muncul saat kunjungan pertama, berisi star rating + form pesan via EmailJS, dengan fingerprint deduplication
+- **Header** — fixed navbar with backdrop blur, active link indicator, "More" dropdown, hamburger mobile nav, resume download, theme toggle, language switcher
+- **GuestbookBanner** — dismissible banner above the header with shimmer animation, height managed by Zustand
+- **WelcomePopup** — appears on first visit, contains a star rating + EmailJS message form, with fingerprint deduplication
 
 ---
 
 ## 🗄️ Database (Supabase Tables)
 
-| Tabel | Konten |
+| Table | Content |
 |---|---|
-| `guestbook` | Pesan tamu dengan realtime subscription |
-| `timelines` | Item timeline karier/pendidikan |
-| `skills` | Data skill dengan kategori, level, ikon |
-| `projects` | Proyek private/company |
-| `portfolio_stats` | Stats (years exp, contributions, project count) |
-| `gallery` / `gallery_albums` / `gallery_guests` | Manajemen galeri foto |
-| `certificates` | Data sertifikat dengan URL PDF |
+| `guestbook` | Guest messages with real-time subscription |
+| `timelines` | Career/education timeline items |
+| `skills` | Skill data with category, level, icon |
+| `projects` | Private/company projects |
+| `portfolio_stats` | Stats (years of experience, contributions, project count) |
+| `gallery` / `gallery_albums` / `gallery_guests` | Photo gallery management |
+| `certificates` | Certificate data with PDF URLs |
 
 ---
 
-## 📁 Struktur Project
+## 📁 Project Structure
 
 ```
 portfolio/
@@ -294,7 +294,7 @@ portfolio/
 │   │   ├── entertainment/
 │   │   ├── tech-stack/
 │   │   ├── contact/
-│   │   └── api/              # API Routes (Steam, Spotify, GitHub, dll)
+│   │   └── api/              # API Routes (Steam, Spotify, GitHub, etc.)
 │   ├── components/           # Reusable UI components
 │   ├── stores/               # Zustand stores
 │   ├── lib/                  # Utilities & Supabase client
@@ -305,26 +305,26 @@ portfolio/
 
 ---
 
-## ⚙️ Menjalankan Secara Lokal
+## ⚙️ Running Locally
 
 ```bash
-# 1. Clone repository
+# 1. Clone the repository
 git clone https://github.com/agungkurniawanid/portfolio.git
 cd portfolio
 
 # 2. Install dependencies
 npm install
 
-# 3. Salin dan isi environment variables
+# 3. Copy and fill in environment variables
 cp .env.example .env.local
 
-# 4. Jalankan development server
+# 4. Start the development server
 npm run dev
 ```
 
-Buka `http://localhost:3000` di browser.
+Open `http://localhost:3000` in your browser.
 
-### Environment Variables yang Dibutuhkan
+### Required Environment Variables
 
 ```env
 # Supabase
@@ -356,7 +356,7 @@ NOTION_DATABASE_ID=
 
 ## 📜 License
 
-MIT License — bebas digunakan sebagai referensi atau template portofolio Anda sendiri.
+MIT License — feel free to use this as a reference or template for your own portfolio.
 
 ---
 

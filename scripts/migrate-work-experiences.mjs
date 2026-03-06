@@ -1,16 +1,3 @@
-// Run: npm run migrate:work-experiences
-//
-// Script ini akan:
-//   1. Membuat tabel work_experiences beserta kolom (company, position,
-//      employment_type, start_date, end_date, is_current, location,
-//      work_mode, description, tech_stack, display_order, is_published)
-//   2. Membuat index performa + trigger auto-update updated_at
-//   3. Mengaktifkan Row Level Security + policies (read-only public)
-//   4. Menyisipkan 6 seed pengalaman kerja dari halaman About
-//
-// ✅ AMAN dijalankan berulang — semua pernyataan bersifat idempotent
-//    (CREATE ... IF NOT EXISTS, ON CONFLICT DO NOTHING)
-
 import pg from "pg"
 import fs from "fs"
 import path from "path"
@@ -20,7 +7,6 @@ import dotenv from "dotenv"
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.join(__dirname, "../.env.local") })
 
-// ─── Validasi env ─────────────────────────────────────────────────────────────
 const connStr = process.env.POSTGRES_URL_NON_POOLING || ""
 if (!connStr) {
   console.error("❌ POSTGRES_URL_NON_POOLING tidak ditemukan di .env.local")

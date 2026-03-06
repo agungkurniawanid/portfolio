@@ -1,5 +1,3 @@
-// Jalankan: node scripts/migrate-all.mjs
-
 import pg from "pg"
 import fs from "fs"
 import path from "path"
@@ -31,7 +29,6 @@ const client = new pg.Client({
   ssl: { rejectUnauthorized: false },
 })
 
-// Daftar bucket sesuai gambar yang kamu berikan
 const targetBuckets = [
   "gallery-guests",
   "gallery-photos",
@@ -39,16 +36,14 @@ const targetBuckets = [
   "project-thumbnails",
   "guestbook-avatars",
   "author-avatars",
-  "blog-thumbnails"
+  "blog-thumbnails",
+  "timeline"
 ]
 
 async function cleanAllStorageBuckets() {
   console.log("🧹 Mengosongkan Supabase Storage...")
-  
   for (const bucket of targetBuckets) {
-    // emptyBucket() menghapus SEMUA file di dalam bucket tanpa menghapus bucket itu sendiri
     const { error } = await supabase.storage.emptyBucket(bucket)
-    
     if (error) {
       console.error(`❌ Gagal mengosongkan bucket '${bucket}':`, error.message)
     } else {
@@ -59,14 +54,10 @@ async function cleanAllStorageBuckets() {
 
 async function run() {
   try {
-    // 1. Kosongkan semua storage bucket lebih dulu
     await cleanAllStorageBuckets()
-
     console.log("🔌 Connecting to Supabase Postgres...")
     await client.connect()
     console.log("✅ Connected!")
-
-    // 2. Eksekusi file reset jika ada (untuk wipe database)
     const resetFile = sqlFiles.find(f => f.toLowerCase().includes("reset"))
     if (resetFile) {
       const resetPath = path.join(migrationsDir, resetFile)
@@ -81,7 +72,6 @@ async function run() {
       }
     }
 
-    // 3. Jalankan migrasi tabel-tabel baru
     for (const file of sqlFiles) {
       if (resetFile && file === resetFile) continue
       const filePath = path.join(migrationsDir, file)
@@ -95,9 +85,7 @@ async function run() {
         break 
       }
     }
-    
     console.log("🎉 Migrate Fresh selesai total!")
-    
   } catch (err) {
     console.error("❌ Migration gagal:", err.message)
   } finally {
@@ -105,5 +93,4 @@ async function run() {
     console.log("🔒 Connection closed.")
   }
 }
-
 run()

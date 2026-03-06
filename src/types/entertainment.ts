@@ -1,13 +1,11 @@
-// ─── Steam / Games ────────────────────────────────────────────────────────────
 export type GameStatus = "playing" | "completed" | "wishlist" | "never_played";
 
 export interface SteamGame {
   appid: number;
   name: string;
-  playtime_forever: number; // minutes
+  playtime_forever: number;
   img_icon_url: string;
   img_logo_url?: string;
-  // manual overrides
   status?: GameStatus;
   achievements_done?: number;
   achievements_total?: number;
@@ -20,7 +18,6 @@ export interface SteamGamesResponse {
   };
 }
 
-// ─── Mobile / Non-Steam Games ─────────────────────────────────────────────────
 export interface MobileGame {
   id: number;
   title: string;

@@ -1,6 +1,3 @@
--- ============================================================
--- Books table — Supabase as data trigger for Open Library
--- ============================================================
 create table if not exists public.books (
   id               bigserial    primary key,
   title            text         not null,
@@ -34,7 +31,6 @@ create trigger books_updated_at
   before update on public.books
   for each row execute procedure public.handle_books_updated_at();
 
--- Seed
 insert into public.books (title, author, status, personal_rating, review, genre, year) values
   ('Clean Code',                          'Robert C. Martin', 'finished',  5, 'Wajib baca setiap programmer.', array['Programming','Software Engineering'], 2008),
   ('The Pragmatic Programmer',            'David Thomas & Andrew Hunt', 'finished', 5, 'Buku career-defining untuk developer.', array['Programming','Career'], 1999),

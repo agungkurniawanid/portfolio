@@ -724,9 +724,24 @@ export default function ProjectsPage() {
             ))}
           </div>
 
-          <p className="hero-sub max-w-xl text-gray-500 dark:text-white/50 text-base md:text-lg leading-relaxed mb-8">
+          <p className="hero-sub max-w-xl text-gray-500 dark:text-white/50 text-base md:text-lg leading-relaxed mb-4">
             {t("hero_sub")}
           </p>
+
+          {/* Deploy badge + CTA button */}
+          <div className="hero-sub flex flex-wrap items-center gap-3 mb-8">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0acf83]/10 border border-[#0acf83]/30 text-[#0acf83] text-xs font-semibold tracking-wide">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#0acf83] animate-pulse" />
+              {t("deploy_badge")}
+            </span>
+            <Link
+              href="/deploy-projects"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0acf83] text-white text-xs font-semibold hover:bg-[#09b874] transition-colors shadow-sm shadow-[#0acf83]/30"
+            >
+              <FaRocket className="text-[9px]" />
+              {t("deploy_btn")}
+            </Link>
+          </div>
 
           {/* stats row */}
           <div className="hero-sub flex flex-wrap gap-8">

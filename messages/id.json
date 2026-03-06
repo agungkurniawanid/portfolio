@@ -32,7 +32,30 @@
     "follow": "Follow saya di TikTok"
   },
   "nav": {
-    "language": "Bahasa"
+    "language": "Bahasa",
+    "home": "Beranda",
+    "about": "Tentang",
+    "skills": "Keahlian",
+    "projects": "Proyek",
+    "blog": "Blog",
+    "guestbook": "Buku Tamu",
+    "more": "Lainnya",
+    "gallery": "Galeri",
+    "gallery_desc": "Koleksi foto & media",
+    "deployed_projects": "Proyek Diluncurkan",
+    "deployed_projects_desc": "Proyek yang telah diluncurkan",
+    "social_media": "Media Sosial",
+    "social_media_desc": "Hubungi & media sosial",
+    "certificate": "Sertifikat",
+    "certificate_desc": "Sertifikat & pencapaian",
+    "entertainment": "Hiburan",
+    "entertainment_desc": "Movie, Game, Hiburan",
+    "timeline": "Timeline",
+    "timeline_desc": "Perjalanan karir & pendidikan",
+    "tools_stack": "Tools & Stack",
+    "tools_stack_desc": "Tech stack favorit",
+    "credit": "Kredit",
+    "credit_desc": "Kredit & atribusi desain"
   },
   "aboutPage": {
     "hello": "👋 Halo, Saya",
@@ -156,6 +179,9 @@
     "hero_title_2": "Project",
     "hero_title_3": "Saya",
     "hero_sub": "Daftar lengkap semua yang pernah saya bangun — dari repositori GitHub open-source hingga pekerjaan freelance, project perusahaan, dan penelitian akademik.",
+    "deploy_badge": "Aplikasi Sudah Live",
+    "deploy_btn": "Lihat Project yang Diluncurkan",
+    "deploy_sub": "Project yang sudah live & production — siap digunakan",
     "stat_repos": "GitHub Repos",
     "stat_company": "Project Private",
     "stat_freelance": "Project Freelance",
@@ -817,5 +843,25 @@
     "preview_unavailable": "Preview tidak tersedia saat ini.",
     "section_description": "Deskripsi Proyek",
     "section_changelog": "Update Notes & Changelog"
+  },
+  "creditPage": {
+    "breadcrumb_home": "Beranda",
+    "breadcrumb_credit": "Kredit",
+    "badge": "Kredit & Atribusi",
+    "title_prefix": "Kredit",
+    "title_accent": "Desain",
+    "subtitle": "Pengakuan dan atribusi untuk inspirasi desain yang digunakan dalam portofolio ini.",
+    "home_section_label": "Halaman Beranda",
+    "home_section_title": "Desain Halaman Beranda",
+    "home_section_badge": "Template Digunakan",
+    "home_desc_1": "Desain halaman beranda (home) diadaptasi dan terinspirasi dari template portofolio yang dibuat oleh",
+    "home_desc_2": ". Tata letak, animasi, dan estetika keseluruhan halaman beranda mengacu pada karya asli mereka.",
+    "home_author": "Shinn Thant",
+    "other_section_label": "Halaman Lainnya",
+    "other_section_title": "Desain Kustom & Improvisasi",
+    "other_section_badge": "Orisinal",
+    "other_desc": "Semua halaman lainnya — About, Skills, Projects, Blog, Guestbook, Gallery, Timeline, Tech Stack, Certificate, Entertainment, Deploy Projects, Contact, dan lainnya — dirancang dan dibangun secara mandiri dari awal tanpa menggunakan template apapun.",
+    "view_github": "Lihat di GitHub",
+    "back_home": "Kembali ke Beranda"
   }
 }

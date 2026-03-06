@@ -32,7 +32,30 @@
     "follow": "Follow me on TikTok"
   },
   "nav": {
-    "language": "Language"
+    "language": "Language",
+    "home": "Home",
+    "about": "About",
+    "skills": "Skills",
+    "projects": "Projects",
+    "blog": "Blog",
+    "guestbook": "Guestbook",
+    "more": "More",
+    "gallery": "Gallery",
+    "gallery_desc": "Photo & media collection",
+    "deployed_projects": "Launched Projects",
+    "deployed_projects_desc": "Projects that have been launched",
+    "social_media": "Media Social",
+    "social_media_desc": "Contact & social media",
+    "certificate": "Certificate",
+    "certificate_desc": "Certificates & achievements",
+    "entertainment": "Entertainment",
+    "entertainment_desc": "Movie, Game, Entertainment",
+    "timeline": "Timeline",
+    "timeline_desc": "Career & education journey",
+    "tools_stack": "Tools & Stack",
+    "tools_stack_desc": "Favorite tech stack",
+    "credit": "Credit",
+    "credit_desc": "Credits & design attribution"
   },
   "aboutPage": {
     "hello": "👋 Hello, I'm",
@@ -188,6 +211,9 @@
     "hero_title_2": "My",
     "hero_title_3": "Projects",
     "hero_sub": "A comprehensive list of everything I've built — from open-source GitHub repositories to freelance client work, company projects, and academic research.",
+    "deploy_badge": "Apps Now Live",
+    "deploy_btn": "View Launched Projects",
+    "deploy_sub": "Projects that are live & in production — ready to use",
     "stat_repos": "GitHub Repos",
     "stat_company": "Private Projects",
     "stat_freelance": "Freelance Projects",
@@ -817,5 +843,25 @@
     "preview_unavailable": "Preview is currently unavailable.",
     "section_description": "Project Description",
     "section_changelog": "Update Notes & Changelog"
+  },
+  "creditPage": {
+    "breadcrumb_home": "Home",
+    "breadcrumb_credit": "Credits",
+    "badge": "Credits & Attribution",
+    "title_prefix": "Design",
+    "title_accent": "Credits",
+    "subtitle": "Acknowledgements and attributions for design inspirations used in this portfolio.",
+    "home_section_label": "Home Page",
+    "home_section_title": "Homepage Design",
+    "home_section_badge": "Template Used",
+    "home_desc_1": "The design of the homepage (beranda) was adapted and inspired by the portfolio template created by",
+    "home_desc_2": ". The layout, animations, and overall aesthetic of the home page are based on their original work.",
+    "home_author": "Shinn Thant",
+    "other_section_label": "Other Pages",
+    "other_section_title": "Custom & Improvised Design",
+    "other_section_badge": "Original",
+    "other_desc": "All other pages — About, Skills, Projects, Blog, Guestbook, Gallery, Timeline, Tech Stack, Certificate, Entertainment, Deploy Projects, Contact, and more — are independently designed and built from scratch without using any template.",
+    "view_github": "View on GitHub",
+    "back_home": "Back to Home"
   }
 }

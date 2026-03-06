@@ -1,39 +1,40 @@
-import { Home, User, Zap, FolderKanban, Newspaper, Mail, MoreHorizontal, ImageIcon, Award, Gamepad2, History, Wrench, BookOpen } from "lucide-react"
+import { Home, User, Zap, FolderKanban, Newspaper, Mail, MoreHorizontal, ImageIcon, Award, Gamepad2, History, Wrench, BookOpen, Heart } from "lucide-react"
 import { ComponentType } from "react"
 
 export interface SubMenuItem {
-  title: string
+  titleKey: string
   href: string
   icon: ComponentType<{ className?: string; size?: number }>
-  description: string
+  descriptionKey: string
 }
 
 export interface NavLink {
-  title: string
+  titleKey: string
   href: string
   icon: ComponentType<{ className?: string; size?: number }>
   subMenu?: SubMenuItem[]
 }
 
 const navlinks: NavLink[] = [
-  { title: "Home", href: "/", icon: Home },
-  { title: "About", href: "/about", icon: User },
-  { title: "Skills", href: "/skills", icon: Zap },
-  { title: "Projects", href: "/projects", icon: FolderKanban },
-  { title: "Blog", href: "/blogs", icon: Newspaper },
-  { title: "Guestbook", href: "/guestbook", icon: BookOpen },
+  { titleKey: "home", href: "/", icon: Home },
+  { titleKey: "about", href: "/about", icon: User },
+  { titleKey: "skills", href: "/skills", icon: Zap },
+  { titleKey: "projects", href: "/projects", icon: FolderKanban },
+  { titleKey: "blog", href: "/blogs", icon: Newspaper },
+  { titleKey: "guestbook", href: "/guestbook", icon: BookOpen },
   {
-    title: "Lainnya",
+    titleKey: "more",
     href: "#",
     icon: MoreHorizontal,
     subMenu: [
-      { title: "Gallery", href: "/gallery", icon: ImageIcon, description: "Koleksi foto & media" },
-      { title: "Launched Projects", href: "/deploy-projects", icon: FolderKanban, description: "Proyek yang telah diluncurkan" },
-      { title: "Media Social", href: "/contact", icon: Mail, description: "Hubungi & media sosial" },
-      { title: "Certificate", href: "/certificate", icon: Award, description: "Sertifikat & pencapaian" },
-      { title: "Entertainment", href: "/entertainment", icon: Gamepad2, description: "Movie, Game, Hiburan" },
-      { title: "Timeline", href: "/timeline", icon: History, description: "Perjalanan karir & pendidikan" },
-      { title: "Tools & Stack", href: "/tech-stack", icon: Wrench, description: "Tech stack favorit" },
+      { titleKey: "gallery", href: "/gallery", icon: ImageIcon, descriptionKey: "gallery_desc" },
+      { titleKey: "deployed_projects", href: "/deploy-projects", icon: FolderKanban, descriptionKey: "deployed_projects_desc" },
+      { titleKey: "social_media", href: "/contact", icon: Mail, descriptionKey: "social_media_desc" },
+      { titleKey: "certificate", href: "/certificate", icon: Award, descriptionKey: "certificate_desc" },
+      { titleKey: "entertainment", href: "/entertainment", icon: Gamepad2, descriptionKey: "entertainment_desc" },
+      { titleKey: "timeline", href: "/timeline", icon: History, descriptionKey: "timeline_desc" },
+      { titleKey: "tools_stack", href: "/tech-stack", icon: Wrench, descriptionKey: "tools_stack_desc" },
+      { titleKey: "credit", href: "/credit", icon: Heart, descriptionKey: "credit_desc" },
     ],
   },
 ]

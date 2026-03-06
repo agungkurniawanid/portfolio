@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { useTranslations } from "next-intl"
 import navlinks from "@/lib/NavConfig"
 import { useSectionStore } from "@/stores/Section"
 import { useBannerStore, BANNER_HEIGHT } from "@/stores/BannerStore"
@@ -60,6 +61,7 @@ export default function Header() {
 
   const { section } = useSectionStore()
   const pathname = usePathname()
+  const t = useTranslations("nav")
 
   const isActive = (href: string) => {
     if (href === "#") return false
@@ -96,7 +98,7 @@ export default function Header() {
 
               if (link.subMenu) {
                 return (
-                  <div key={link.title} className="relative" ref={dropdownRef}>
+                  <div key={link.titleKey} className="relative" ref={dropdownRef}>
                     <button
                       suppressHydrationWarning
                       onClick={() => setDropdownOpen((prev) => !prev)}
@@ -108,7 +110,7 @@ export default function Header() {
                       )}
                     >
                       <Icon size={15} className="opacity-70 group-hover:opacity-100 transition-opacity" />
-                      <span>{link.title}</span>
+                      <span>{t(link.titleKey)}</span>
                       <ChevronDown
                         size={13}
                         className={cn(
@@ -134,7 +136,7 @@ export default function Header() {
                           const SubIcon = sub.icon
                           return (
                             <Link
-                              key={sub.title}
+                              key={sub.titleKey}
                               href={sub.href}
                               onClick={() => setDropdownOpen(false)}
                               className={cn(
@@ -147,11 +149,11 @@ export default function Header() {
                                   <SubIcon size={14} />
                                 </span>
                                 <span className="text-sm font-medium text-gray-800 dark:text-gray-100 group-hover:text-accentColor transition-colors">
-                                  {sub.title}
+                                  {t(sub.titleKey)}
                                 </span>
                               </span>
                               <span className="text-xs text-gray-400 dark:text-gray-500 pl-[2px]">
-                                {sub.description}
+                                {t(sub.descriptionKey)}
                               </span>
                             </Link>
                           )
@@ -164,7 +166,7 @@ export default function Header() {
 
               return (
                 <Link
-                  key={link.title}
+                  key={link.titleKey}
                   href={link.href}
                   data-active={isActive(link.href)}
                   className={cn(
@@ -182,7 +184,7 @@ export default function Header() {
                       isActive(link.href) ? "opacity-100" : "opacity-60 group-hover:opacity-100"
                     )}
                   />
-                  <span>{link.title}</span>
+                  <span>{t(link.titleKey)}</span>
                   {isActive(link.href) && (
                     <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accentColor" />
                   )}

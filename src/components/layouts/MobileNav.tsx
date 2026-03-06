@@ -8,6 +8,7 @@ import { Menu, X, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/Utils"
 import { useSectionStore } from "@/stores/Section"
 import { useLanguageStore, type Locale } from "@/stores/LanguageStore"
+import { useTranslations } from "next-intl"
 
 const LANGUAGES: { code: Locale; label: string; flag: string; short: string }[] = [
   { code: "id", label: "Indonesia", flag: "🇮🇩", short: "ID" },
@@ -53,6 +54,7 @@ export default function MobileNav() {
   const pathname = usePathname()
   const router = useRouter()
   const { section } = useSectionStore()
+  const t = useTranslations("nav")
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -156,7 +158,7 @@ export default function MobileNav() {
 
             if (link.subMenu) {
               return (
-                <div key={link.title}>
+                <div key={link.titleKey}>
                   {/* Divider before Lainnya */}
                   <div className="h-px bg-gray-100 dark:bg-gray-800 my-2 mx-2" />
 
@@ -179,7 +181,7 @@ export default function MobileNav() {
                     >
                       <Icon size={16} />
                     </span>
-                    <span className="flex-1 text-sm font-medium">{link.title}</span>
+                    <span className="flex-1 text-sm font-medium">{t(link.titleKey)}</span>
                     <ChevronDown
                       size={15}
                       className={cn(
@@ -201,7 +203,7 @@ export default function MobileNav() {
                         const SubIcon = sub.icon
                         return (
                           <button
-                            key={sub.title}
+                            key={sub.titleKey}
                             onClick={() => handleNavClick(sub.href)}
                             className={cn(
                               "group w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-150 text-left",
@@ -213,8 +215,8 @@ export default function MobileNav() {
                               <SubIcon size={13} />
                             </span>
                             <div className="flex flex-col">
-                              <span className="text-sm font-medium leading-none">{sub.title}</span>
-                              <span className="text-xs text-gray-400 dark:text-gray-600 mt-0.5">{sub.description}</span>
+                              <span className="text-sm font-medium leading-none">{t(sub.titleKey)}</span>
+                              <span className="text-xs text-gray-400 dark:text-gray-600 mt-0.5">{t(sub.descriptionKey)}</span>
                             </div>
                           </button>
                         )
@@ -227,7 +229,7 @@ export default function MobileNav() {
 
             return (
               <button
-                key={link.title}
+                key={link.titleKey}
                 onClick={() => handleNavClick(link.href)}
                 className={cn(
                   "group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left",
@@ -246,7 +248,7 @@ export default function MobileNav() {
                 >
                   <Icon size={16} />
                 </span>
-                <span className="text-sm font-medium">{link.title}</span>
+                <span className="text-sm font-medium">{t(link.titleKey)}</span>
                 {active && (
                   <span className="ml-auto w-1.5 h-1.5 rounded-full bg-accentColor" />
                 )}

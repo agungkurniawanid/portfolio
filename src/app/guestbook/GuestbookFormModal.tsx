@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase"
 import { generateFingerprint } from "@/lib/fingerprint"
 import GuestbookCard, { GuestbookEntry } from "./GuestbookCard"
 import Image from "next/image"
+import imageCompression from "browser-image-compression"
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -131,7 +132,7 @@ function StarRatingInput({
   )
 }
 
-// ─── Avatar Upload Area ────────────────────────────────────────────────────────
+// ─── Avatar Upload Area (Dengan Kompresi) ──────────────────────────────────────
 
 function AvatarUpload({
   preview,
@@ -145,24 +146,54 @@ function AvatarUpload({
   const t = useTranslations("guestbookPage")
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [isCompressing, setIsCompressing] = useState(false)
   const [error, setError] = useState("")
 
-  const handleFile = (file: File) => {
+  const handleFile = async (file: File) => {
     setError("")
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       setError(t("avatar_err_format"))
       return
     }
-    if (file.size > 2 * 1024 * 1024) {
-      setError(t("avatar_err_size"))
+    // Batas upload kita naikkan ke 5MB karena akan otomatis dikompres
+    if (file.size > 5 * 1024 * 1024) {
+      setError(t("avatar_err_size") || "Ukuran file terlalu besar (Maks 5MB)")
       return
     }
-    onFile(file)
+
+    setIsCompressing(true)
+    let processedFile = file
+
+    // Kompresi jika ukuran file lebih dari 100KB (102400 bytes)
+    if (file.size > 102400) {
+      try {
+        const options = {
+          maxSizeMB: 0.1, // Target ukuran maks 100KB
+          maxWidthOrHeight: 400, // Dimensi kecil karena hanya untuk avatar
+          useWebWorker: true,
+          initialQuality: 0.8,
+        }
+        const compressedBlob = await imageCompression(file, options)
+        processedFile = new File([compressedBlob], file.name, {
+          type: compressedBlob.type,
+          lastModified: Date.now(),
+        })
+      } catch (err) {
+        console.error("Gagal kompresi avatar:", err)
+        setError("Gagal memproses gambar. Coba lagi.")
+        setIsCompressing(false)
+        return
+      }
+    }
+
+    setIsCompressing(false)
+    onFile(processedFile)
   }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
+    if (isCompressing) return
     const file = e.dataTransfer.files[0]
     if (file) handleFile(file)
   }
@@ -178,7 +209,7 @@ function AvatarUpload({
           <button
             type="button"
             onClick={onClear}
-            className="text-xs text-red-500 hover:text-red-600 underline"
+            className="text-xs text-red-500 hover:text-red-600 underline text-left"
           >
             {t("avatar_remove")}
           </button>
@@ -190,27 +221,40 @@ function AvatarUpload({
   return (
     <div className="space-y-2">
       <div
-        onClick={() => inputRef.current?.click()}
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+        onClick={() => !isCompressing && inputRef.current?.click()}
+        onDragOver={(e) => { e.preventDefault(); if (!isCompressing) setIsDragging(true) }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
         className={cn(
-          "border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all",
-          isDragging
+          "border-2 border-dashed rounded-xl p-6 text-center transition-all",
+          isCompressing ? "opacity-50 cursor-wait border-gray-300" : "cursor-pointer",
+          isDragging && !isCompressing
             ? "border-accentColor bg-accentColor/5"
             : "border-gray-200 dark:border-gray-700 hover:border-accentColor/50 hover:bg-gray-50 dark:hover:bg-gray-800/50"
         )}
       >
         <div className="flex flex-col items-center gap-2">
           <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-800">
-            <ImageIcon size={20} className="text-gray-400" />
+            {isCompressing ? (
+              <span className="w-5 h-5 border-2 border-accentColor/30 border-t-accentColor rounded-full animate-spin inline-block" />
+            ) : (
+              <ImageIcon size={20} className="text-gray-400" />
+            )}
           </div>
           <div>
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t("avatar_drag")}{" "}
-              <span className="text-accentColor underline">{t("avatar_click")}</span>
+              {isCompressing ? (
+                "Memproses gambar..."
+              ) : (
+                <>
+                  {t("avatar_drag")}{" "}
+                  <span className="text-accentColor underline">{t("avatar_click")}</span>
+                </>
+              )}
             </p>
-            <p className="text-xs text-gray-400 mt-0.5">{t("avatar_hint")}</p>
+            {!isCompressing && (
+              <p className="text-xs text-gray-400 mt-0.5">{t("avatar_hint")} (Max: 5MB)</p>
+            )}
           </div>
         </div>
         <input
@@ -218,9 +262,11 @@ function AvatarUpload({
           type="file"
           accept="image/jpeg,image/png,image/webp"
           className="hidden"
+          disabled={isCompressing}
           onChange={(e) => {
             const file = e.target.files?.[0]
             if (file) handleFile(file)
+            e.target.value = "" // reset agar bisa memilih file yang sama lagi
           }}
         />
       </div>

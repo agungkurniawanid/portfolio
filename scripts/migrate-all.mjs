@@ -4,6 +4,7 @@ import path from "path"
 import { fileURLToPath } from "url"
 import dotenv from "dotenv"
 import { createClient } from "@supabase/supabase-js"
+import { execSync } from "child_process" // 👈 Tambahkan import ini
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.join(__dirname, "../.env.local") })
@@ -58,6 +59,7 @@ async function run() {
     console.log("🔌 Connecting to Supabase Postgres...")
     await client.connect()
     console.log("✅ Connected!")
+    
     const resetFile = sqlFiles.find(f => f.toLowerCase().includes("reset"))
     if (resetFile) {
       const resetPath = path.join(migrationsDir, resetFile)
@@ -85,7 +87,26 @@ async function run() {
         break 
       }
     }
-    console.log("🎉 Migrate Fresh selesai total!")
+    console.log("🎉 Migrate Fresh selesai total!\n")
+
+    // 👇 PROSES AUTO SEEDING DATA
+    console.log("🌱 Menjalankan Seeding Data (Timeline)...")
+    try {
+      execSync("node scripts/migrate-timeline.mjs", { stdio: "inherit" })
+      console.log("✅ Auto-Seeding Timeline berhasil diselesaikan!\n")
+    } catch (err) {
+      console.error("❌ Auto-Seeding Timeline gagal dijalankan.")
+    }
+
+    console.log("🌱 Menjalankan Seeding Data (Tech Tools)...")
+    try {
+      execSync("node scripts/migrate-tech-tools.mjs", { stdio: "inherit" })
+      console.log("✅ Auto-Seeding Tech Tools berhasil diselesaikan!\n")
+    } catch (err) {
+      console.error("❌ Auto-Seeding Tech Tools gagal dijalankan.")
+    }
+    // 👆 SAMPAI SINI
+
   } catch (err) {
     console.error("❌ Migration gagal:", err.message)
   } finally {

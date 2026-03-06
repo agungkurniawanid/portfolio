@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase"
 import { cn } from "@/lib/Utils"
 import dynamic from "next/dynamic"
 import { useTranslations } from "next-intl"
+import imageCompression from "browser-image-compression"
 
 const RichTextEditor = dynamic(() => import("./RichTextEditor"), { ssr: false })
 
@@ -44,6 +45,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
   const { fetchBlogs } = useBlogStore()
   const [step, setStep] = useState<Step>("form")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isCompressing, setIsCompressing] = useState(false)
   const [success, setSuccess] = useState(false)
 
   const [authorName, setAuthorName] = useState("")
@@ -51,12 +53,14 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
   const [authorPhone, setAuthorPhone] = useState("")
   const [authorAvatarFile, setAuthorAvatarFile] = useState<File | null>(null)
   const [authorAvatarPreview, setAuthorAvatarPreview] = useState("")
+  
   const [title, setTitle] = useState("")
   const [category, setCategory] = useState<BlogCategory>("General")
   const [content, setContent] = useState("")
   const [thumbnail, setThumbnail] = useState("")
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
   const [thumbnailPreview, setThumbnailPreview] = useState("")
+  
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitError, setSubmitError] = useState("")
 
@@ -75,19 +79,63 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle Thumbnail Upload & Compress
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setThumbnailFile(file)
-    setThumbnailPreview(URL.createObjectURL(file))
+
+    setIsCompressing(true)
+    let processedFile = file
+
+    // Kompresi jika lebih dari 250KB (256000 bytes)
+    if (file.size > 256000) {
+      try {
+        const options = {
+          maxSizeMB: 0.25, // Target ukuran maks 250KB
+          maxWidthOrHeight: 1200, // Dimensi optimal untuk thumbnail web
+          useWebWorker: true,
+          initialQuality: 0.85,
+        }
+        const compressedBlob = await imageCompression(file, options)
+        processedFile = new File([compressedBlob], file.name, { type: compressedBlob.type, lastModified: Date.now() })
+      } catch (error) {
+        console.error("Gagal kompresi thumbnail:", error)
+      }
+    }
+
+    setThumbnailFile(processedFile)
+    setThumbnailPreview(URL.createObjectURL(processedFile))
     setThumbnail("") // clear URL input when file is selected
+    setIsCompressing(false)
   }
 
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle Avatar Upload & Compress
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setAuthorAvatarFile(file)
-    setAuthorAvatarPreview(URL.createObjectURL(file))
+
+    setIsCompressing(true)
+    let processedFile = file
+
+    // Kompresi jika lebih dari 100KB (102400 bytes)
+    if (file.size > 102400) {
+      try {
+        const options = {
+          maxSizeMB: 0.1, // Target ukuran maks 100KB
+          maxWidthOrHeight: 400, // Dimensi kecil karena hanya untuk avatar
+          useWebWorker: true,
+          initialQuality: 0.8,
+        }
+        const compressedBlob = await imageCompression(file, options)
+        processedFile = new File([compressedBlob], file.name, { type: compressedBlob.type, lastModified: Date.now() })
+      } catch (error) {
+        console.error("Gagal kompresi avatar:", error)
+      }
+    }
+
+    setAuthorAvatarFile(processedFile)
+    setAuthorAvatarPreview(URL.createObjectURL(processedFile))
+    setIsCompressing(false)
   }
 
   const handlePreview = () => {
@@ -249,8 +297,8 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                     <div className="flex items-center gap-4">
                       {/* Avatar preview */}
                       <div
-                        onClick={() => avatarInputRef.current?.click()}
-                        className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden border-2 border-dashed border-gray-200 dark:border-gray-600 hover:border-accentColor transition-colors cursor-pointer flex items-center justify-center bg-gray-100 dark:bg-gray-800"
+                        onClick={() => !isCompressing && avatarInputRef.current?.click()}
+                        className={`w-16 h-16 rounded-full flex-shrink-0 overflow-hidden border-2 border-dashed border-gray-200 dark:border-gray-600 transition-colors flex items-center justify-center bg-gray-100 dark:bg-gray-800 ${isCompressing ? 'opacity-50 cursor-wait' : 'hover:border-accentColor cursor-pointer'}`}
                       >
                         {authorAvatarPreview ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -262,12 +310,13 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                       <div className="flex-1">
                         <button
                           type="button"
+                          disabled={isCompressing}
                           onClick={() => avatarInputRef.current?.click()}
-                          className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-accentColor hover:text-accentColor transition-colors dark:text-gray-300"
+                          className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-accentColor hover:text-accentColor transition-colors dark:text-gray-300 disabled:opacity-50 disabled:cursor-wait"
                         >
-                          {authorAvatarPreview ? t("btn_change_photo") : t("btn_upload_photo")}
+                          {isCompressing ? "Memproses..." : authorAvatarPreview ? t("btn_change_photo") : t("btn_upload_photo")}
                         </button>
-                        {authorAvatarPreview && (
+                        {authorAvatarPreview && !isCompressing && (
                           <button
                             type="button"
                             onClick={() => { setAuthorAvatarFile(null); setAuthorAvatarPreview("") }}
@@ -285,6 +334,7 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                       accept="image/*"
                       className="hidden"
                       onChange={handleAvatarUpload}
+                      disabled={isCompressing}
                     />
                   </div>
 
@@ -401,8 +451,8 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                       <span className="flex items-center gap-1.5"><ImageIcon size={13} /> {t("label_thumbnail")}</span>
                     </label>
                     <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-full border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-4 flex flex-col items-center gap-2 cursor-pointer hover:border-accentColor transition-colors"
+                      onClick={() => !isCompressing && fileInputRef.current?.click()}
+                      className={`w-full border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-4 flex flex-col items-center gap-2 transition-colors ${isCompressing ? 'opacity-50 cursor-wait' : 'cursor-pointer hover:border-accentColor'}`}
                     >
                       {thumbnailPreview || thumbnail ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -415,9 +465,9 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                         <>
                           <Upload size={22} className="text-gray-400" />
                           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                            {t("thumbnail_hint")}
+                            {isCompressing ? "Memproses gambar..." : t("thumbnail_hint")}
                             <br />
-                            <span className="text-gray-400">PNG, JPG, WebP (max 5MB)</span>
+                            {!isCompressing && <span className="text-gray-400">PNG, JPG, WebP (max 5MB)</span>}
                           </p>
                         </>
                       )}
@@ -428,8 +478,9 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                       accept="image/*"
                       className="hidden"
                       onChange={handleImageUpload}
+                      disabled={isCompressing}
                     />
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-gray-400 mt-1 flex items-center">
                       {t("thumbnail_url_hint")}{" "}
                       <input
                         type="url"
@@ -440,8 +491,9 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
                           setThumbnailPreview("")
                         }}
                         placeholder="https://example.com/image.jpg"
-                        className="ml-1 px-2 py-0.5 text-xs border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-800 dark:text-white outline-none focus:border-accentColor"
+                        className="ml-2 px-2 py-1 flex-1 text-xs border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-800 dark:text-white outline-none focus:border-accentColor"
                         onClick={(e) => e.stopPropagation()}
+                        disabled={isCompressing}
                       />
                     </p>
                   </div>
@@ -529,7 +581,8 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-gray-300"
+              disabled={isSubmitting || isCompressing}
+              className="px-4 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-gray-300 disabled:opacity-50"
             >
               {t("btn_cancel")}
             </button>
@@ -537,7 +590,8 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
               <button
                 type="button"
                 onClick={handlePreview}
-                className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-accentColor text-accentColor hover:bg-accentColor/10 transition-colors"
+                disabled={isCompressing}
+                className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-accentColor text-accentColor hover:bg-accentColor/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Eye size={15} /> {t("btn_preview")}
               </button>
@@ -545,10 +599,10 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={isSubmitting || success}
+                disabled={isSubmitting || success || isCompressing}
                 className={`flex items-center gap-2 px-5 py-2 text-sm rounded-lg font-medium transition-all text-white ${
                   success ? "bg-green-500" : "bg-accentColor hover:bg-accentColor/90"
-                } ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}`}
+                } ${isSubmitting || isCompressing ? "opacity-70 cursor-not-allowed" : ""}`}
               >
                 {success ? (
                   t("btn_published")

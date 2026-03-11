@@ -1,12 +1,10 @@
 import type { Metadata } from "next"
 import { Jost } from "next/font/google"
-import Header from "@/components/layouts/Header" 
-import GuestbookBanner from "@/components/GuestbookBanner"
 import "./globals.css"
 import { ThemeProvider } from "@/providers/ThemeProvider"
 import IntlProvider from "@/providers/IntlProvider"
-import WelcomePopup from "@/components/WelcomePopup"
 import ThemeColorSync from "@/components/ThemeColorSync"
+import PublicLayout from "@/components/layouts/PublicLayout"
 
 const jost = Jost({ subsets: ["latin"] })
 
@@ -85,10 +83,9 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <ThemeColorSync />
-            <GuestbookBanner />
-            <Header />
-            <WelcomePopup />
-            {children}
+            <PublicLayout>
+              {children}
+            </PublicLayout>
           </ThemeProvider>
         </IntlProvider>
       </body>

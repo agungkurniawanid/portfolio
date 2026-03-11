@@ -39,7 +39,7 @@ const targetBuckets = [
   "author-avatars",
   "blog-thumbnails",
   "timeline",
-  "project-files" // 👈 Bucket untuk fitur Deployed Projects sudah ditambahkan
+  "project-files"
 ]
 
 async function cleanAllStorageBuckets() {
@@ -89,8 +89,6 @@ async function run() {
       }
     }
     console.log("🎉 Migrate Fresh selesai total!\n")
-
-    // 👇 PROSES AUTO SEEDING DATA
     console.log("🌱 Menjalankan Seeding Data (Timeline)...")
     try {
       execSync("node scripts/migrate-timeline.mjs", { stdio: "inherit" })
@@ -107,7 +105,6 @@ async function run() {
       console.error("❌ Auto-Seeding Tech Tools gagal dijalankan.")
     }
 
-    // 👈 TAMBAHAN UNTUK DEPLOYED PROJECTS
     console.log("🌱 Menjalankan Seeding Data (Deployed Projects)...")
     try {
       execSync("node scripts/migrate-deployed-projects.mjs", { stdio: "inherit" })
@@ -115,7 +112,6 @@ async function run() {
     } catch (err) {
       console.error("❌ Auto-Seeding Deployed Projects gagal dijalankan.")
     }
-    // 👆 SAMPAI SINI
 
     console.log("🌱 Menjalankan Seeding Storage (Project Thumbnails)...")
     try {
@@ -123,6 +119,14 @@ async function run() {
       console.log("✅ Auto-Seeding Project Thumbnails berhasil diselesaikan!\n")
     } catch (err) {
       console.error("❌ Auto-Seeding Project Thumbnails gagal dijalankan.")
+    }
+
+    console.log("🌱 Menjalankan Seeding Auth User (Supabase Auth + profiles)...")
+    try {
+      execSync("node scripts/create-auth-user.mjs", { stdio: "inherit" })
+      console.log("✅ Auth User berhasil diselesaikan!\n")
+    } catch (err) {
+      console.error("❌ Auth User seeding gagal dijalankan.")
     }
 
   } catch (err) {

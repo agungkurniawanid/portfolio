@@ -2,7 +2,7 @@ import { SteamGame, TMDBMovie } from "@/types/entertainment";
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 const STEAM_API_KEY = process.env.NEXT_PUBLIC_STEAM_API_KEY ?? "";
-const STEAM_ID = process.env.NEXT_PUBLIC_STEAM_ID ?? "76561199513134799";
+const STEAM_ID = process.env.NEXT_PUBLIC_STEAM_ID ?? "";
 const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY ?? "";
 const GOOGLE_BOOKS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY ?? "";
 

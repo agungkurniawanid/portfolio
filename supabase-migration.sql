@@ -41,6 +41,19 @@ CREATE POLICY "blogs_insert_public"
   ON public.blogs FOR INSERT
   WITH CHECK (true);
 
+-- 4b. Policy: Semua orang bisa update blog
+DROP POLICY IF EXISTS "blogs_update_public" ON public.blogs;
+CREATE POLICY "blogs_update_public"
+  ON public.blogs FOR UPDATE
+  USING (true)
+  WITH CHECK (true);
+
+-- 4c. Policy: Semua orang bisa delete blog
+DROP POLICY IF EXISTS "blogs_delete_public" ON public.blogs;
+CREATE POLICY "blogs_delete_public"
+  ON public.blogs FOR DELETE
+  USING (true);
+
 -- ============================================================
 -- SUPABASE STORAGE: Bucket untuk thumbnail gambar artikel
 -- ============================================================
@@ -60,6 +73,19 @@ CREATE POLICY "blog_thumbnails_insert"
 DROP POLICY IF EXISTS "blog_thumbnails_select" ON storage.objects;
 CREATE POLICY "blog_thumbnails_select"
   ON storage.objects FOR SELECT
+  USING (bucket_id = 'blog-thumbnails');
+
+-- 7b. Policy: Semua orang bisa update file di bucket blog-thumbnails
+DROP POLICY IF EXISTS "blog_thumbnails_update" ON storage.objects;
+CREATE POLICY "blog_thumbnails_update"
+  ON storage.objects FOR UPDATE
+  USING (bucket_id = 'blog-thumbnails')
+  WITH CHECK (bucket_id = 'blog-thumbnails');
+
+-- 7c. Policy: Semua orang bisa delete file di bucket blog-thumbnails
+DROP POLICY IF EXISTS "blog_thumbnails_delete" ON storage.objects;
+CREATE POLICY "blog_thumbnails_delete"
+  ON storage.objects FOR DELETE
   USING (bucket_id = 'blog-thumbnails');
 
 -- ============================================================
@@ -83,6 +109,19 @@ CREATE POLICY "author_avatars_select"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'author-avatars');
 
+-- 10b. Policy: Semua orang bisa update foto profil penulis
+DROP POLICY IF EXISTS "author_avatars_update" ON storage.objects;
+CREATE POLICY "author_avatars_update"
+  ON storage.objects FOR UPDATE
+  USING (bucket_id = 'author-avatars')
+  WITH CHECK (bucket_id = 'author-avatars');
+
+-- 10c. Policy: Semua orang bisa delete foto profil penulis
+DROP POLICY IF EXISTS "author_avatars_delete" ON storage.objects;
+CREATE POLICY "author_avatars_delete"
+  ON storage.objects FOR DELETE
+  USING (bucket_id = 'author-avatars');
+
 -- ============================================================
 -- SUPABASE STORAGE: Bucket untuk foto profil tamu (guestbook)
 -- ============================================================
@@ -103,6 +142,86 @@ DROP POLICY IF EXISTS "guestbook_avatars_select" ON storage.objects;
 CREATE POLICY "guestbook_avatars_select"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'guestbook-avatars');
+
+-- ============================================================
+-- USER MANAGEMENT & SEED: Public Users Table
+-- ============================================================
+
+-- 14. RESET: Drop tabel users jika ada (menghapus data profile public lama agar fresh)
+DROP TABLE IF EXISTS public.users CASCADE;
+
+-- 15. Buat tabel public.users
+CREATE TABLE IF NOT EXISTS public.users (
+  id              UUID NOT NULL PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email           TEXT,
+  full_name       TEXT,
+  avatar_url      TEXT,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 16. Enable RLS
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+
+-- 17. Policies untuk public.users
+CREATE POLICY "Public profiles are viewable by everyone"
+  ON public.users FOR SELECT
+  USING (true);
+
+CREATE POLICY "Users can update own profile"
+  ON public.users FOR UPDATE
+  USING (auth.uid() = id);
+
+-- 18. Function & Trigger untuk handle new user signup
+--     Otomatis insert ke public.users saat ada user baru mendaftar di auth.users
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.users (id, email, full_name, avatar_url)
+  VALUES (new.id, new.email, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url');
+  RETURN new;
+END;
+$$;
+
+-- Drop trigger jika sudah ada untuk menghindari duplikasi saat migrasi ulang
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- ============================================================
+-- SEED: Auth Users (Membuat user login default)
+-- ============================================================
+
+-- Pastikan ekstensi pgcrypto aktif untuk hashing password
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Insert default user ke auth.users jika belum ada
+INSERT INTO auth.users (
+  instance_id, id, aud, role, email, encrypted_password, 
+  email_confirmed_at, raw_app_meta_data, raw_user_meta_data, 
+  created_at, updated_at, confirmation_token, email_change, email_change_token_new, recovery_token
+) VALUES (
+  '00000000-0000-0000-0000-000000000000',
+  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', -- UUID statis
+  'authenticated',
+  'authenticated',
+  'agung@dev.com',
+  crypt('password123', gen_salt('bf')), -- Password default: password123
+  NOW(),
+  '{"provider":"email","providers":["email"]}',
+  '{"full_name":"Agung Kurniawan","avatar_url":"https://github.com/agungkurniawanid.png"}',
+  NOW(), NOW(), '', '', '', ''
+) ON CONFLICT (id) DO NOTHING;
+
+-- 19. SEED: Backfill/Sync existing users
+--     Mengisi ulang tabel public.users dari data auth.users yang sudah ada
+INSERT INTO public.users (id, email, full_name, avatar_url)
+SELECT id, email, raw_user_meta_data->>'full_name', raw_user_meta_data->>'avatar_url'
+FROM auth.users
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- SEED: Developer blogs awal (opsional — hapus jika tidak perlu)

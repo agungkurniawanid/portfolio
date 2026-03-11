@@ -12,13 +12,18 @@ import fs from "fs"
  * Headers:
  *   Authorization: Bearer <MIGRATION_SECRET>
  *
- * MIGRATION_SECRET dapat diset di .env.local
- * Default: "migrate-gallery-guest-2026"
+ * MIGRATION_SECRET harus diset di .env.local
  */
 export async function POST(req: NextRequest) {
   // Guard: hanya di development ATAU dengan secret yang benar
-  const migrationSecret =
-    process.env.MIGRATION_SECRET || "migrate-gallery-guest-2026"
+  const migrationSecret = process.env.MIGRATION_SECRET
+  if (!migrationSecret) {
+    return NextResponse.json(
+      { error: "MIGRATION_SECRET tidak dikonfigurasi di environment variables." },
+      { status: 500 }
+    )
+  }
+
   const authHeader = req.headers.get("authorization")
   const token = authHeader?.replace("Bearer ", "")
 
@@ -94,7 +99,7 @@ export async function GET() {
   return NextResponse.json({
     info: "POST ke endpoint ini untuk menjalankan migration Gallery Tamu.",
     usage: "POST /api/gallery/migrate",
-    headers: { Authorization: "Bearer migrate-gallery-guest-2026" },
+    headers: { Authorization: "Bearer <MIGRATION_SECRET dari .env.local>" },
     note: "Di development, Authorization header tidak diperlukan.",
     migration_file: "supabase/migrations/20260310000000_guest_gallery_profiles.sql",
     or_run_script: "node scripts/migrate-guest-gallery.mjs",

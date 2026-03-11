@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const NOTION_API_KEY = process.env.NOTION_API_KEY ?? "";
-const NOTION_DB_ID = process.env.NOTION_WATCHREAD_DB_ID ?? "12056271e05f80739ef0f0b34d8e1f23";
+const NOTION_DB_ID = process.env.NOTION_WATCHREAD_DB_ID ?? "";
 
 // 1. UBAH DI SINI: Kita nyalakan kembali cache selama 60 detik (ISR)
 export const revalidate = 60; 

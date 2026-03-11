@@ -171,12 +171,13 @@ export default function ArticleModal({ isOpen, onClose }: ArticleModalProps) {
       if (thumbnailFile) {
         const ext = thumbnailFile.name.split(".").pop()
         const filePath = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`
+        const bucket = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET ?? "blog-thumbnails"
         const { error: uploadError } = await supabase.storage
-          .from("blog-thumbnails")
+          .from(bucket)
           .upload(filePath, thumbnailFile, { cacheControl: "3600", upsert: false })
         if (uploadError) throw new Error(uploadError.message)
         const { data: urlData } = supabase.storage
-          .from("blog-thumbnails")
+          .from(bucket)
           .getPublicUrl(filePath)
         finalThumbnailUrl = urlData.publicUrl
       }

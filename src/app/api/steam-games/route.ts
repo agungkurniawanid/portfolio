@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const STEAM_API_KEY = process.env.STEAM_API_KEY ?? process.env.NEXT_PUBLIC_STEAM_API_KEY ?? "";
-  const STEAM_ID = process.env.NEXT_PUBLIC_STEAM_ID ?? "76561199513134799";
+  const STEAM_ID = process.env.NEXT_PUBLIC_STEAM_ID ?? "";
 
   if (!STEAM_API_KEY) {
     // Return mock data when API key is not set

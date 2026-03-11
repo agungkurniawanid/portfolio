@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "supabase-migration.sql": "pgsql",
+    "supabase/**/*.sql": "pgsql"
+  },
+  "mssql.linting.enable": false
+}

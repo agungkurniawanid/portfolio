@@ -444,9 +444,16 @@ export default function SkillsPage() {
       <div className="max-w-[1100px] mx-auto px-[5%] py-12 flex flex-col gap-14">
         {isLoading
           ? CATEGORY_ORDER.map((id) => <SkeletonSection key={id} />)
-          : categories.map((cat) => (
+          : categories.length > 0
+            ? categories.map((cat) => (
               <CategorySection key={cat.id} cat={cat} getLevelLabel={getLevelLabel} />
-            ))}
+            ))
+            : (
+              <div className="text-center py-20 text-gray-500 dark:text-white/50">
+                <p className="text-xl font-semibold mb-2">{t('no_data_title')}</p>
+                <p>{t('no_data_desc')}</p>
+              </div>
+            )}
       </div>
 
       {/* ── CTA footer ── */}

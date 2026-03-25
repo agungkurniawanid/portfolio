@@ -204,7 +204,9 @@
     "cat_cloud_desc": "Scaling applications on cloud infrastructure",
     "cta_title": "Interested in working together?",
     "cta_desc": "Let's build something great — reach out anytime.",
-    "cta_btn": "Contact Me"
+    "cta_btn": "Contact Me",
+    "no_data_title": "No Skill Data Available",
+    "no_data_desc": "There is currently no skill data to display. Please check back later."
   },
   "projectsPage": {
     "hero_title_1": "All",

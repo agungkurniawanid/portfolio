@@ -101,9 +101,13 @@ export default function BlogSection() {
         </div>
 
         <div className="md:w-full pt-4 pb-10 flex flex-col items-start gap-6">
-          {storeBlogList.slice(0, 3).map((blog) => (
-            <BlogCard key={blog.id} item={blog} />
-          ))}
+          {storeBlogList.length > 0 ? (
+            storeBlogList.slice(0, 3).map((blog) => (
+              <BlogCard key={blog.id} item={blog} />
+            ))
+          ) : (
+            <div className="w-full text-center text-gray-500 dark:text-gray-400 py-10">Belum ada artikel yang ditampilkan.</div>
+          )}
         </div>
 
         <Link

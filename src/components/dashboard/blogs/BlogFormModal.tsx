@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect, type ReactNode } from "react"
+import { useState, useEffect, useRef, type ReactNode } from "react"
 import { X, Upload, Tag as TagIcon, Plus, Clock, Loader2 } from "lucide-react"
 import { cn } from "@/lib/Utils"
+import { supabase } from "@/lib/supabase"
 
 export type AuthorType = "developer" | "visitor"
 
@@ -81,6 +82,8 @@ export default function BlogFormModal({
   const [form, setForm] = useState<BlogFormData>(EMPTY_FORM)
   const [tagInput, setTagInput] = useState("")
   const [saving, setSaving] = useState(false)
+  const [uploadingField, setUploadingField] = useState<string | null>(null)
+  const contentRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     if (isOpen) {
@@ -105,6 +108,33 @@ export default function BlogFormModal({
     setField("tags", form.tags.filter((t) => t !== tag))
   }
 
+  async function handleFileUpload(file: File, field: "thumbnail" | "author_avatar") {
+    try {
+      setUploadingField(field)
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+      const filePath = `${field}s/${fileName}` // akan menjadi 'thumbnails/...' atau 'author_avatars/...'
+      const bucket = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET || "blog-thumbnails"
+
+      const { error: uploadError } = await supabase.storage
+        .from(bucket)
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(filePath)
+
+      setField(field, publicUrl)
+    } catch (error: any) {
+      console.error("Upload error:", error)
+      alert(`Gagal mengupload file: ${error.message}`)
+    } finally {
+      setUploadingField(null)
+    }
+  }
+
   function handleSave() {
     if (externalSaving !== undefined) {
       // Externally managed async save
@@ -115,6 +145,51 @@ export default function BlogFormModal({
         onSave(form)
         setSaving(false)
       }, 600)
+    }
+  }
+
+  // ─── Rich Text Formatting Helper ─────────────────────────────────────────────
+  function applyFormat(startTag: string, endTag: string) {
+    if (!contentRef.current) return
+    const el = contentRef.current
+    const start = el.selectionStart
+    const end = el.selectionEnd
+    const text = form.content
+    const selectedText = text.substring(start, end)
+
+    const newText = text.substring(0, start) + startTag + selectedText + endTag + text.substring(end)
+    setField("content", newText)
+
+    // Mengembalikan fokus dan posisi kursor ke dalam tag setelah state ter-update
+    setTimeout(() => {
+      el.focus()
+      el.setSelectionRange(start + startTag.length, start + startTag.length + selectedText.length)
+    }, 0)
+  }
+
+  function handleToolbarClick(action: string) {
+    switch (action) {
+      case "H1": applyFormat("<h1>", "</h1>"); break;
+      case "H2": applyFormat("<h2>", "</h2>"); break;
+      case "H3": applyFormat("<h3>", "</h3>"); break;
+      case "B": applyFormat("<strong>", "</strong>"); break;
+      case "I": applyFormat("<em>", "</em>"); break;
+      case "U": applyFormat("<u>", "</u>"); break;
+      case "S": applyFormat("<s>", "</s>"); break;
+      case "Code": applyFormat("<code>", "</code>"); break;
+      case "Quote": applyFormat("<blockquote>", "</blockquote>"); break;
+      case "• List": applyFormat("<ul>\n  <li>", "</li>\n</ul>"); break;
+      case "1. List": applyFormat("<ol>\n  <li>", "</li>\n</ol>"); break;
+      case "Link": {
+        const url = window.prompt("Masukkan URL tautan:")
+        if (url) applyFormat(`<a href="${url}" target="_blank" rel="noopener noreferrer">`, "</a>")
+        break;
+      }
+      case "Image": {
+        const src = window.prompt("Masukkan URL gambar:")
+        if (src) applyFormat(`<img src="${src}" alt="image" className="rounded-xl w-full my-4" />`, "")
+        break;
+      }
     }
   }
 
@@ -162,7 +237,7 @@ export default function BlogFormModal({
               <TextInput
                 value={form.id}
                 onChange={(v) => setField("id", v)}
-                placeholder="blog-004 atau biarkan kosong"
+                placeholder="Isi ID khusus atau biarkan kosong (Auto UUID)"
               />
             </FormField>
             <div>
@@ -265,11 +340,12 @@ export default function BlogFormModal({
                   placeholder="+62..."
                 />
               </FormField>
-              <FormField label="Author Avatar URL">
-                <TextInput
+              <FormField label="Author Avatar" hint="Upload gambar">
+                <FileInput
                   value={form.author_avatar}
                   onChange={(v) => setField("author_avatar", v)}
-                  placeholder="https://..."
+                  onUpload={(file) => handleFileUpload(file, "author_avatar")}
+                  uploading={uploadingField === "author_avatar"}
                 />
               </FormField>
             </div>
@@ -278,13 +354,14 @@ export default function BlogFormModal({
           {/* Thumbnail + Published At */}
           <div className="grid grid-cols-2 gap-4">
             <FormField
-              label="Thumbnail URL"
+              label="Thumbnail"
               icon={<Upload size={12} className="text-gray-500" />}
             >
-              <TextInput
+              <FileInput
                 value={form.thumbnail}
                 onChange={(v) => setField("thumbnail", v)}
-                placeholder="https://..."
+                onUpload={(file) => handleFileUpload(file, "thumbnail")}
+                uploading={uploadingField === "thumbnail"}
               />
             </FormField>
             <FormField label="Published At">
@@ -376,6 +453,7 @@ export default function BlogFormModal({
                   <button
                     key={t}
                     type="button"
+                    onClick={() => handleToolbarClick(t)}
                     className="px-2 py-1 text-[11px] font-mono rounded-md bg-white/[0.04] text-gray-500 hover:bg-accentColor/15 hover:text-accentColor transition-colors"
                   >
                     {t}
@@ -383,6 +461,7 @@ export default function BlogFormModal({
                 ))}
               </div>
               <textarea
+                ref={contentRef}
                 value={form.content}
                 onChange={(e) => setField("content", e.target.value)}
                 rows={9}
@@ -391,7 +470,7 @@ export default function BlogFormModal({
               />
             </div>
             <p className="text-[10px] text-gray-600 mt-1.5">
-              TipTap rich text editor akan diintegrasikan pada fase berikutnya.
+              Gunakan toolbar di atas untuk memasukkan format HTML dengan cepat.
             </p>
           </div>
         </div>
@@ -474,5 +553,55 @@ function TextInput({
       placeholder={placeholder}
       className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-gray-200 outline-none focus:border-accentColor/60 transition-colors placeholder:text-gray-600"
     />
+  )
+}
+
+function FileInput({
+  value,
+  onChange,
+  onUpload,
+  uploading,
+  accept = "image/*"
+}: {
+  value: string
+  onChange: (v: string) => void
+  onUpload: (file: File) => void
+  uploading?: boolean
+  accept?: string
+}) {
+  return (
+    <div className="space-y-2">
+      {value ? (
+        <div className="relative w-full h-28 rounded-xl overflow-hidden border border-white/[0.08] bg-white/[0.02]">
+          <img src={value} alt="Preview" className="w-full h-full object-cover" />
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/50 text-white hover:bg-red-500/80 transition-colors backdrop-blur-sm"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      ) : (
+        <div className="relative flex items-center">
+          <input
+            type="file"
+            accept={accept}
+            onChange={(e) => {
+              if (e.target.files && e.target.files[0]) {
+                onUpload(e.target.files[0])
+              }
+            }}
+            disabled={uploading}
+            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-gray-200 outline-none focus:border-accentColor/60 transition-colors file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-accentColor/10 file:text-accentColor hover:file:bg-accentColor/20 file:cursor-pointer disabled:opacity-50"
+          />
+          {uploading && (
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+              <Loader2 size={16} className="animate-spin text-accentColor" />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   )
 }

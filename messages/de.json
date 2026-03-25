@@ -273,7 +273,9 @@
     "cat_cloud_desc": "Skalierung von Anwendungen in der Cloud-Infrastruktur",
     "cta_title": "Interesse an einer Zusammenarbeit?",
     "cta_desc": "Lass uns gemeinsam etwas Großartiges bauen — schreib mir jederzeit.",
-    "cta_btn": "Kontakt"
+    "cta_btn": "Kontakt",
+    "no_data_title": "Keine Skill-Daten verfügbar",
+    "no_data_desc": "Derzeit sind keine Skill-Daten zum Anzeigen vorhanden. Bitte schauen Sie später wieder vorbei."
   },
   "blogsPage": {
     "label": "Blog & Artikel",

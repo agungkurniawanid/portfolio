@@ -38,7 +38,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ id: strin
     fetchBlogs().then(() => setMounted(true))
   }, [])
 
-  const blog = useMemo(() => getBlogById(id), [id, getBlogById])
+  const blog = useMemo(() => {
+    return blogs.find((b) => String(b.id) === String(id)) || getBlogById(id)
+  }, [blogs, id, getBlogById])
 
   const related = useMemo(() => {
     if (!blog) return []
@@ -85,12 +87,12 @@ export default function BlogDetailPage({ params }: { params: Promise<{ id: strin
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-baseBackground">
+      <div className="min-h-screen bg-baseBackground pt-20 md:pt-24">
         {/* Hero thumbnail shimmer */}
-        <div className="relative w-full h-56 md:h-80 bg-gray-200 dark:bg-gray-700 shimmer overflow-hidden">
+        <div className="relative w-full min-h-[250px] aspect-video lg:max-h-[550px] bg-gray-200 dark:bg-gray-700 shimmer overflow-hidden">
           {/* Back btn placeholder */}
           <div className="absolute top-6 left-[5%]">
-            <div className="h-8 w-28 rounded-lg bg-gray-300/60 dark:bg-gray-600/60 shimmer mt-14 md:mt-0" />
+            <div className="h-8 w-28 rounded-lg bg-gray-300/60 dark:bg-gray-600/60 shimmer" />
           </div>
         </div>
 
@@ -114,14 +116,16 @@ export default function BlogDetailPage({ params }: { params: Promise<{ id: strin
                 <div className="h-9 w-24 rounded-xl bg-gray-200 dark:bg-gray-700 shimmer shrink-0 mt-1" />
               </div>
 
-              {/* Author card */}
-              <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl mb-8 border border-gray-100 dark:border-gray-700/40">
-                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 shimmer shrink-0" />
-                <div className="flex-1 space-y-1.5">
-                  <div className="h-4 w-32 rounded bg-gray-200 dark:bg-gray-700 shimmer" />
-                  <div className="h-3 w-44 rounded bg-gray-200 dark:bg-gray-700 shimmer" />
+              {/* Author card shimmer */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl mb-8 border border-gray-100 dark:border-gray-700/40">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 shimmer shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-32 rounded bg-gray-200 dark:bg-gray-700 shimmer" />
+                    <div className="h-3 w-44 rounded bg-gray-200 dark:bg-gray-700 shimmer" />
+                  </div>
                 </div>
-                <div className="flex gap-1.5">
+                <div className="flex gap-1.5 pt-3 sm:pt-0 border-t border-gray-200 dark:border-gray-700/50 sm:border-t-0">
                   {[0, 1, 2].map((i) => (
                     <div key={i} className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-700 shimmer" />
                   ))}
@@ -192,9 +196,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ id: strin
   const shareTitle = encodeURIComponent(blog.title)
 
   return (
-    <div className="min-h-screen bg-baseBackground">
+    <div className="min-h-screen bg-baseBackground pt-20 md:pt-24">
       {/* Hero thumbnail */}
-      <div className="relative w-full h-56 md:h-80 overflow-hidden">
+      <div className="relative w-full min-h-[250px] aspect-video lg:max-h-[550px] overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={blog.thumbnail}
@@ -206,7 +210,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ id: strin
         <div className="absolute top-6 left-[5%]">
           <Link
             href="/blogs"
-            className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white transition-colors backdrop-blur-sm bg-black/20 px-3 py-1.5 rounded-lg mt-14 md:mt-0"
+            className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white transition-colors backdrop-blur-sm bg-black/20 px-3 py-1.5 rounded-lg"
           >
             <ArrowLeft size={14} /> Kembali ke Blog
           </Link>
@@ -251,42 +255,44 @@ export default function BlogDetailPage({ params }: { params: Promise<{ id: strin
             </div>
 
             {/* Author */}
-            <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl mb-8 border border-gray-100 dark:border-gray-700/40">
-              <div
-                className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 overflow-hidden",
-                  !blog.author.avatar && (isDeveloper
-                    ? "bg-accentColor text-white"
-                    : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200")
-                )}
-              >
-                {blog.author.avatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={blog.author.avatar} alt={blog.author.name} className="w-full h-full object-cover" />
-                ) : (
-                  blog.author.name.charAt(0).toUpperCase()
-                )}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-semibold dark:text-white">{blog.author.name}</p>
-                  {isDeveloper && (
-                    <span className="text-[10px] px-2 py-0.5 bg-accentColor/15 text-accentColor rounded font-bold">
-                      DEVELOPER / AUTHOR
-                    </span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl mb-8 border border-gray-100 dark:border-gray-700/40">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div
+                  className={cn(
+                    "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 overflow-hidden",
+                    !blog.author.avatar && (isDeveloper
+                      ? "bg-accentColor text-white"
+                      : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200")
                   )}
-                  {!isDeveloper && (
-                    <span className="text-[10px] px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded font-medium">
-                      Visitor
-                    </span>
+                >
+                  {blog.author.avatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={blog.author.avatar} alt={blog.author.name} className="w-full h-full object-cover" />
+                  ) : (
+                    blog.author.name.charAt(0).toUpperCase()
                   )}
                 </div>
-                <p className="text-xs text-gray-400 dark:text-gray-500">
-                  Dipublikasikan {formatDate(blog.publishedAt)}
-                </p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-semibold dark:text-white truncate max-w-full">{blog.author.name}</p>
+                    {isDeveloper && (
+                      <span className="text-[10px] px-2 py-0.5 bg-accentColor/15 text-accentColor rounded font-bold shrink-0">
+                        DEVELOPER / AUTHOR
+                      </span>
+                    )}
+                    {!isDeveloper && (
+                      <span className="text-[10px] px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded font-medium shrink-0">
+                        Visitor
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">
+                    Dipublikasikan {formatDate(blog.publishedAt)}
+                  </p>
+                </div>
               </div>
               {/* Share buttons */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 sm:shrink-0 pt-3 sm:pt-0 border-t border-gray-200 dark:border-gray-700/50 sm:border-t-0 mt-1 sm:mt-0">
                 <a
                   href={`https://twitter.com/intent/tweet?text=${shareTitle}&url=${shareUrl}`}
                   target="_blank"

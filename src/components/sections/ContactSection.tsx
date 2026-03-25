@@ -92,7 +92,7 @@ export default function ContactSection() {
         <div className="flex flex-col gap-8 items-center">
           <div className="flex items-center gap-4">
             <Link
-              href="https://www.linkedin.com/in/agung-k-74530028b"
+              href="https://www.linkedin.com/in/agung-kurniawan-8a798a3b9/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Contact me on linkedin"

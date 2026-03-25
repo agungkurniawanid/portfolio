@@ -12,15 +12,6 @@ import { RoughNotation } from "react-rough-notation";
 import ProjectCard from "../ProjectCard";
 import { useTranslations } from "next-intl";
 import { fetchPopularProjects } from "@/lib/projectsApi";
-import ThumbGreenhouse from "@/assets/thumbnails/Intelligence-Quality-Air-Control-System-Greenhouse-Kopi-Nrsery-App.jpeg";
-import ThumbEmotional from "@/assets/thumbnails/Emotional-Faces-Classification.jpeg";
-import ThumbKampSewa from "@/assets/thumbnails/Marketplace-KampSewa_-Jual-Beli,-Sewa-dan-Menyewakan-Alat-Kamping-App.jpeg";
-import ThumbSpeech from "@/assets/thumbnails/Speech-to-Speech-With-AI-ElevenLabs-App.jpeg";
-import ThumbDapnetwork from "@/assets/thumbnails/Dapnetwork-(Old-Version)-App.jpeg";
-import ThumbClock from "@/assets/thumbnails/Clock-App.jpeg";
-import ThumbElectroMart from "@/assets/thumbnails/Electro-Mart-App.jpeg";
-import ThumbQRCode from "@/assets/thumbnails/QR-Code-Reader-App.jpeg";
-import ThumbHandyCraft from "@/assets/thumbnails/HandyCraft-App.jpeg";
 
 // ─── Skeleton card shown while Supabase data is loading ──────────────────────
 function ProjectCardSkeleton() {
@@ -53,17 +44,13 @@ export default function ProjectSection() {
   const isOnScreen = useOnScreen(elementRef as React.RefObject<HTMLElement>);
 
   // ─── Supabase data state ────────────────────────────────────────────────────
-  const [displayProjects, setDisplayProjects] = useState<Project[]>(staticProjects);
+  const [displayProjects, setDisplayProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
   // ─── Fetch popular projects from Supabase ─────────────────────────────────
   useEffect(() => {
     fetchPopularProjects().then((rows) => {
-      if (rows.length > 0) {
-        // Map ProjectCardItem → Project (image comes as a URL string from Supabase)
-        setDisplayProjects(rows as Project[]);
-      }
-      // If Supabase returns empty (DB not seeded yet), staticProjects stay as fallback
+      setDisplayProjects((rows || []) as Project[]);
       setLoading(false);
     });
   }, []);
@@ -133,9 +120,13 @@ export default function ProjectSection() {
             ? Array.from({ length: 9 }).map((_, i) => (
                 <ProjectCardSkeleton key={i} />
               ))
-            : displayProjects.map((project) => (
+            : displayProjects.length > 0 ? (
+              displayProjects.map((project) => (
                 <ProjectCard key={project.id} item={project} />
-              ))}
+              ))
+            ) : (
+              <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500 dark:text-gray-400 py-10">Belum ada project yang ditampilkan.</div>
+            )}
         </div>
 
         <div className="font-medium text-black">
@@ -169,167 +160,3 @@ export interface Project {
   liveURL: string;
   technologies: string[];
 }
-
-/**
- * staticProjects — used as:
- *   1. The initial render value (zero layout shift before Supabase responds)
- *   2. A fallback when Supabase is unreachable or the DB has not been seeded yet
- */
-const staticProjects: Project[] = [
-  {
-    id: 1,
-    title: "Intelligence Quality Air Control System Greenhouse Kopi Nrsery App",
-    description:
-      "Menggabungkan Situs Web, Aplikasi Seluler, dan IoT. Proyek ini merupakan sistem kontrol kualitas udara berbasis kecerdasan buatan yang dirancang khusus untuk pembibitan kopi. Sistem ini bertujuan untuk memantau, menganalisis, dan mengontrol udara serta mendiagnosis penyakit kopi melalui aplikasi seluler dengan deep learning CNN.",
-    platformApp: ["Web App", "Mobile App", "IoT Device"],
-    image: ThumbGreenhouse,
-    githubURL: {
-      web: "https://github.com/agungkurniawanid/kopi_greenhouse_aircontrol_web",
-      mobile:
-        "https://github.com/agungkurniawanid/kopi_greenhouse_aircontrol_app",
-      "model AI":
-        "https://github.com/agungkurniawanid/kopi_greenhouse_aircontrol_coffee_leaf_model",
-      iot: "https://github.com/agungkurniawanid/kopi_greenhouse_aircontrol_iot",
-    },
-    liveURL: "#",
-    githubApi: "",
-    technologies: [
-      "Laravel",
-      "Flutter",
-      "Python",
-      "Tensorflow",
-      "FastAPI",
-      "Convolusional Neural Network",
-      "Deep Learning",
-    ],
-  },
-  {
-    id: 4,
-    title: "Emotional Faces Classification",
-    description:
-      "Sebuah aplikasi yang dibuat untuk memberikan kesimpulan pada foto yang diupload dengan beberapa ekspresi yang akan didapatkan seperti marah, sedih dan lain-lain. Aplikasi ini dibuat dengan Flutter untuk App, Nextjs dan Fast API untuk backend, dan metode deep learning yaitu Convolutional Neural Network.",
-    platformApp: ["Web App", "Mobile App"],
-    image: ThumbEmotional,
-    githubURL: {
-      web: "https://github.com/agungkurniawanid/emotional_faces_classification_web",
-      mobile:
-        "https://github.com/agungkurniawanid/emotional_faces_classification_app",
-    },
-    liveURL: "#",
-    githubApi: "",
-    technologies: [
-      "Flutter",
-      "Laravel",
-      "FastAPI",
-      "TailwindCSS",
-      "MySQL",
-      "Python",
-      "Convolutional Neural Network",
-      "Deep Learning",
-      "Tensorflow",
-    ],
-  },
-  {
-    id: 2,
-    title:
-      "Marketplace KampSewa: Jual Beli, Sewa dan Menyewakan Alat Kamping App",
-    description:
-      "Aplikasi yang menyediakan penyewaan & penyewaan peralatan berkemah ke seluruh wilayah yang memungkinkan pengguna untuk saling menyewakan dan menyewakan peralatan berkemah mereka.",
-    platformApp: ["Web App", "Mobile App"],
-    image: ThumbKampSewa,
-    githubURL: {
-      web: "https://github.com/agungkurniawanid/marketplace_kampsewa_web",
-      mobile: "https://github.com/agungkurniawanid/marketplace_kampsewa_app",
-    },
-    liveURL: "#",
-    githubApi: "",
-    technologies: ["Laravel", "Flutter", "TailwindCSS", "MySQL", "Midtrans"],
-  },
-  {
-    id: 3,
-    title: "Speech to Speech With AI ElevenLabs App",
-    description:
-      "Sebuah aplikasi di mana pengguna dapat melakukan percakapan dua arah dengan AI, speech to speech dalam aplikasi ini dilakukan secara Real-Time. Dibangun dengan API Gemini dan ElevenLabs AI.",
-    platformApp: ["Mobile App"],
-    image: ThumbSpeech,
-    githubURL: {
-      mobile:
-        "https://github.com/agungkurniawanid/speech_to_speech_ai_evenlabs_app",
-    },
-    liveURL: "#",
-    githubApi: "",
-    technologies: ["Flutter", "Gemini API", "ElevenLabs AI"],
-  },
-  {
-    id: 8,
-    title: "Dapnetwork (Old Version) App",
-    description:
-      "Aplikasi DAPNetwork, yang dikembangkan oleh DAPNetwork, membuat manajemen jaringan internet menjadi mudah. Aplikasi ini mencakup platform seluler bagi staf untuk menangani penagihan dan pemasangan pelanggan baru, dan situs web bagi admin untuk mengelola operasi melalui dasbor yang komprehensif.",
-    platformApp: ["Web App", "Mobile App"],
-    image: ThumbDapnetwork,
-    githubURL: {
-      webs: "https://github.com/agungkurniawanid/dapnetwork_web",
-      mobile: "https://github.com/agungkurniawanid/dapnetwork_old_app",
-    },
-    liveURL: "#",
-    githubApi: "",
-    technologies: ["Java Native", "PHP Native", "TailwindCSS", "MySQL"],
-  },
-  {
-    id: 5,
-    title: "Clock App",
-    description:
-      "Clock App adalah aplikasi canggih yang dirancang untuk memberikan pengalaman pengguna terbaik dalam mengelola waktu.",
-    platformApp: ["Mobile App"],
-    image: ThumbClock,
-    githubURL: {
-      mobile: "https://github.com/agungkurniawanid/clock_app",
-    },
-    liveURL: "#",
-    githubApi: "",
-    technologies: ["Flutter"],
-  },
-  {
-    id: 6,
-    title: "Electro Mart App",
-    description:
-      "Aplikasi E-Commerce untuk menjual peralatan elektronik seperti Laptop, Komputer, TV dan lain-lain. Dibuat dengan Flutter untuk aplikasi mobile dan Nextjs untuk aplikasi website.",
-    platformApp: ["Web App", "Mobile App"],
-    image: ThumbElectroMart,
-    githubURL: {
-      web: "https://github.com/agungkurniawanid/electro_mart_web",
-      mobile: "https://github.com/agungkurniawanid/electro_mart_app",
-    },
-    liveURL: "#",
-    githubApi: "",
-    technologies: ["Flutter", "Next.js", "MySQL", "TailwindCSS"],
-  },
-  {
-    id: 7,
-    title: "QR Code Reader App",
-    description:
-      "QRCode Reader adalah aplikasi yang memungkinkan pengguna untuk memindai dan membaca kode QR dengan cepat dan efisien. Aplikasi ini mendukung berbagai jenis konten yang dikodekan dalam QR, seperti URL, teks, kontak, dan informasi lainnya.",
-    platformApp: ["Mobile App"],
-    image: ThumbQRCode,
-    githubURL: {
-      mobile: "https://github.com/agungkurniawanid/qrcode_reader_app",
-    },
-    liveURL: "#",
-    githubApi: "",
-    technologies: ["Flutter"],
-  },
-    {
-    id: 9,
-    title: "HandyCraft App",
-    description:
-      "Aplikasi untuk UMKM yang bergerak di bidang usaha kerajinan dan perkakas, aplikasi ini berisi sistem yang dapat mengatur transaksi, keuangan seperti pemasukan dan pengeluaran serta pemasukan dari supplier. Dan integrasi Firebase",
-    platformApp: ["Mobile App"],
-    image: ThumbHandyCraft,
-    githubURL: {
-      mobile: "https://github.com/agungkurniawanid/handycraft_app",
-    },
-    liveURL: "#",
-    githubApi: "",
-    technologies: ["Flutter"],
-  },
-];

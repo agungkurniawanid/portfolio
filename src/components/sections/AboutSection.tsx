@@ -16,8 +16,6 @@ import { useTranslations } from "next-intl";
 import { useLanguageStore } from "@/stores/LanguageStore";
 import { fetchAboutStats, type AboutStats } from "@/lib/projectsApi";
 
-/** Fallback stats displayed while data is loading or on fetch error */
-const STATS_DEFAULT: AboutStats = { yearsExperience: 5, contributions: 24, totalProjects: 49, totalSkills: 30, totalCertificates: 8 };
 
 export default function AboutSection() {
   gsap.registerPlugin(ScrollTrigger);
@@ -31,7 +29,7 @@ export default function AboutSection() {
    * Mutable ref so GSAP's onEnter closure always reads the latest fetched values
    * without needing to re-register the ScrollTrigger.
    */
-  const statsRef = useRef<AboutStats>(STATS_DEFAULT);
+  const statsRef = useRef<AboutStats>({ yearsExperience: 0, contributions: 0, totalProjects: 0, totalSkills: 0, totalCertificates: 0 });
 
   /** True once the ScrollTrigger onEnter has fired at least once */
   const hasEnteredRef = useRef(false);

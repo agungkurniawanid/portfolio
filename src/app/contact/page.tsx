@@ -202,7 +202,7 @@ const socialGroups: SocialGroup[] = [
         id: "linkedin",
         platform: "LinkedIn",
         handle: "agung-k-74530028b",
-        url: "https://linkedin.com/in/agung-k-74530028b",
+        url: "https://www.linkedin.com/in/agung-kurniawan-8a798a3b9/",
         icon: <SiLinkedin size={28} />,
         bgColor: "from-[#0A66C2]/20 to-[#0A66C2]/5",
         textColor: "text-[#0A66C2]",

@@ -53,10 +53,6 @@ export interface AboutStats {
  */
 const IGNORED_GITHUB_REPOS = 2; // "agungkurniawanid" + "portfolio"
 
-/** Fallback values used when Supabase or GitHub is unreachable */
-const STATS_FALLBACK = {
-  yearsExperience: 5,
-} as const;
 
 /**
  * Fetches all About-section stats in parallel:
@@ -74,8 +70,7 @@ export async function fetchAboutStats(): Promise<AboutStats> {
     supabase
       .from("portfolio_stats")
       .select("years_experience")
-      .limit(1)
-      .single(),
+      .limit(1), // Fetches at most 1 row, returns an array
     supabase
       .from("projects")
       .select("id", { count: "exact", head: true })
@@ -92,14 +87,18 @@ export async function fetchAboutStats(): Promise<AboutStats> {
   ]);
 
   // ── Supabase portfolio_stats (years_experience only) ─────────────────────
-  let yearsExperience = STATS_FALLBACK.yearsExperience;
+  let yearsExperience = 0;
 
   if (
     supabaseResult.status === "fulfilled" &&
     !supabaseResult.value.error &&
     supabaseResult.value.data
   ) {
-    yearsExperience = supabaseResult.value.data.years_experience ?? yearsExperience;
+    // Data is now an array, so we safely access the first element.
+    const statsData = supabaseResult.value.data[0];
+    if (statsData) {
+      yearsExperience = statsData.years_experience ?? 0;
+    }
   } else {
     console.error(
       "[projectsApi] fetchAboutStats — Supabase portfolio_stats error:",

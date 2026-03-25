@@ -24,6 +24,7 @@
     "migrate:visitor-ip-log-fingerprint": "node scripts/migrate-visitor-ip-log-fingerprint.mjs",
     "migrate:visitor-ip-log-fix-index": "node scripts/migrate-visitor-ip-log-fix-index.mjs",
     "migrate:guestbook-fix-rls": "node scripts/migrate-guestbook-fix-rls.mjs",
+    "migrate:fix-certificates-rls": "node scripts/migrate-fix-certificates-rls.mjs",
     "migrate:all": "node scripts/migrate-all.mjs",
     "migrate:timeline": "node scripts/migrate-timeline.mjs",
     "create:auth-user": "node scripts/create-auth-user.mjs"

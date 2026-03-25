@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo, useEffect } from "react"
 import {
   Search, Plus, Edit2, Trash2, BookOpen, Clock,
   Users, Shield, ChevronLeft, ChevronRight, X,
   Tag, RefreshCw, ListFilter, Database, Menu,
-  AlertCircle, CheckCircle2,
+  AlertCircle, CheckCircle2, CheckSquare
 } from "lucide-react"
 import { cn } from "@/lib/Utils"
 import BlogFormModal, { type BlogFormData } from "@/components/dashboard/blogs/BlogFormModal"
@@ -14,6 +14,7 @@ import { useBlogStore } from "@/stores/BlogStore"
 import { supabase } from "@/lib/supabase"
 import { useSidebar } from "@/components/dashboard/SidebarContext"
 import type { Blog } from "@/types/blog"
+import { saveBlogOnServer, deleteBlogOnServer, bulkDeleteBlogsOnServer } from "./blogActions"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -36,22 +37,28 @@ interface BlogEntry {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function blogToEntry(blog: Blog): BlogEntry {
+function blogToEntry(blog: any): BlogEntry {
+  const authorName = blog.author?.name || blog.author_name || "Unknown Author"
+  const authorEmail = blog.author?.email || blog.author_email || ""
+  const authorPhone = blog.author?.phone || blog.author_phone || ""
+  const authorAvatar = blog.author?.avatar || blog.author_avatar || ""
+  const authorType = blog.author?.type || blog.author_type || "visitor"
+
   return {
     id: blog.id,
-    title: blog.title,
-    excerpt: blog.excerpt,
-    content: blog.content,
-    thumbnail: blog.thumbnail,
-    category: blog.category,
-    author_name: blog.author.name,
-    author_email: blog.author.email ?? "",
-    author_phone: blog.author.phone ?? "",
-    author_avatar: blog.author.avatar ?? "",
-    author_type: blog.author.type,
-    published_at: blog.publishedAt,
-    reading_time: blog.readingTime,
-    tags: blog.tags ?? [],
+    title: blog.title || "Untitled",
+    excerpt: blog.excerpt || "",
+    content: blog.content || "",
+    thumbnail: blog.thumbnail || "",
+    category: blog.category || "General",
+    author_name: authorName,
+    author_email: authorEmail,
+    author_phone: authorPhone,
+    author_avatar: authorAvatar,
+    author_type: authorType,
+    published_at: blog.publishedAt || blog.published_at || new Date().toISOString(),
+    reading_time: blog.readingTime || blog.reading_time || 0,
+    tags: blog.tags || [],
   }
 }
 
@@ -83,7 +90,19 @@ function formatDate(iso: string) {
 }
 
 function getInitials(name: string) {
+  if (!name) return "U"
   return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase()
+}
+
+function generateId() {
+  if (typeof window !== "undefined" && window.crypto && window.crypto.randomUUID) {
+    return window.crypto.randomUUID()
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0
+    const v = c === 'x' ? r : (r & 0x3 | 0x8)
+    return v.toString(16)
+  })
 }
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
@@ -103,11 +122,16 @@ export default function BlogsDashboardPage() {
   const [filterCategory, setFilterCategory] = useState("All")
   const [filterType, setFilterType] = useState<"all" | "developer" | "visitor">("all")
   const [page, setPage] = useState(1)
+  
   const [saving, setSaving] = useState(false)
+  const [isDeletingBulk, setIsDeletingBulk] = useState(false)
   const [toast, setToast] = useState<ToastMsg | null>(null)
   const STORAGE_BUCKET = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET || "blog-thumbnails"
 
-  // Modal state
+  // Checkbox State
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+
+  // Modals state
   const [formModal, setFormModal] = useState<{
     open: boolean
     mode: "create" | "edit"
@@ -120,10 +144,17 @@ export default function BlogsDashboardPage() {
     title: string
   }>({ open: false, id: "", title: "" })
 
+  const [bulkDeleteModal, setBulkDeleteModal] = useState(false)
+
   // Fetch on mount
   useEffect(() => {
     fetchBlogs()
   }, [fetchBlogs])
+
+  // Reset checkboxes if page or filter changes
+  useEffect(() => {
+    setSelectedIds([])
+  }, [page, search, filterCategory, filterType])
 
   // Auto-dismiss toast
   useEffect(() => {
@@ -132,20 +163,17 @@ export default function BlogsDashboardPage() {
     return () => clearTimeout(t)
   }, [toast])
 
-  // Map store blogs to flat BlogEntry format
   const blogs = useMemo(() => storeBlogs.map(blogToEntry), [storeBlogs])
-
-  // ─── Filtered data ─────────────────────────────────────────────────────────
 
   const filtered = useMemo(() => {
     return blogs.filter((b) => {
       const q = search.toLowerCase()
       const matchSearch =
         !q ||
-        b.title.toLowerCase().includes(q) ||
-        b.author_name.toLowerCase().includes(q) ||
-        b.category.toLowerCase().includes(q) ||
-        b.tags.some((t) => t.toLowerCase().includes(q))
+        (b.title?.toLowerCase() || "").includes(q) ||
+        (b.author_name?.toLowerCase() || "").includes(q) ||
+        (b.category?.toLowerCase() || "").includes(q) ||
+        (b.tags || []).some((t) => (t?.toLowerCase() || "").includes(q))
       const matchCat = filterCategory === "All" || b.category === filterCategory
       const matchType = filterType === "all" || b.author_type === filterType
       return matchSearch && matchCat && matchType
@@ -155,14 +183,29 @@ export default function BlogsDashboardPage() {
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
 
-  // ─── Stats ────────────────────────────────────────────────────────────────
-
   const totalBlogs = blogs.length
   const devBlogs = blogs.filter((b) => b.author_type === "developer").length
   const visitorBlogs = blogs.filter((b) => b.author_type === "visitor").length
   const categoryCount = new Set(blogs.map((b) => b.category)).size
 
-  // ─── Handlers ─────────────────────────────────────────────────────────────
+  // ─── Selection Handlers ───────────────────────────────────────────────────
+
+  function toggleSelectAll() {
+    if (paginated.length === 0) return
+    if (selectedIds.length === paginated.length) {
+      setSelectedIds([])
+    } else {
+      setSelectedIds(paginated.map(b => b.id))
+    }
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    )
+  }
+
+  // ─── Action Handlers ──────────────────────────────────────────────────────
 
   function openCreate() {
     setFormModal({ open: true, mode: "create" })
@@ -198,7 +241,6 @@ export default function BlogsDashboardPage() {
   async function handleSave(data: BlogFormData) {
     setSaving(true)
     try {
-      // Perbaikan struktur baris yang akan dikirim ke Supabase
       const row: any = {
         title: data.title,
         category: data.category,
@@ -208,7 +250,7 @@ export default function BlogsDashboardPage() {
         author_avatar: data.author_avatar || null,
         author_type: data.author_type,
         thumbnail: data.thumbnail || null,
-        tags: data.tags,
+        tags: data.tags || [],
         excerpt: data.excerpt || data.content.replace(/<[^>]+>/g, "").slice(0, 180),
         reading_time: data.reading_time,
         published_at: data.published_at ? new Date(data.published_at).toISOString() : new Date().toISOString(),
@@ -218,28 +260,27 @@ export default function BlogsDashboardPage() {
       let error = null
 
       if (formModal.mode === "create") {
-        // PENTING: Jangan kirim properti `id` jika user mengosongkannya. 
-        // Biarkan Supabase meng-generate UUID secara otomatis.
         if (data.id && data.id.trim() !== "") {
           row.id = data.id;
+        } else {
+          row.id = generateId();
         }
         
-        const res = await supabase.from("blogs").insert(row)
-        error = res.error
+        const result = await saveBlogOnServer(row, "create")
+        if (!result.success) error = { message: result.error as string }
       } else {
         const idToUpdate = data.id || formModal.data?.id
         if (!idToUpdate) throw new Error("ID tidak ditemukan untuk update.")
 
-        const res = await supabase.from("blogs").update(row).eq("id", idToUpdate)
-        error = res.error
+        const result = await saveBlogOnServer(row, "edit", idToUpdate)
+        if (!result.success) error = { message: result.error as string }
       }
 
       if (error) {
         throw new Error(error.message)
       } else {
-        await fetchBlogs() // Refresh data dari store
+        await fetchBlogs() 
         setFormModal({ open: false, mode: "create" })
-        setPage(1)
         setToast({
           type: "success",
           text: formModal.mode === "create" ? "Blog post berhasil dibuat." : "Blog post berhasil diperbarui.",
@@ -257,36 +298,26 @@ export default function BlogsDashboardPage() {
     try {
       if (!deleteModal.id) return
 
-      // 1. Ambil URL thumbnail terlebih dahulu sebelum row dihapus
-      const blogToDelete = storeBlogs.find((b) => b.id === deleteModal.id)
+      const blogToDelete = storeBlogs.find((b) => String(b.id) === String(deleteModal.id))
 
-      // 2. Hapus gambar dari Storage jika URL thumbnail ada
+      let filePathToDel = undefined
       if (blogToDelete?.thumbnail) {
         const fileUrl = blogToDelete.thumbnail
-        
-        // Ekstrak file path dari Public URL Supabase
-        // Contoh URL: https://xyz.supabase.co/storage/v1/object/public/blog-images/folder/gambar.jpg
         const pathIdentifier = `/public/${STORAGE_BUCKET}/`
         const pathIndex = fileUrl.indexOf(pathIdentifier)
         
         if (pathIndex !== -1) {
-          const filePath = fileUrl.substring(pathIndex + pathIdentifier.length)
-          const { error: storageError } = await supabase.storage.from(STORAGE_BUCKET).remove([filePath])
-          
-          if (storageError) {
-            console.warn("Gagal menghapus gambar di storage:", storageError.message)
-            // Lanjut menghapus row database meskipun gambar gagal dihapus
-          }
+          filePathToDel = fileUrl.substring(pathIndex + pathIdentifier.length)
         }
       }
 
-      // 3. Hapus Row Database
-      const { error: dbError } = await supabase.from("blogs").delete().eq("id", deleteModal.id)
-      
-      if (dbError) throw new Error(dbError.message)
+      const result = await deleteBlogOnServer(deleteModal.id, STORAGE_BUCKET, filePathToDel)
+      if (!result.success) {
+        throw new Error(result.error as string)
+      }
 
       await fetchBlogs()
-      setPage(1)
+      setSelectedIds(prev => prev.filter(id => id !== deleteModal.id))
       setToast({ type: "success", text: "Blog post dan thumbnail berhasil dihapus." })
 
     } catch (err: any) {
@@ -294,6 +325,44 @@ export default function BlogsDashboardPage() {
       setToast({ type: "error", text: `Gagal menghapus: ${err.message}` })
     } finally {
       setDeleteModal({ open: false, id: "", title: "" })
+    }
+  }
+
+  async function handleBulkDelete() {
+    setIsDeletingBulk(true)
+    try {
+      const itemsToDelete = selectedIds.map(id => {
+        const blog = storeBlogs.find((b) => String(b.id) === String(id))
+        let filePath = undefined
+        
+        if (blog?.thumbnail) {
+          const pathIdentifier = `/public/${STORAGE_BUCKET}/`
+          const pathIndex = blog.thumbnail.indexOf(pathIdentifier)
+          if (pathIndex !== -1) {
+            filePath = blog.thumbnail.substring(pathIndex + pathIdentifier.length)
+          }
+        }
+        return { id, storageBucket: STORAGE_BUCKET, filePath }
+      })
+
+      const result = await bulkDeleteBlogsOnServer(itemsToDelete)
+      if (!result.success) throw new Error(result.error as string)
+
+      await fetchBlogs()
+      setSelectedIds([])
+      
+      // Hitung ulang total halaman jika yang dihapus adalah semua yang ada di page saat ini
+      const newTotal = filtered.length - itemsToDelete.length
+      const maxPage = Math.ceil(newTotal / ITEMS_PER_PAGE) || 1
+      if (page > maxPage) setPage(maxPage)
+
+      setToast({ type: "success", text: `${result.count} Blog post berhasil dihapus.` })
+    } catch (err: any) {
+      console.error("Bulk Delete Error:", err)
+      setToast({ type: "error", text: `Gagal menghapus: ${err.message}` })
+    } finally {
+      setIsDeletingBulk(false)
+      setBulkDeleteModal(false)
     }
   }
 
@@ -315,7 +384,6 @@ export default function BlogsDashboardPage() {
         {/* ── Page Header ── */}
         <div className="sticky top-0 z-10 flex items-center justify-between px-4 md:px-8 py-4 border-b border-white/[0.06] bg-[#070e0e]/90 backdrop-blur-sm shrink-0">
           <div className="flex items-center gap-3">
-            {/* Hamburger — mobile only */}
             <button
               onClick={toggleSidebar}
               className="p-2 -ml-1 rounded-xl hover:bg-white/[0.06] text-gray-400 hover:text-gray-200 transition-colors md:hidden"
@@ -333,14 +401,27 @@ export default function BlogsDashboardPage() {
               </p>
             </div>
           </div>
-          <button
-            onClick={openCreate}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium bg-accentColor text-white rounded-xl hover:brightness-[0.85] transition-all hover:shadow-lg hover:shadow-accentColor/20"
-          >
-            <Plus size={14} />
-            <span className="hidden sm:inline">New Post</span>
-            <span className="sm:hidden">Baru</span>
-          </button>
+          
+          <div className="flex items-center gap-2">
+            {selectedIds.length > 0 && (
+              <button
+                onClick={() => setBulkDeleteModal(true)}
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl hover:bg-red-500/20 hover:border-red-500/30 transition-all"
+              >
+                <Trash2 size={14} />
+                <span className="hidden sm:inline">Hapus ({selectedIds.length})</span>
+                <span className="sm:hidden">({selectedIds.length})</span>
+              </button>
+            )}
+            <button
+              onClick={openCreate}
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium bg-accentColor text-white rounded-xl hover:brightness-[0.85] transition-all hover:shadow-lg hover:shadow-accentColor/20"
+            >
+              <Plus size={14} />
+              <span className="hidden sm:inline">New Post</span>
+              <span className="sm:hidden">Baru</span>
+            </button>
+          </div>
         </div>
 
         {/* ── Scrollable Content ── */}
@@ -407,7 +488,6 @@ export default function BlogsDashboardPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Category Filter */}
               <div className="relative flex-1 sm:flex-none">
                 <ListFilter size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
                 <select
@@ -421,7 +501,6 @@ export default function BlogsDashboardPage() {
                 </select>
               </div>
 
-              {/* Type Filter */}
               <select
                 value={filterType}
                 onChange={(e) => { setFilterType(e.target.value as typeof filterType); setPage(1) }}
@@ -432,7 +511,6 @@ export default function BlogsDashboardPage() {
                 <option value="visitor" className="bg-[#0d1a1a]">Visitor</option>
               </select>
 
-              {/* Clear Filters */}
               {hasActiveFilters && (
                 <button
                   onClick={resetFilters}
@@ -444,7 +522,6 @@ export default function BlogsDashboardPage() {
               )}
             </div>
 
-            {/* Results count */}
             {hasActiveFilters && (
               <span className="text-xs text-gray-500 shrink-0">
                 {filtered.length}/{blogs.length}
@@ -474,6 +551,8 @@ export default function BlogsDashboardPage() {
                       key={blog.id}
                       blog={blog}
                       rowNum={(page - 1) * ITEMS_PER_PAGE + idx + 1}
+                      isSelected={selectedIds.includes(blog.id)}
+                      onToggle={() => toggleSelect(blog.id)}
                       onEdit={() => openEdit(blog)}
                       onDelete={() => openDelete(blog)}
                     />
@@ -487,7 +566,16 @@ export default function BlogsDashboardPage() {
                   <table className="w-full min-w-[860px]">
                     <thead>
                       <tr className="bg-white/[0.04] border-b border-white/[0.06]">
-                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase tracking-widest px-5 py-3.5 w-8">#</th>
+                        {/* Checkbox Header */}
+                        <th className="px-4 py-3.5 w-12 text-left">
+                          <input
+                            type="checkbox"
+                            checked={paginated.length > 0 && selectedIds.length === paginated.length}
+                            onChange={toggleSelectAll}
+                            className="w-4 h-4 rounded cursor-pointer accent-accentColor bg-white/[0.05] border-white/[0.1]"
+                          />
+                        </th>
+                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase tracking-widest px-2 py-3.5 w-8">#</th>
                         <th className="text-left text-[10px] font-semibold text-gray-500 uppercase tracking-widest px-4 py-3.5">Post</th>
                         <th className="text-left text-[10px] font-semibold text-gray-500 uppercase tracking-widest px-4 py-3.5 w-32">Kategori</th>
                         <th className="text-left text-[10px] font-semibold text-gray-500 uppercase tracking-widest px-4 py-3.5 w-44">Author</th>
@@ -499,7 +587,7 @@ export default function BlogsDashboardPage() {
                     <tbody className="divide-y divide-white/[0.04]">
                       {paginated.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="text-center py-16">
+                          <td colSpan={8} className="text-center py-16">
                             <EmptyState onReset={resetFilters} />
                           </td>
                         </tr>
@@ -509,6 +597,8 @@ export default function BlogsDashboardPage() {
                             key={blog.id}
                             blog={blog}
                             rowNum={(page - 1) * ITEMS_PER_PAGE + idx + 1}
+                            isSelected={selectedIds.includes(blog.id)}
+                            onToggle={() => toggleSelect(blog.id)}
                             onEdit={() => openEdit(blog)}
                             onDelete={() => openDelete(blog)}
                           />
@@ -566,6 +656,43 @@ export default function BlogsDashboardPage() {
         onConfirm={handleDelete}
       />
 
+      {/* ── Bulk Delete Modal (Inline) ── */}
+      {bulkDeleteModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity" onClick={() => !isDeletingBulk && setBulkDeleteModal(false)} />
+          <div className="relative w-full max-w-md bg-[#0e1c1c] border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 text-center space-y-4 mt-2">
+              <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto border border-red-500/20">
+                <AlertCircle size={26} className="text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-1.5">Hapus {selectedIds.length} Data Sekaligus?</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">
+                  Apakah Anda yakin ingin menghapus {selectedIds.length} data yang dicentang beserta gambar thumbnail-nya? <br/>
+                  <span className="font-semibold text-gray-300">Tindakan ini tidak dapat dibatalkan.</span>
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 px-6 py-4 bg-white/[0.02] border-t border-white/[0.06]">
+              <button 
+                onClick={() => setBulkDeleteModal(false)} 
+                disabled={isDeletingBulk} 
+                className="flex-1 py-2.5 text-sm font-medium text-gray-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-xl transition-all disabled:opacity-50"
+              >
+                Batal
+              </button>
+              <button 
+                onClick={handleBulkDelete} 
+                disabled={isDeletingBulk} 
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-white bg-red-500/90 hover:bg-red-500 rounded-xl transition-all disabled:opacity-50"
+              >
+                {isDeletingBulk ? <RefreshCw size={16} className="animate-spin" /> : "Ya, Hapus Semua"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Toast fixed top-right ── */}
       {toast && (
         <div className="fixed top-4 right-4 z-[70] animate-in slide-in-from-right-4 fade-in duration-300">
@@ -596,15 +723,7 @@ export default function BlogsDashboardPage() {
 
 // ─── Pagination ───────────────────────────────────────────────────────────────
 
-function Pagination({
-  page,
-  totalPages,
-  onPageChange,
-}: {
-  page: number
-  totalPages: number
-  onPageChange: (p: number) => void
-}) {
+function Pagination({ page, totalPages, onPageChange }: { page: number, totalPages: number, onPageChange: (p: number) => void }) {
   if (totalPages <= 1) return null
 
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -615,37 +734,18 @@ function Pagination({
 
   return (
     <div className="flex items-center gap-1.5">
-      <button
-        onClick={() => onPageChange(Math.max(1, page - 1))}
-        disabled={page === 1}
-        className="p-1.5 rounded-lg border border-white/[0.08] hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-      >
+      <button onClick={() => onPageChange(Math.max(1, page - 1))} disabled={page === 1} className="p-1.5 rounded-lg border border-white/[0.08] hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
         <ChevronLeft size={13} className="text-gray-400" />
       </button>
       {visible.map((p, i, arr) => (
-        <>
-          {i > 0 && arr[i - 1] !== p - 1 && (
-            <span key={`ellipsis-${p}`} className="text-xs text-gray-600 px-1">…</span>
-          )}
-          <button
-            key={p}
-            onClick={() => onPageChange(p)}
-            className={cn(
-              "w-7 h-7 rounded-lg text-xs font-medium transition-all",
-              page === p
-                ? "bg-accentColor text-white"
-                : "border border-white/[0.08] text-gray-400 hover:border-white/20 hover:text-gray-200"
-            )}
-          >
+        <React.Fragment key={p}>
+          {i > 0 && arr[i - 1] !== p - 1 && <span className="text-xs text-gray-600 px-1">…</span>}
+          <button onClick={() => onPageChange(p)} className={cn("w-7 h-7 rounded-lg text-xs font-medium transition-all", page === p ? "bg-accentColor text-white" : "border border-white/[0.08] text-gray-400 hover:border-white/20 hover:text-gray-200")}>
             {p}
           </button>
-        </>
+        </React.Fragment>
       ))}
-      <button
-        onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-        disabled={page === totalPages}
-        className="p-1.5 rounded-lg border border-white/[0.08] hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-      >
+      <button onClick={() => onPageChange(Math.min(totalPages, page + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg border border-white/[0.08] hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
         <ChevronRight size={13} className="text-gray-400" />
       </button>
     </div>
@@ -668,16 +768,7 @@ function EmptyState({ onReset }: { onReset: () => void }) {
 
 // ─── StatCard ────────────────────────────────────────────────────────────────
 
-function StatCard({
-  label, value, icon, color, sub, loading,
-}: {
-  label: string
-  value: number
-  icon: React.ReactNode
-  color: "default" | "green" | "blue" | "purple"
-  sub?: string
-  loading?: boolean
-}) {
+function StatCard({ label, value, icon, color, sub, loading }: { label: string, value: number, icon: React.ReactNode, color: "default" | "green" | "blue" | "purple", sub?: string, loading?: boolean }) {
   const borderColor = {
     default: "border-white/[0.07]",
     green:   "border-accentColor/20",
@@ -714,20 +805,20 @@ function StatCard({
 
 // ─── BlogCard (mobile) ────────────────────────────────────────────────────────
 
-function BlogCard({
-  blog, rowNum, onEdit, onDelete,
-}: {
-  blog: BlogEntry
-  rowNum: number
-  onEdit: () => void
-  onDelete: () => void
-}) {
+function BlogCard({ blog, rowNum, onEdit, onDelete, isSelected, onToggle }: { blog: BlogEntry, rowNum: number, onEdit: () => void, onDelete: () => void, isSelected: boolean, onToggle: () => void }) {
   const isDev = blog.author_type === "developer"
 
   return (
-    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 space-y-3">
-      {/* Top row: thumbnail + meta */}
+    <div className={cn("rounded-2xl border bg-white/[0.02] p-4 space-y-3 transition-colors", isSelected ? "border-accentColor/40 bg-accentColor/5" : "border-white/[0.07]")}>
+      {/* Top row: Checkbox, thumbnail + meta */}
       <div className="flex items-start gap-3">
+        <div className="pt-0.5 shrink-0">
+          <input 
+            type="checkbox" checked={isSelected} onChange={onToggle}
+            className="w-4 h-4 rounded cursor-pointer accent-accentColor bg-white/[0.05] border-white/[0.1]" 
+          />
+        </div>
+
         {/* Thumbnail */}
         <div className="w-14 h-11 rounded-xl overflow-hidden shrink-0 bg-white/[0.04] border border-white/[0.06]">
           {blog.thumbnail ? (
@@ -751,32 +842,21 @@ function BlogCard({
       </div>
 
       {/* Meta row */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <span
-          className={cn(
-            "text-[11px] font-medium px-2.5 py-1 rounded-lg border",
-            CATEGORY_STYLE[blog.category] ?? "bg-gray-500/15 text-gray-400 border-gray-500/20"
-          )}
-        >
+      <div className="flex items-center gap-2 flex-wrap pl-7">
+        <span className={cn("text-[11px] font-medium px-2.5 py-1 rounded-lg border", CATEGORY_STYLE[blog.category] ?? "bg-gray-500/15 text-gray-400 border-gray-500/20")}>
           {blog.category}
         </span>
-        <span
-          className={cn(
-            "text-[10px] font-semibold px-1.5 py-0.5 rounded-md",
-            isDev ? "text-accentColor bg-accentColor/10" : "text-blue-400 bg-blue-500/10"
-          )}
-        >
+        <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded-md", isDev ? "text-accentColor bg-accentColor/10" : "text-blue-400 bg-blue-500/10")}>
           {isDev ? "DEV" : "VISITOR"}
         </span>
         <span className="text-[11px] text-gray-500">{blog.author_name}</span>
         <span className="text-[11px] text-gray-600 flex items-center gap-1">
-          <Clock size={9} />
-          {blog.reading_time} min
+          <Clock size={9} /> {blog.reading_time} min
         </span>
       </div>
 
       {/* Date + tags + actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pl-7">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-[11px] text-gray-400">{formatDate(blog.published_at)}</span>
           {blog.tags.slice(0, 2).map((tag) => (
@@ -789,16 +869,10 @@ function BlogCard({
           )}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
-          <button
-            onClick={onEdit}
-            className="p-2 rounded-xl text-gray-500 hover:text-accentColor hover:bg-accentColor/10 border border-transparent hover:border-accentColor/20 transition-all"
-          >
+          <button onClick={onEdit} className="p-2 rounded-xl text-gray-500 hover:text-accentColor hover:bg-accentColor/10 border border-transparent hover:border-accentColor/20 transition-all">
             <Edit2 size={13} />
           </button>
-          <button
-            onClick={onDelete}
-            className="p-2 rounded-xl text-gray-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all"
-          >
+          <button onClick={onDelete} className="p-2 rounded-xl text-gray-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all">
             <Trash2 size={13} />
           </button>
         </div>
@@ -809,19 +883,18 @@ function BlogCard({
 
 // ─── BlogTableRow (desktop) ───────────────────────────────────────────────────
 
-function BlogTableRow({
-  blog, rowNum, onEdit, onDelete,
-}: {
-  blog: BlogEntry
-  rowNum: number
-  onEdit: () => void
-  onDelete: () => void
-}) {
+function BlogTableRow({ blog, rowNum, onEdit, onDelete, isSelected, onToggle }: { blog: BlogEntry, rowNum: number, onEdit: () => void, onDelete: () => void, isSelected: boolean, onToggle: () => void }) {
   const isDev = blog.author_type === "developer"
 
   return (
-    <tr className="group hover:bg-white/[0.025] transition-colors">
-      <td className="px-5 py-3.5">
+    <tr className={cn("group transition-colors", isSelected ? "bg-accentColor/5" : "hover:bg-white/[0.025]")}>
+      <td className="px-4 py-3.5">
+        <input 
+          type="checkbox" checked={isSelected} onChange={onToggle}
+          className="w-4 h-4 rounded cursor-pointer accent-accentColor bg-white/[0.05] border-white/[0.1]" 
+        />
+      </td>
+      <td className="px-2 py-3.5">
         <span className="text-xs text-gray-600 tabular-nums">{rowNum}</span>
       </td>
 
@@ -849,24 +922,14 @@ function BlogTableRow({
       </td>
 
       <td className="px-4 py-3.5">
-        <span
-          className={cn(
-            "text-[11px] font-medium px-2.5 py-1 rounded-lg border",
-            CATEGORY_STYLE[blog.category] ?? "bg-gray-500/15 text-gray-400 border-gray-500/20"
-          )}
-        >
+        <span className={cn("text-[11px] font-medium px-2.5 py-1 rounded-lg border", CATEGORY_STYLE[blog.category] ?? "bg-gray-500/15 text-gray-400 border-gray-500/20")}>
           {blog.category}
         </span>
       </td>
 
       <td className="px-4 py-3.5">
         <div className="flex items-center gap-2">
-          <div
-            className={cn(
-              "w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 overflow-hidden",
-              isDev ? "bg-accentColor/20 text-accentColor" : "bg-white/[0.08] text-gray-400"
-            )}
-          >
+          <div className={cn("w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 overflow-hidden", isDev ? "bg-accentColor/20 text-accentColor" : "bg-white/[0.08] text-gray-400")}>
             {blog.author_avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={blog.author_avatar} alt={blog.author_name} className="w-full h-full object-cover" />
@@ -876,12 +939,7 @@ function BlogTableRow({
           </div>
           <div className="min-w-0">
             <p className="text-xs font-medium text-gray-300 truncate max-w-[110px]">{blog.author_name}</p>
-            <span
-              className={cn(
-                "text-[10px] font-semibold px-1.5 py-0.5 rounded-md",
-                isDev ? "text-accentColor bg-accentColor/10" : "text-blue-400 bg-blue-500/10"
-              )}
-            >
+            <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded-md", isDev ? "text-accentColor bg-accentColor/10" : "text-blue-400 bg-blue-500/10")}>
               {isDev ? "DEV" : "VISITOR"}
             </span>
           </div>
@@ -892,8 +950,7 @@ function BlogTableRow({
         <div className="space-y-0.5">
           <p className="text-xs text-gray-300">{formatDate(blog.published_at)}</p>
           <div className="flex items-center gap-1 text-[10px] text-gray-600">
-            <Clock size={9} />
-            {blog.reading_time} min read
+            <Clock size={9} /> {blog.reading_time} min read
           </div>
         </div>
       </td>
@@ -913,18 +970,10 @@ function BlogTableRow({
 
       <td className="px-5 py-3.5">
         <div className="flex items-center justify-end gap-1.5">
-          <button
-            onClick={onEdit}
-            className="p-2 rounded-xl text-gray-500 hover:text-accentColor hover:bg-accentColor/10 border border-transparent hover:border-accentColor/20 transition-all"
-            title="Edit"
-          >
+          <button onClick={onEdit} className="p-2 rounded-xl text-gray-500 hover:text-accentColor hover:bg-accentColor/10 border border-transparent hover:border-accentColor/20 transition-all" title="Edit">
             <Edit2 size={13} />
           </button>
-          <button
-            onClick={onDelete}
-            className="p-2 rounded-xl text-gray-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all"
-            title="Hapus"
-          >
+          <button onClick={onDelete} className="p-2 rounded-xl text-gray-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all" title="Hapus">
             <Trash2 size={13} />
           </button>
         </div>

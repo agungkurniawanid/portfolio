@@ -81,7 +81,7 @@ const socialLinks = [
   {
     id: 2,
     title: "Agung Kurniawan LinkedIn Profile",
-    link: "https://www.linkedin.com/in/agung-k-74530028b",
+    link: "https://www.linkedin.com/in/agung-kurniawan-8a798a3b9/",
     svg: (
       <svg
         xmlns="http://www.w3.org/2000/svg"

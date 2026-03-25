@@ -273,7 +273,9 @@
     "cat_cloud_desc": "Menskalakan aplikasi di infrastruktur cloud",
     "cta_title": "Tertarik bekerja sama?",
     "cta_desc": "Mari bangun sesuatu yang luar biasa — hubungi saya kapan saja.",
-    "cta_btn": "Hubungi Saya"
+    "cta_btn": "Hubungi Saya",
+    "no_data_title": "Tidak Ada Data Keahlian",
+    "no_data_desc": "Saat ini tidak ada data keahlian untuk ditampilkan. Silakan periksa kembali nanti."
   },
   "blogsPage": {
     "label": "Blog & Artikel",

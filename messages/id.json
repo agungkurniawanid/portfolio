@@ -803,6 +803,8 @@
   },
   "deployProjects": {
     "hero_breadcrumb_home": "Beranda",
+    "card_btn_demo": "Demo Langsung",
+    "card_btn_appstore": "App Store",
     "hero_breadcrumb_deploy": "Deploy Projects",
     "hero_badge": "Live & Production Ready",
     "hero_title_prefix": "Preview &",
@@ -841,6 +843,8 @@
     "updated_at": "Diperbarui",
     "try_app_title": "Coba Aplikasi",
     "btn_web": "Buka Website",
+    "btn_demo": "Tonton Demo",
+    "btn_appstore": "App Store",
     "btn_playstore": "Google Play Store",
     "btn_apk": "Download APK",
     "preview_unavailable": "Preview tidak tersedia saat ini.",

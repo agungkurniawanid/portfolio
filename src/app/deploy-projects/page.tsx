@@ -7,7 +7,7 @@ import { useTranslations, useLocale } from "next-intl"
 import { createClient } from "@supabase/supabase-js"
 import {
   Layers, ExternalLink, Download, Globe, Smartphone,
-  Loader2, ArrowRight, Calendar, Zap, Search, X, ArrowUpDown
+  Loader2, ArrowRight, Calendar, Zap, Search, X, ArrowUpDown, Apple, Play
 } from "lucide-react"
 import { cn } from "@/lib/Utils"
 import TranslateWidget from "@/components/TranslateWidget"
@@ -180,45 +180,47 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
         </div>
 
         <div className="flex items-center gap-2 pt-2 mt-auto border-t border-gray-100 dark:border-gray-800/60">
-          {isWeb && project.web_url ? (
-            <a
-              href={project.web_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 text-white transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25 active:scale-95"
-            >
-              <Globe size={13} /> {t("card_btn_web")}
-            </a>
-          ) : hasDownload ? (
-            <a
-              href={apkUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2.5 rounded-xl bg-accentColor hover:bg-accentColor/90 text-white transition-all duration-200 hover:shadow-lg hover:shadow-accentColor/25 active:scale-95"
-            >
-              <Download size={13} /> {t("card_btn_apk")}
-            </a>
-          ) : project.play_store_url ? (
-            <a
-              href={project.play_store_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2.5 rounded-xl bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 dark:text-gray-900 text-white transition-all duration-200 hover:shadow-lg active:scale-95"
-            >
-              <ExternalLink size={13} /> {t("card_btn_playstore")}
-            </a>
-          ) : null}
+          <div className="flex items-center flex-wrap gap-2">
+            {project.demo_url && (
+              <a
+                href={project.demo_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-all"
+              >
+                {/* YouTube SVG icon */}
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="-ml-0.5">
+                  <path d="M23.498 6.186a2.994 2.994 0 0 0-2.11-2.116C19.228 3.5 12 3.5 12 3.5s-7.228 0-9.388.57A2.994 2.994 0 0 0 .502 6.186C0 8.353 0 12 0 12s0 3.647.502 5.814a2.994 2.994 0 0 0 2.11 2.116C4.772 20.5 12 20.5 12 20.5s7.228 0 9.388-.57a2.994 2.994 0 0 0 2.11-2.116C24 15.647 24 12 24 12s0-3.647-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                </svg>
+                {t("card_btn_demo")}
+              </a>
+            )}
+            {isWeb && project.web_url && (
+              <a href={project.web_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-all">
+                  <Globe size={13} /> {t("card_btn_web")}
+              </a>
+            )}
+            {project.play_store_url && project.platform.toLowerCase().includes("android") && (
+              <a href={project.play_store_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg bg-[#f9bb04] hover:bg-[#e0a803] text-black transition-all">
+                  <Play size={13} /> {t("card_btn_playstore")}
+              </a>
+            )}
+            {project.app_store_url && project.platform.toLowerCase().includes("ios") && (
+              <a href={project.app_store_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all">
+                  <Apple size={13} /> {t("card_btn_appstore")}
+              </a>
+            )}
+            {apkUrl && !isWeb && (
+              <a href={apkUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-all">
+                  <Download size={13} /> {t("card_btn_apk")}
+              </a>
+            )}
+          </div>
 
           <Link
             href={`/deploy-projects/${project.slug}`}
-            className={cn(
-              "inline-flex items-center justify-center gap-1 text-xs font-semibold px-3 py-2.5 rounded-xl border transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-95",
-              "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300",
-              (!isWeb && !hasDownload && !project.play_store_url) ? "flex-1" : ""
-            )}
+            className="inline-flex items-center justify-center gap-1 text-xs font-semibold px-3 py-2.5 rounded-xl border transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-95 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 ml-auto shrink-0"
           >
             {t("card_btn_detail")} <ArrowRight size={12} />
           </Link>

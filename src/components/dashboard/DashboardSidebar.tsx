@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Terminal, BookOpen, LayoutGrid, ShieldAlert, LogOut, FolderKanban, BarChart, Wrench } from "lucide-react"
+import { Terminal, BookOpen, LayoutGrid, ShieldAlert, LogOut, FolderKanban, BarChart, Wrench, Rocket } from "lucide-react"
 import { cn } from "@/lib/Utils"
 import { useSidebar } from "./SidebarContext"
 
@@ -10,7 +10,10 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Overview", icon: LayoutGrid, exact: true },
   { href: "/dashboard/blogs", label: "Blogs", icon: BookOpen },
   { href: "/dashboard/projects", label: "Projects", icon: FolderKanban },
+  { href: "/dashboard/deploy-projects", label: "Deployed Projects", icon: Rocket },
   { href: "/dashboard/certificates", label: "Certificates", icon: ShieldAlert },
+  { href: "/dashboard/timelines", label: "Timelines", icon: LayoutGrid },
+  { href: "/dashboard/tech-tools", label: "Tech Tools", icon: Terminal },
   { href: "/dashboard/skills", label: "Skills", icon: Wrench },
   { href: "/dashboard/portfolio-stats", label: "Portfolio Stats", icon: BarChart },
 ]

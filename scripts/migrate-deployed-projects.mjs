@@ -35,7 +35,9 @@ const dummyProjects = [
     ],
     platform: "Web",
     web_url: "https://example-ecommerce.com",
+    demo_url: "https://example-ecommerce.com/demo",
     play_store_url: null,
+    app_store_url: null,
     apk_file_path: null,
     external_apk_url: null,
     update_notes: "### Versi 1.2.0\n- Penambahan fitur Wishlist.\n- Optimalisasi kecepatan load gambar.\n- Perbaikan bug pada saat checkout.",
@@ -44,18 +46,20 @@ const dummyProjects = [
   {
     title: "Task Manager Mobile",
     slug: "task-manager-mobile",
-    summary: "Aplikasi manajemen tugas harian yang intuitif untuk Android.",
+    summary: "Aplikasi manajemen tugas harian yang intuitif untuk Android & iOS.",
     description: "Aplikasi produktivitas berbasis mobile untuk mengatur rutinitas harian. Fiturnya meliputi timer pomodoro, kategori task, grafik statistik performa, dan sinkronisasi cloud.",
     thumbnail_url: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80",
     gallery_urls: [
       "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80",
       "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&q=80"
     ],
-    platform: "Android",
+    platform: "Android/iOS",
     web_url: null,
+    demo_url: "https://example-task-manager.com/demo",
     play_store_url: "https://play.google.com/store/apps/details?id=com.example.taskmanager",
+    app_store_url: "https://apps.apple.com/app/id1234567890",
     apk_file_path: null,
-    external_apk_url: "https://drive.google.com/file/d/1xxxx/view?usp=sharing", // Contoh External URL
+    external_apk_url: "https://drive.google.com/file/d/1xxxx/view?usp=sharing",
     update_notes: "### Versi 2.0.1\n- Dark mode support.\n- Penambahan fitur Pomodoro Timer.\n- Bug fixes pada kalender.",
     tags: ["Flutter", "Firebase", "Mobile"]
   }

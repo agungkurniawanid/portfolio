@@ -6,7 +6,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useTranslations, useLocale } from "next-intl"
 import { createClient } from "@supabase/supabase-js"
-import { ChevronLeft, Globe, Download, Smartphone, Calendar, Info } from "lucide-react"
+import { ChevronLeft, Globe, Download, Smartphone, Calendar, Info, ExternalLink, Apple, Play } from "lucide-react"
 import TranslateWidget from "@/components/TranslateWidget" // Pastikan path ini benar
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
@@ -170,6 +170,11 @@ export default function ProjectDetailPage() {
   const displayDescription = translated?.description || project.description
   const displayUpdateNotes = translated?.update_notes || project.update_notes
 
+  // Platform logic
+  const platform = (project.platform || "").toLowerCase()
+  const isAndroid = platform.includes("android")
+  const isIOS = platform.includes("ios")
+
   return (
     <>
       <style>{`
@@ -211,7 +216,7 @@ export default function ProjectDetailPage() {
                 {t("updated_at")}: {new Date(project.updated_at || project.published_at).toLocaleDateString(locale === "id" ? "id-ID" : locale === "de" ? "de-DE" : "en-US", { day: "numeric", month: "short", year: "numeric" })}
               </span>
               <span className="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-md text-xs font-medium">
-                {project.platform.toLowerCase().includes("web")
+                {platform.includes("web")
                   ? <Globe size={12} />
                   : <Smartphone size={12} />}
                 {project.platform}
@@ -264,38 +269,62 @@ export default function ProjectDetailPage() {
                   {t("try_app_title")}
                 </h3>
                 <div className="flex flex-col gap-2.5">
+                  {project.demo_url && (
+                    <a
+                      href={project.demo_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 active:scale-95 transition-all"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M23.498 6.186a2.994 2.994 0 0 0-2.11-2.116C19.228 3.5 12 3.5 12 3.5s-7.228 0-9.388.57A2.994 2.994 0 0 0 .502 6.186C0 8.353 0 12 0 12s0 3.647.502 5.814a2.994 2.994 0 0 0 2.11 2.116C4.772 20.5 12 20.5 12 20.5s7.228 0 9.388-.57a2.994 2.994 0 0 0 2.11-2.116C24 15.647 24 12 24 12s0-3.647-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                      </svg>
+                      {t("btn_demo")}
+                    </a>
+                  )}
                   {project.web_url && (
                     <a
                       href={project.web_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full py-3 bg-accentColor text-white text-sm font-medium rounded-xl hover:bg-accentColor/90 active:scale-95 transition-all"
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-accentColor text-white text-sm font-medium rounded-xl hover:brightness-90 active:scale-95 transition-all"
                     >
                       <Globe size={16} />
                       {t("btn_web")}
                     </a>
                   )}
-                  {project.play_store_url && (
+                  {project.play_store_url && isAndroid && (
                     <a
                       href={project.play_store_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full py-3 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 active:scale-95 transition-all"
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-[#f9bb04] hover:bg-[#e0a803] text-black text-sm font-medium rounded-xl active:scale-95 transition-all"
                     >
-                      <Smartphone size={16} />
+                      <Play size={16} />
                       {t("btn_playstore")}
+                    </a>
+                  )}
+                  {project.app_store_url && isIOS && (
+                    <a
+                      href={project.app_store_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 active:scale-95 transition-all"
+                    >
+                      <Apple size={16} />
+                      {t("btn_appstore")}
                     </a>
                   )}
                   {(project.apk_file_path || project.external_apk_url) && (
                     <button
                       onClick={handleDownloadApk}
-                      className="flex items-center justify-center gap-2 w-full py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 transition-all"
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 active:scale-95 transition-all"
                     >
                       <Download size={16} />
                       {t("btn_apk")}
                     </button>
                   )}
-                  {!project.web_url && !project.play_store_url && !project.apk_file_path && !project.external_apk_url && (
+                  {!project.demo_url && !project.web_url && !isAndroid && !isIOS && !project.apk_file_path && !project.external_apk_url && (
                     <div className="text-center text-xs text-gray-500 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg">
                       {t("preview_unavailable")}
                     </div>

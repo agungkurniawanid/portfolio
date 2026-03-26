@@ -802,6 +802,8 @@
   },
   "deployProjects": {
     "hero_breadcrumb_home": "Startseite",
+    "card_btn_demo": "Live-Demo",
+    "card_btn_appstore": "App Store",
     "hero_breadcrumb_deploy": "Deploy Projects",
     "hero_badge": "Live & Production Ready",
     "hero_title_prefix": "Vorschau &",
@@ -840,6 +842,8 @@
     "updated_at": "Aktualisiert",
     "try_app_title": "App ausprobieren",
     "btn_web": "Website öffnen",
+    "btn_demo": "Demo ansehen",
+    "btn_appstore": "App Store",
     "btn_playstore": "Google Play Store",
     "btn_apk": "APK herunterladen",
     "preview_unavailable": "Vorschau ist derzeit nicht verfügbar.",

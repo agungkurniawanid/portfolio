@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 import { useMemo, useState, useEffect, use, useCallback } from "react"
 import BlogPageCard from "@/components/blog/BlogPageCard"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { useTranslate } from "@/hooks/useTranslate"
 import TranslateButton from "@/components/blog/TranslateButton"
 

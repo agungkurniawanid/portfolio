@@ -8,7 +8,7 @@ import {
   isAfter, startOfDay, differenceInHours 
 } from "date-fns"
 import { supabase } from "@/lib/supabase"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { type DbNotification, TYPE_CONFIG } from "./DashboardNotificationBell"
 
 interface ManageNotificationModalProps {

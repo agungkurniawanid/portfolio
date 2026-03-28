@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
 import Image from "next/image"
@@ -9,7 +9,7 @@ import {
   Clock,
   FileX,
 } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import type { Certificate } from "@/types/certificate"
 
 interface PdfViewerProps {

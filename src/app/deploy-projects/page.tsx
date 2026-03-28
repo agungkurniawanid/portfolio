@@ -9,7 +9,7 @@ import {
   Layers, ExternalLink, Download, Globe, Smartphone,
   Loader2, ArrowRight, Calendar, Zap, Search, X, ArrowUpDown, Apple, Play
 } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import TranslateWidget from "@/components/TranslateWidget"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Gamepad2, Clock, Trophy, Search, X, Monitor, Smartphone } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/Utils";
+import { cn } from "@/lib/utils";
 import { fetchSteamGames, steamHeaderUrl, formatPlaytime } from "@/lib/entertainmentApi";
 import { SteamGame, MobileGame } from "@/types/entertainment";
 import { GAME_MANUAL_DATA, STEAM_GAMES_FALLBACK } from "@/data/entertainmentData";

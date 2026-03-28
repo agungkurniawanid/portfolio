@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type ReactNode } from "react"
 import { X, Loader2, Gamepad2, Star, Clock, Image as ImageIcon, Building2, Calendar, LayoutList, AlignLeft } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase"
 
 export interface MobileGameFormData {

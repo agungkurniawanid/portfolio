@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Terminal, Eye, EyeOff, Loader2, CheckCircle2, XCircle } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 
 export default function LoginPage() {
   const router = useRouter()

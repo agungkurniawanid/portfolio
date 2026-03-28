@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type ReactNode } from "react"
 import { X, Upload, Loader2, Calendar, Hash, Building2, Layers, AlignLeft, PaintBucket, ImageIcon, Check } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase"
 
 export interface TimelinePhoto {

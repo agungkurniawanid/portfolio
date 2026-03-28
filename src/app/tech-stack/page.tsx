@@ -24,7 +24,7 @@ import {
 } from "react-icons/si"
 import { FaCode, FaBriefcase, FaServer, FaDatabase, FaCloud, FaGlobe, FaDesktop, FaWrench, FaFilm, FaRobot, FaMobileAlt, FaHeart, FaStar, FaRegStar, FaCog, FaTerminal, FaSearch } from "react-icons/fa"
 
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import {
   ALL_TOOL_CATEGORIES, CATEGORY_META, BADGE_META,
   type ToolItem, type ToolCategory, type ToolBadge,

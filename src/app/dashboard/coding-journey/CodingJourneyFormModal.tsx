@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type ReactNode } from "react"
 import { X, Loader2, Calendar, Hash, Type, AlignLeft, PaintBucket, Layers } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 
 export interface CodingJourneyFormData {
   id: string

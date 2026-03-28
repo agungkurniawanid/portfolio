@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Gamepad2, MonitorPlay, Music, BookOpen, Clock } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/Utils";
+import { cn } from "@/lib/utils";
 import { EntertainmentTab } from "@/types/entertainment";
 import { STEAM_GAMES_FALLBACK } from "@/data/entertainmentData";
 import { StatCardSkeleton } from "./EntertainmentSkeletons";

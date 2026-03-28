@@ -26,7 +26,7 @@ import {
   Undo,
   Redo,
 } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 
 interface RichTextEditorProps {
   content: string

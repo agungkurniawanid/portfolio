@@ -3,7 +3,7 @@
 import { useState, useMemo, Suspense, lazy, useRef, useEffect } from "react";
 import { Search, X, Gamepad2, MonitorPlay, Music, BookOpen, LayoutDashboard } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/Utils";
+import { cn } from "@/lib/utils";
 import { EntertainmentTab } from "@/types/entertainment";
 
 // Lazy-load heavy sections

@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react"
 import Image from "next/image"
 import { ChevronLeft, Users, FolderOpen, ImageIcon, User } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { GalleryGuest, GalleryAlbum } from "@/types/gallery"
 import GalleryAlbumCard from "@/components/gallery/GalleryAlbumCard"
 import { useTranslations } from "next-intl"

@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import Link from "next/link"
 import { X, BookOpen, ArrowRight } from "lucide-react"
 import { useBannerStore, BANNER_HEIGHT } from "@/stores/BannerStore"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 
 export default function GuestbookBanner() {
   const { visible, initialized, init, dismiss } = useBannerStore()

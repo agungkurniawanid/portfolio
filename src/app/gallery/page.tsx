@@ -17,7 +17,7 @@ import {
   Plus,
   MousePointerClick,
 } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { GalleryPhoto, GalleryAlbum, GalleryCategory, GalleryGuest, SortOption } from "@/types/gallery"
 import { GALLERY_CATEGORIES } from "@/data/galleryData"
 import { fetchGalleryPhotos, fetchGalleryAlbums, fetchGalleryGuests } from "@/lib/galleryApi"

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type ReactNode } from "react"
 import { X, Loader2, Wrench, PaintBucket, Layers, Link2, Star, Tag, AlignLeft } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 
 export interface TechToolFormData {
   id?: number

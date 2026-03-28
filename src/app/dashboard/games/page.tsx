@@ -6,7 +6,7 @@ import {
     CheckCircle2, ChevronLeft, ChevronRight, X, RefreshCw,
     Gamepad2, Image as ImageIcon, Star, Clock, Trophy, ListFilter
 } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase"
 import { useSidebar } from "@/components/dashboard/SidebarContext"
 

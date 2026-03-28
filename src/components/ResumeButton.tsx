@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { useSectionStore } from "@/stores/Section"
 import { gsap } from "gsap"
 

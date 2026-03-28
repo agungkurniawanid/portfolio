@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Edit2, Trash2, Folder, Image as ImageIcon, Tag, Calendar } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 
 interface Album {
   name: string

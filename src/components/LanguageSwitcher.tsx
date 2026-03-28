@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useLanguageStore, type Locale } from "@/stores/LanguageStore"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { ChevronDown, Check } from "lucide-react"
 import Image from "next/image"
 

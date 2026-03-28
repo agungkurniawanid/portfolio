@@ -7,7 +7,7 @@ import {
   ListFilter, Image as ImageIcon, MapPin, Database, CheckSquare, 
   GraduationCap, Briefcase
 } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase"
 import { useSidebar } from "@/components/dashboard/SidebarContext"
 

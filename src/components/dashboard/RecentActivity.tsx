@@ -1,7 +1,7 @@
 import React from 'react'
 import { MessageSquare, Calendar, ChevronRight, User } from 'lucide-react'
 import Link from 'next/link'
-import { cn } from '@/lib/Utils'
+import { cn } from '@/lib/utils'
 
 interface ActivityItem {
   id: string

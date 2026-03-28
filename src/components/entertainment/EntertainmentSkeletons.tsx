@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/Utils";
+import { cn } from "@/lib/utils";
 
 // ─── Base Shimmer wrapper ──────────────────────────────────────────────────────
 export function Shimmer({ className }: { className?: string }) {

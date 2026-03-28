@@ -24,7 +24,7 @@ import {
 } from "react-icons/si";
 import { FaMicrochip } from "react-icons/fa";
 import ProfileImg from "@/assets/SAVE_20221213_123032 (1).jpg";
-import { cn } from "@/lib/Utils";
+import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { useLanguageStore } from "@/stores/LanguageStore";
 import TranslateWidget from "@/components/TranslateWidget";

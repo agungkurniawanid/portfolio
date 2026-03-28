@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type ReactNode } from "react"
 import { X, Loader2, Code2, PaintBucket, Activity, Hash, Layers, EyeOff } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 
 export interface SkillFormData {
   id: string

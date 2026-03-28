@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Music, Headphones, ExternalLink, List, Album, Search, X, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/Utils";
+import { cn } from "@/lib/utils";
 import { MusicTrack, CustomAlbum } from "@/types/entertainment";
 
 type MusicSubTab = "tracks" | "albums";

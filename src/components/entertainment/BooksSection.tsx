@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { BookOpen, Search, X, Star, SlidersHorizontal, ChevronDown, Heart } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/Utils";
+import { cn } from "@/lib/utils";
 import { fetchOpenLibraryBook } from "@/lib/entertainmentApi";
 import { SupabaseBook, BookStatus } from "@/types/entertainment";
 import { BookCardSkeleton } from "./EntertainmentSkeletons";

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type ReactNode } from "react"
 import { X, Upload, Plus, Loader2, Github, Star, Layers, Code, Globe, Calendar, Link2 } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase"
 
 export interface GithubUrlData {

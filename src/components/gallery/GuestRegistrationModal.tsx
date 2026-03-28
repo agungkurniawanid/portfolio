@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect, KeyboardEvent } from "react"
 import Image from "next/image"
 import { X, Upload, Check, FolderPlus, ImagePlus, User, AlertCircle, Loader2, Tag } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase"
 import { generateFingerprint } from "@/lib/fingerprint"
 import { GALLERY_CATEGORIES } from "@/data/galleryData"

@@ -16,7 +16,7 @@
  */
 
 import { Loader2, Globe, RotateCcw, AlertCircle } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 
 interface TranslateButtonProps {
   onTranslate: () => void

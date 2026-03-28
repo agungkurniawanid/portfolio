@@ -7,7 +7,7 @@ import {
   ListFilter, EyeOff, Building2, CheckSquare, ShieldCheck,
   FileText
 } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase"
 import { useSidebar } from "@/components/dashboard/SidebarContext"
 

@@ -21,7 +21,7 @@ import {
   FolderOpen,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { CERTIFICATE_CATEGORIES } from "@/data/certificateData"
 import { fetchCertificates } from "@/lib/certificateApi"
 import type { Certificate, CertificateCategory, CertificateStatus, SortOption } from "@/types/certificate"

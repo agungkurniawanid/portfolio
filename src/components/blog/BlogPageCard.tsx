@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Blog } from "@/types/blog"
 import { Clock, Calendar, Tag } from "lucide-react"
 import Link from "next/link"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import TranslateWidget from "@/components/TranslateWidget"
 
 interface BlogPageCardProps {

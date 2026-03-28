@@ -18,7 +18,7 @@ import {
   Pencil,
   Sparkles,
 } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase"
 import GuestbookCard, { GuestbookEntry } from "./GuestbookCard"
 import GuestbookFormModal, { MOODS } from "./GuestbookFormModal"

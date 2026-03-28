@@ -6,7 +6,7 @@ import {
     CheckCircle2, ChevronLeft, ChevronRight, X, RefreshCw,
     BookOpen, Star, Building2, Quote, BookMarked, AlignLeft
 } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase"
 import { useSidebar } from "@/components/dashboard/SidebarContext"
 

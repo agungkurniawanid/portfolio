@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, type ReactNode } from "react"
 import { X, Upload, Tag as TagIcon, Plus, Clock, Loader2 } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase"
 
 export type AuthorType = "developer" | "visitor"

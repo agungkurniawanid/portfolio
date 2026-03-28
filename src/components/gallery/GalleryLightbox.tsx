@@ -18,7 +18,7 @@ import {
   User,
 } from "lucide-react"
 import { FaWhatsapp, FaTwitter, FaInstagram } from "react-icons/fa"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import TranslateWidget from "@/components/TranslateWidget"
 

@@ -5,7 +5,7 @@ import { X, Upload, Eye, Send, AlertCircle, User, Mail, Phone, FileText, Tag, Im
 import { BlogCategory } from "@/types/blog"
 import { useBlogStore } from "@/stores/BlogStore"
 import { supabase } from "@/lib/supabase"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import dynamic from "next/dynamic"
 import { useTranslations } from "next-intl"
 import imageCompression from "browser-image-compression"

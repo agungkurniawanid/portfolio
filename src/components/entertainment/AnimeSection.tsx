@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Tv, Search, X, Star, SlidersHorizontal, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/Utils";
+import { cn } from "@/lib/utils";
 import { searchTMDBTV, tmdbPosterUrl } from "@/lib/entertainmentApi";
 import { AnimeSeries, SeriesStatus } from "@/types/entertainment";
 import { ANIME_SERIES_DATA } from "@/data/entertainmentData";

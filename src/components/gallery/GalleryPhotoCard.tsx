@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { GalleryPhoto } from "@/types/gallery"
 import { MapPin, Search, Download, Share2, Tag } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 
 interface GalleryPhotoCardProps {
   photo: GalleryPhoto

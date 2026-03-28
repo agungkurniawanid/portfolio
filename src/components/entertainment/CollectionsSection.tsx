@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Package, Search, X } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/Utils";
+import { cn } from "@/lib/utils";
 import { CollectionItem, CollectionCategory, CollectionCondition } from "@/types/entertainment";
 import { COLLECTIONS_DATA } from "@/data/entertainmentData";
 

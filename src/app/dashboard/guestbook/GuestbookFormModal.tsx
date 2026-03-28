@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type ReactNode } from "react"
 import { X, Loader2, User, MapPin, Briefcase, MessageSquare, Image as ImageIcon, Link2, Star, Smile, ShieldCheck } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase"
 
 export interface GuestbookFormData {

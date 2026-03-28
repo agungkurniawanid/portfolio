@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Search, X, Play, BookMarked, Loader2, SlidersHorizontal, ChevronDown, Tag } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/Utils";
+import { cn } from "@/lib/utils";
 import { WatchReadItem, WatchReadCategory, WatchReadStatus } from "@/types/entertainment";
 import { searchTMDBByTitle } from "@/lib/entertainmentApi";
 

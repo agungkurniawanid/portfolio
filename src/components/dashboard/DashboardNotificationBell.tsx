@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Bell, X, CheckCheck, MessageSquare, Users, Image, Folder, Clock, Settings2 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 
 export interface DbNotification {
   id: string

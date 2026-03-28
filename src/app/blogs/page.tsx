@@ -7,7 +7,7 @@ import BlogPageCard from "@/components/blog/BlogPageCard"
 import BlogPageCardSkeleton from "@/components/blog/BlogPageCardSkeleton"
 import ArticleModal from "@/components/blog/ArticleModal"
 import { Search, PenSquare, LayoutGrid, List, Rss, ChevronLeft, ChevronRight, AlertTriangle, ShieldCheck } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 
 const CATEGORIES: (BlogCategory | "All")[] = [

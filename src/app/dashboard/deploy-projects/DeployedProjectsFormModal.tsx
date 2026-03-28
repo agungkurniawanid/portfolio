@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type ReactNode } from "react"
 import { X, Loader2, Link2, Globe, Smartphone, Play, Apple, FileArchive, LayoutGrid, Tag, Images } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 
 export interface DeployedProjectFormData {
   id: string

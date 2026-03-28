@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { Film, Search, X, Star, SlidersHorizontal, ChevronDown, LayoutGrid, List, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/Utils";
+import { cn } from "@/lib/utils";
 import { searchTMDBMovie, tmdbPosterUrl } from "@/lib/entertainmentApi";
 import { EnrichedMovie, MovieStatus, TMDBMovie } from "@/types/entertainment";
 import { LOCAL_MOVIES } from "@/data/entertainmentData";

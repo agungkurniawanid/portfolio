@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { X, Save, RefreshCw, User, ImageIcon } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 
 export interface GuestFormData {
   id?: number

@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Edit2, Trash2, User, ImageIcon, Folder, Calendar } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { GalleryGuest } from "@/types/gallery"
 
 interface GuestListProps {

@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { GalleryAlbum } from "@/types/gallery"
 import { Images, Calendar, ArrowRight } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 
 interface GalleryAlbumCardProps {
   album: GalleryAlbum

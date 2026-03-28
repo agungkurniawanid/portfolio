@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type ReactNode } from "react"
 import { X, Loader2, Calendar, Hash, Building2, MapPin, Briefcase, FileText, Code2 } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 
 export interface WorkExperienceFormData {
   id: string

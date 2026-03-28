@@ -17,7 +17,7 @@ import {
   FaHandshake,
 } from "react-icons/fa"
 import { SiFlutter } from "react-icons/si"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import {
   ALL_CATEGORIES,
   categoryMeta,

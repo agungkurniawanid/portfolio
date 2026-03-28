@@ -6,7 +6,7 @@ import {
   CheckCircle2, ChevronLeft, ChevronRight, X, RefreshCw, 
   ListFilter, Database, Briefcase, Building2, MapPin, EyeOff, CalendarClock, Code2
 } from "lucide-react"
-import { cn } from "@/lib/Utils"
+import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase"
 import { useSidebar } from "@/components/dashboard/SidebarContext"
 

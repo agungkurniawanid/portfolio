@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/providers/ThemeProvider"
 import IntlProvider from "@/providers/IntlProvider"
 import ThemeColorSync from "@/components/ThemeColorSync"
 import PublicLayout from "@/components/layouts/PublicLayout"
+import { Toaster } from "sonner"
 
 const jost = Jost({ subsets: ["latin"] })
 
@@ -82,6 +83,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <Toaster richColors />
             <ThemeColorSync />
             <PublicLayout>
               {children}

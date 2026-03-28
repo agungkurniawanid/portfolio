@@ -27,6 +27,7 @@
     "migrate:fix-certificates-rls": "node scripts/migrate-fix-certificates-rls.mjs",
     "migrate:all": "node scripts/migrate-all.mjs",
     "migrate:timeline": "node scripts/migrate-timeline.mjs",
+    "migrate:profile": "node scripts/migrate-profile.mjs",
     "create:auth-user": "node scripts/create-auth-user.mjs"
   },
   "dependencies": {
@@ -70,6 +71,7 @@
     "react-pdf": "^10.4.1",
     "react-rough-notation": "^1.0.5",
     "react-timeago": "^8.3.0",
+    "recharts": "^3.8.1",
     "remark-gfm": "^4.0.1",
     "sonner": "^2.0.7",
     "split-type": "^0.3.4",
@@ -87,6 +89,7 @@
     "@types/pg": "^8.18.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@types/recharts": "^1.8.29",
     "eslint": "^9",
     "eslint-config-next": "15.1.5",
     "postcss": "^8",

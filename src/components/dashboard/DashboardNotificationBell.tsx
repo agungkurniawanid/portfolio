@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Bell, X, CheckCheck, MessageSquare, Users, Image, Folder, Clock } from "lucide-react"
+import { Bell, X, CheckCheck, MessageSquare, Users, Image, Folder, Clock, Settings2 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { cn } from "@/lib/Utils"
 
-interface Notification {
+export interface DbNotification {
   id: string
   type: string
   title: string
@@ -16,7 +16,7 @@ interface Notification {
   created_at: string
 }
 
-const TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
+export const TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
   guestbook_entry:       { icon: <MessageSquare size={14} />, color: "text-purple-400",  bg: "bg-purple-500/10 border-purple-500/20" },
   gallery_guest_register:{ icon: <Users size={14} />,         color: "text-blue-400",    bg: "bg-blue-500/10 border-blue-500/20" },
   gallery_guest_album:   { icon: <Folder size={14} />,        color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
@@ -33,59 +33,19 @@ function timeAgo(dateStr: string) {
   return `${Math.floor(hours / 24)} hari lalu`
 }
 
-export default function DashboardNotificationBell() {
+interface Props {
+  onManageClick: () => void
+  notifications: DbNotification[]
+  onRefresh: () => void
+  loading: boolean
+}
+
+export default function DashboardNotificationBell({ onManageClick, notifications, onRefresh, loading }: Props) {
   const router = useRouter()
-  const [notifications, setNotifications] = useState<Notification[]>([])
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
   const popoverRef = useRef<HTMLDivElement>(null)
 
   const unreadCount = notifications.filter((n) => !n.is_read).length
-
-  // ── Fetch initial notifications ──────────────────────────────────────────────
-  const fetchNotifications = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("notifications")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(50)
-
-    if (!error && data) {
-      setNotifications(data)
-    }
-    setLoading(false)
-  }, [])
-
-  useEffect(() => {
-    fetchNotifications()
-  }, [fetchNotifications])
-
-  // ── Supabase Realtime subscription ───────────────────────────────────────────
-  useEffect(() => {
-    const channel = supabase
-      .channel("notifications-realtime")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications" },
-        (payload) => {
-          setNotifications((prev) => [payload.new as Notification, ...prev])
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "notifications" },
-        (payload) => {
-          setNotifications((prev) =>
-            prev.map((n) => (n.id === payload.new.id ? (payload.new as Notification) : n))
-          )
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [])
 
   // ── Close on outside click ────────────────────────────────────────────────────
   useEffect(() => {
@@ -103,26 +63,23 @@ export default function DashboardNotificationBell() {
     const unreadIds = notifications.filter((n) => !n.is_read).map((n) => n.id)
     if (!unreadIds.length) return
 
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
-
     await supabase
       .from("notifications")
       .update({ is_read: true })
       .in("id", unreadIds)
+    onRefresh()
   }
 
   // ── Mark single as read + navigate ───────────────────────────────────────────
-  async function handleNotifClick(notif: Notification) {
+  async function handleNotifClick(notif: DbNotification) {
     setOpen(false)
 
     if (!notif.is_read) {
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === notif.id ? { ...n, is_read: true } : n))
-      )
       await supabase
         .from("notifications")
         .update({ is_read: true })
         .eq("id", notif.id)
+      onRefresh()
     }
 
     router.push(notif.target_url)
@@ -133,12 +90,11 @@ export default function DashboardNotificationBell() {
     const readIds = notifications.filter((n) => n.is_read).map((n) => n.id)
     if (!readIds.length) return
 
-    setNotifications((prev) => prev.filter((n) => !n.is_read))
-
     await supabase
       .from("notifications")
       .delete()
       .in("id", readIds)
+    onRefresh()
   }
 
   const cfg = (type: string) => TYPE_CONFIG[type] ?? {
@@ -222,7 +178,7 @@ export default function DashboardNotificationBell() {
               </div>
             ) : (
               <div className="p-2 space-y-1">
-                {notifications.map((notif) => {
+                {notifications.map((notif: DbNotification) => {
                   const c = cfg(notif.type)
                   return (
                     <button
@@ -266,13 +222,17 @@ export default function DashboardNotificationBell() {
           </div>
 
           {/* Footer */}
-          {notifications.length > 0 && (
-            <div className="px-4 py-3 border-t border-white/[0.07] text-center">
-              <p className="text-[10px] text-gray-600">
-                {notifications.length} total notifikasi
-              </p>
-            </div>
-          )}
+          <div className="px-4 py-3 border-t border-white/[0.07] flex items-center justify-between bg-white/[0.01]">
+            <p className="text-[10px] text-gray-600">
+              {notifications.length} total notifikasi
+            </p>
+            <button 
+              onClick={() => { onManageClick(); setOpen(false) }}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium text-accentColor hover:text-white bg-accentColor/5 hover:bg-accentColor border border-accentColor/10 rounded-lg transition-all"
+            >
+              <Settings2 size={11} /> Manage
+            </button>
+          </div>
         </div>
       )}
     </div>

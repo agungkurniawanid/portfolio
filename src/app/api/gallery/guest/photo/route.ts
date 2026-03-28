@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import { insertNotification } from "@/lib/notificationUtils"
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -118,6 +119,14 @@ export async function POST(req: NextRequest) {
       .from("gallery_guests")
       .update({ photo_count: totalPhotos || 0 })
       .eq("id", guestId)
+
+    // ── Notification ──────────────────────────────────────────────────────────
+    await insertNotification(supabaseAdmin, {
+      type: "gallery_guest_photo",
+      title: `${photos.length} Foto Baru dari ${guestName}`,
+      content: `${guestName} mengunggah ${photos.length} foto ke album "${albumName}" (${albumCategory}).`,
+      target_url: `/dashboard/gallery?view=photos&search=${encodeURIComponent(guestName)}`,
+    })
 
     return NextResponse.json({
       count: inserted?.length || 0,

@@ -6,13 +6,12 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export const revalidate = 300;
+export const revalidate = 0;
 
 export async function GET() {
   const { data, error } = await supabase
     .from("mobile_games")
     .select("*")
-    .eq("status", "playing")
     .order("title");
 
   if (error) {

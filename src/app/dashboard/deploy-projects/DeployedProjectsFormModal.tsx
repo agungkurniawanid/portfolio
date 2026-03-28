@@ -30,7 +30,6 @@ const EMPTY_FORM: DeployedProjectFormData = {
   update_notes: "", tags: []
 }
 
-const PLATFORMS = ["Web", "Android", "iOS", "Cross-Platform", "Desktop"]
 const DEFAULT_URL = "https://i.pinimg.com/736x/31/dc/76/31dc76b88cfba521b6f3836b8f439a03.jpg"
 
 interface DeployedProjectsFormModalProps {
@@ -117,12 +116,9 @@ export default function DeployedProjectsFormModal({ isOpen, mode, initialData, o
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-2">Platform <span className="text-red-400">*</span></label>
-              <select value={form.platform} onChange={(e) => setField("platform", e.target.value)} className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-gray-200 outline-none focus:border-accentColor/60 transition-colors appearance-none">
-                {PLATFORMS.map(p => <option key={p} value={p} className="bg-[#0e1c1c]">{p}</option>)}
-              </select>
-            </div>
+            <FormField label="Platform (Manual Input)" required>
+              <TextInput value={form.platform} onChange={v => setField("platform", v)} placeholder="Contoh: Web, Android, iOS, AI Model, dst." />
+            </FormField>
             <FormField label="Tags" icon={<Tag size={12} className="text-gray-500" />} hint="Tekan Enter">
               <div className="bg-white/[0.04] border border-white/[0.08] rounded-xl p-2.5 space-y-2 focus-within:border-accentColor/60 transition-colors">
                 {form.tags.length > 0 && (

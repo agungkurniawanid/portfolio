@@ -27,6 +27,8 @@ import GalleryPhotoCard from "@/components/gallery/GalleryPhotoCard"
 import GalleryAlbumCard from "@/components/gallery/GalleryAlbumCard"
 import GuestRegistrationModal from "@/components/gallery/GuestRegistrationModal"
 
+import ProfileImg from "@/assets/SAVE_20221213_123032 (1).jpg"
+
 // Dynamically import lightbox to avoid SSR issues
 const GalleryLightbox = dynamic(() => import("@/components/gallery/GalleryLightbox"), {
   ssr: false,
@@ -72,7 +74,7 @@ export default function GalleryPage() {
   }, [])
 
   // ── UI State ─────────────────────────────────────────────────────────
-  const [ownerTab, setOwnerTab] = useState<OwnerTab>("personal")
+  const [ownerTab, setOwnerTab] = useState<OwnerTab>("guest")
   const [search, setSearch] = useState("")
   const [activeCategory, setActiveCategory] = useState<GalleryCategory>("Semua")
   const [sortBy, setSortBy] = useState<SortOption>("Terbaru")
@@ -189,24 +191,6 @@ export default function GalleryPage() {
           <div className="flex items-center justify-center mb-6">
             <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-2xl p-1 gap-1 shadow-inner">
               <button
-                onClick={() => switchOwnerTab("personal")}
-                className={cn(
-                  "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200",
-                  ownerTab === "personal"
-                    ? "bg-accentColor text-white shadow-md shadow-accentColor/30"
-                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                )}
-              >
-                <User className="w-4 h-4" />
-                <span>{t("tab_personal")}</span>
-                {ownerTab !== "personal" && (
-                  <span className="ml-1 flex items-center gap-1 text-[10px] font-normal opacity-70 bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded-md border border-black/5 dark:border-white/10">
-                    <MousePointerClick className="w-3 h-3" />
-                    {t("click_hint")}
-                  </span>
-                )}
-              </button>
-              <button
                 onClick={() => switchOwnerTab("guest")}
                 className={cn(
                   "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200",
@@ -218,6 +202,24 @@ export default function GalleryPage() {
                 <Users className="w-4 h-4" />
                 <span>{t("tab_guest")}</span>
                 {ownerTab !== "guest" && (
+                  <span className="ml-1 flex items-center gap-1 text-[10px] font-normal opacity-70 bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded-md border border-black/5 dark:border-white/10">
+                    <MousePointerClick className="w-3 h-3" />
+                    {t("click_hint")}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => switchOwnerTab("personal")}
+                className={cn(
+                  "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200",
+                  ownerTab === "personal"
+                    ? "bg-accentColor text-white shadow-md shadow-accentColor/30"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                )}
+              >
+                <User className="w-4 h-4" />
+                <span>{t("tab_personal")}</span>
+                {ownerTab !== "personal" && (
                   <span className="ml-1 flex items-center gap-1 text-[10px] font-normal opacity-70 bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded-md border border-black/5 dark:border-white/10">
                     <MousePointerClick className="w-3 h-3" />
                     {t("click_hint")}
@@ -544,15 +546,30 @@ export default function GalleryPage() {
                       className="flex -ml-2 sm:-ml-4 w-[calc(100%+0.5rem)] sm:w-[calc(100%+1rem)]"
                       columnClassName="pl-2 sm:pl-4"
                     >
-                      {visiblePhotos.map((photo) => (
-                        <GalleryPhotoCard
-                          key={photo.id}
-                          photo={photo}
-                          onView={openLightbox}
-                          onDownload={handleDownload}
-                          onShare={handleShare}
-                        />
-                      ))}
+                      {visiblePhotos.map((photo) => {
+                        let uploaderName = undefined;
+                        let uploaderAvatar = undefined;
+                        if (photo.ownerType === "guest" && photo.guestId) {
+                          const guestUser = allGuests.find((g) => g.id === photo.guestId);
+                          uploaderName = guestUser ? guestUser.name : "Guest";
+                          uploaderAvatar = guestUser?.avatarUrl;
+                        } else {
+                          uploaderName = "Agung Kurniawan";
+                          uploaderAvatar = ProfileImg;
+                        }
+
+                        return (
+                          <GalleryPhotoCard
+                            key={photo.id}
+                            photo={photo}
+                            onView={openLightbox}
+                            onDownload={handleDownload}
+                            onShare={handleShare}
+                            uploaderName={uploaderName}
+                            uploaderAvatar={uploaderAvatar}
+                          />
+                        )
+                      })}
                     </Masonry>
 
                     {/* Load More */}
@@ -596,9 +613,27 @@ export default function GalleryPage() {
                           a.description.toLowerCase().includes(search.toLowerCase())
                         )
                       })
-                      .map((album) => (
-                        <GalleryAlbumCard key={album.slug} album={album} />
-                      ))}
+                      .map((album) => {
+                        let uploaderName = undefined;
+                        let uploaderAvatar = undefined;
+                        if (album.ownerType === "guest" && album.guestId) {
+                          const guestUser = allGuests.find((g) => g.id === album.guestId);
+                          uploaderName = guestUser ? guestUser.name : "Guest";
+                          uploaderAvatar = guestUser?.avatarUrl;
+                        } else {
+                          uploaderName = "Agung Kurniawan";
+                          uploaderAvatar = ProfileImg;
+                        }
+
+                        return (
+                          <GalleryAlbumCard 
+                            key={album.slug} 
+                            album={album} 
+                            uploaderName={uploaderName}
+                            uploaderAvatar={uploaderAvatar}
+                          />
+                        )
+                      })}
                   </div>
                 )}
               </>

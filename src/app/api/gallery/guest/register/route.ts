@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { headers } from "next/headers"
+import { insertNotification } from "@/lib/notificationUtils"
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -67,8 +68,7 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Insert tamu baru (ip_address tidak lagi disimpan di gallery_guests,
-    // melainkan di visitor_ip_log sebagai bagian tracking terpusat)
+    // Insert tamu baru
     const { data: guest, error: insertErr } = await supabaseAdmin
       .from("gallery_guests")
       .insert({
@@ -86,8 +86,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: insertErr.message }, { status: 500 })
     }
 
-    // Catat ke visitor_ip_log (tracking terpusat, sama seperti banner/guestbook)
-    // Gunakan '0.0.0.0' sebagai fallback jika IP tidak tersedia (dev/local)
+    // Catat ke visitor_ip_log
     await supabaseAdmin
       .from("visitor_ip_log")
       .insert({
@@ -98,6 +97,14 @@ export async function POST(req: NextRequest) {
       .then(({ error }) => {
         if (error) console.warn("[gallery/guest/register] visitor_ip_log insert warn:", error.message)
       })
+
+    // ── Notification ──────────────────────────────────────────────────────────
+    await insertNotification(supabaseAdmin, {
+      type: "gallery_guest_register",
+      title: `Tamu Gallery Baru: ${guest.name}`,
+      content: `${guest.name} baru saja mendaftar sebagai tamu di Gallery. Siap untuk membuat album dan mengunggah foto.`,
+      target_url: `/dashboard/gallery?view=guests&search=${encodeURIComponent(guest.name)}`,
+    })
 
     return NextResponse.json({
       guest: {

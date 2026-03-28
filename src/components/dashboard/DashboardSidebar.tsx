@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Terminal, BookOpen, LayoutGrid, ShieldAlert, LogOut, FolderKanban, BarChart, Wrench, Rocket } from "lucide-react"
+import { Terminal, BookOpen, LayoutGrid, ShieldAlert, LogOut, FolderKanban, BarChart, Wrench, Rocket, Milestone, Briefcase, Image, Music, Gamepad2, MessageSquare } from "lucide-react"
 import { cn } from "@/lib/Utils"
 import { useSidebar } from "./SidebarContext"
 
@@ -16,6 +16,14 @@ const NAV_ITEMS = [
   { href: "/dashboard/tech-tools", label: "Tech Tools", icon: Terminal },
   { href: "/dashboard/skills", label: "Skills", icon: Wrench },
   { href: "/dashboard/portfolio-stats", label: "Portfolio Stats", icon: BarChart },
+  { href: "/dashboard/coding-journey", label: "Coding Journey", icon: Milestone },
+  { href: "/dashboard/work-experiences", label: "Work Experiences", icon: Briefcase },
+  { href: "/dashboard/gallery", label: "Gallery", icon: Image },
+  { href: "/dashboard/music", label: "Music", icon: Music },
+  { href: "/dashboard/games", label: "Games Library", icon: Gamepad2 },
+  { href: "/dashboard/books", label: "Books Library", icon: BookOpen },
+  { href: "/dashboard/guestbook", label: "Guestbook", icon: MessageSquare },
+  { href: "/dashboard/visitor-ip-logs", label: "Visitor IP Logs", icon: ShieldAlert },
 ]
 
 export default function DashboardSidebar() {

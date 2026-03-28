@@ -23,6 +23,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "mosaic.scdn.co" },
       // Flag CDN
       { protocol: "https", hostname: "flagcdn.com" },
+      // Pinterest
+      { protocol: "https", hostname: "i.pinimg.com" },
     ],
   },
 

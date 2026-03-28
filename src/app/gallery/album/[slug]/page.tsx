@@ -8,9 +8,10 @@ import dynamic from "next/dynamic"
 import Masonry from "react-masonry-css"
 import { ArrowLeft, MapPin, Calendar, Images, Loader2 } from "lucide-react"
 import { galleryPhotos, galleryAlbums } from "@/data/galleryData"
-import { GalleryPhoto, GalleryAlbum } from "@/types/gallery"
-import { fetchAlbumBySlug, fetchPhotosByAlbum } from "@/lib/galleryApi"
+import { GalleryPhoto, GalleryAlbum, GalleryGuest } from "@/types/gallery"
+import { fetchAlbumBySlug, fetchPhotosByAlbum, fetchGalleryGuests } from "@/lib/galleryApi"
 import GalleryPhotoCard from "@/components/gallery/GalleryPhotoCard"
+import ProfileImg from "@/assets/SAVE_20221213_123032 (1).jpg"
 
 const GalleryLightbox = dynamic(() => import("@/components/gallery/GalleryLightbox"), {
   ssr: false,
@@ -34,6 +35,7 @@ export default function AlbumDetailPage({ params }: PageProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const [album, setAlbum] = useState<GalleryAlbum | null | undefined>(undefined)
   const [photos, setPhotos] = useState<GalleryPhoto[]>([])
+  const [guests, setGuests] = useState<GalleryGuest[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -51,16 +53,21 @@ export default function AlbumDetailPage({ params }: PageProps) {
       }
 
       // 2. Fetch dynamic album from Supabase (guest albums)
-      const dbAlbum = await fetchAlbumBySlug(slug)
+      const [dbAlbum, dbPhotos, allGuests] = await Promise.all([
+        fetchAlbumBySlug(slug),
+        fetchPhotosByAlbum(slug),
+        fetchGalleryGuests()
+      ])
+
       if (!dbAlbum) {
         setAlbum(null)
         setIsLoading(false)
         return
       }
 
-      const dbPhotos = await fetchPhotosByAlbum(slug)
       setAlbum(dbAlbum)
       setPhotos(dbPhotos)
+      setGuests(allGuests)
       setIsLoading(false)
     }
 
@@ -108,24 +115,25 @@ export default function AlbumDetailPage({ params }: PageProps) {
           src={album.coverUrl}
           alt={album.name}
           fill
+          unoptimized={true}
           className="object-cover"
           priority
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent pointer-events-none" />
 
         {/* Back button */}
         <Link
           href="/gallery"
-          className="absolute top-6 left-6 flex items-center gap-2 text-white text-sm font-medium bg-black/40 hover:bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 transition-all duration-200 hover:-translate-x-0.5"
+          className="absolute z-[999] top-6 left-6 flex items-center gap-2 text-white text-sm font-medium bg-black/40 hover:bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 transition-all duration-200 hover:-translate-x-0.5"
         >
           <ArrowLeft className="w-4 h-4" />
           Kembali ke Gallery
         </Link>
 
         {/* Album info */}
-        <div className="absolute bottom-0 left-0 right-0 px-[5%] py-8">
+        <div className="absolute z-10 bottom-0 left-0 right-0 px-[5%] py-8">
           <span className="inline-flex items-center text-xs font-semibold px-3 py-1 rounded-full bg-accentColor/90 text-white mb-3">
             {album.category}
           </span>
@@ -174,15 +182,30 @@ export default function AlbumDetailPage({ params }: PageProps) {
             className="flex -ml-2 sm:-ml-4 w-[calc(100%+0.5rem)] sm:w-[calc(100%+1rem)]"
             columnClassName="pl-2 sm:pl-4"
           >
-            {photos.map((photo) => (
-              <GalleryPhotoCard
-                key={photo.id}
-                photo={photo}
-                onView={openLightbox}
-                onDownload={handleDownload}
-                onShare={openLightbox}
-              />
-            ))}
+            {photos.map((photo) => {
+              let uploaderName = undefined;
+              let uploaderAvatar = undefined;
+              if (photo.ownerType === "guest" && photo.guestId) {
+                const guestUser = guests.find((g) => g.id === photo.guestId);
+                uploaderName = guestUser ? guestUser.name : "Guest";
+                uploaderAvatar = guestUser?.avatarUrl;
+              } else {
+                uploaderName = "Agung Kurniawan";
+                uploaderAvatar = ProfileImg;
+              }
+
+              return (
+                <GalleryPhotoCard
+                  key={photo.id}
+                  photo={photo}
+                  onView={openLightbox}
+                  onDownload={handleDownload}
+                  onShare={openLightbox}
+                  uploaderName={uploaderName}
+                  uploaderAvatar={uploaderAvatar}
+                />
+              )
+            })}
           </Masonry>
         )}
       </section>

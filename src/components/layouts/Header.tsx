@@ -14,6 +14,8 @@ import LanguageSwitcher from "../LanguageSwitcher"
 import MobileNav from "./MobileNav"
 import { cn } from "@/lib/Utils"
 import { ChevronDown } from "lucide-react"
+import NotificationBell from "../dashboard/NotificationBell"
+import NotificationListener from "../dashboard/NotificationListener"
 
 export default function Header() {
   const headerRef = useRef<HTMLElement>(null)
@@ -195,6 +197,12 @@ export default function Header() {
 
           {/* Right side */}
           <div className="flex items-center justify-end gap-1.5 md:gap-2 shrink-0">
+            {pathname.startsWith("/dashboard") && (
+              <>
+                <NotificationListener />
+                <NotificationBell />
+              </>
+            )}
             <LanguageSwitcher />
             <ResumeBtn />
             <ThemeSwitch />

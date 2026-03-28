@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from "react"
 import { 
   Search, Plus, Edit2, Trash2, Menu, AlertCircle, 
   CheckCircle2, ChevronLeft, ChevronRight, X, RefreshCw, 
-  ListFilter, Database, Rocket, Globe, Smartphone, Monitor, Layers
+  ListFilter, Database, Rocket, Globe, Smartphone, Monitor, Layers, Box
 } from "lucide-react"
 import { cn } from "@/lib/Utils"
 import { supabase } from "@/lib/supabase"
@@ -92,8 +92,20 @@ export default function DeployedProjectsDashboardPage() {
 
   // ─── Stats ──────────────────────────────────────────────────────────────────
   const totalItems = projects.length
-  const webCount = projects.filter(p => p.platform === "Web").length
-  const mobileCount = projects.filter(p => p.platform === "Android" || p.platform === "iOS" || p.platform === "Cross-Platform").length
+  const { webCount, mobileCount, othersCount } = useMemo(() => {
+    let web = 0
+    let mobile = 0
+    projects.forEach(p => {
+      const platform = (p.platform || "").toLowerCase()
+      if (platform.includes("web")) {
+        web++
+      } else if (platform.includes("android") || platform.includes("ios") || platform.includes("cross-platform")) {
+        mobile++
+      }
+    })
+    const others = projects.length - web - mobile
+    return { webCount: web, mobileCount: mobile, othersCount: others }
+  }, [projects])
 
   // ─── Selection Handlers ───────────────────────────────────────────────────
 
@@ -256,10 +268,11 @@ export default function DeployedProjectsDashboardPage() {
         <div className="flex-1 overflow-y-auto px-4 md:px-8 py-5 md:py-6 space-y-5 md:space-y-6 scrollbar-none">
           
           {/* ── Stats ── */}
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             <StatCard label="Total Released" value={totalItems} icon={<Database size={15} className="text-gray-400" />} color="default" loading={loading} />
             <StatCard label="Web Apps" value={webCount} icon={<Globe size={15} className="text-blue-400" />} color="blue" loading={loading} />
             <StatCard label="Mobile Apps" value={mobileCount} icon={<Smartphone size={15} className="text-emerald-400" />} color="green" loading={loading} />
+            <StatCard label="Others" value={othersCount} icon={<Box size={15} className="text-amber-400" />} color="yellow" loading={loading} />
           </div>
 
           {/* ── Toolbar ── */}

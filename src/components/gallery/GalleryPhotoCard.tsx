@@ -10,6 +10,8 @@ interface GalleryPhotoCardProps {
   onView: (photo: GalleryPhoto) => void
   onDownload: (photo: GalleryPhoto) => void
   onShare: (photo: GalleryPhoto) => void
+  uploaderName?: string
+  uploaderAvatar?: any // can be string or StaticImageData
 }
 
 export default function GalleryPhotoCard({
@@ -17,6 +19,8 @@ export default function GalleryPhotoCard({
   onView,
   onDownload,
   onShare,
+  uploaderName,
+  uploaderAvatar,
 }: GalleryPhotoCardProps) {
   return (
     <div
@@ -36,6 +40,7 @@ export default function GalleryPhotoCard({
           alt={photo.title}
           width={photo.width}
           height={photo.height}
+          unoptimized={true}
           className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
           placeholder="blur"
@@ -96,6 +101,24 @@ export default function GalleryPhotoCard({
           </div>
         </div>
       </div>
+
+      {/* Uploader Info snippet (outside hover overlay) */}
+      {(uploaderName || uploaderAvatar) && (
+        <div className="flex items-center gap-2 p-3 border-t border-black/5 dark:border-white/5 bg-gray-50 dark:bg-gray-800/80">
+          {uploaderAvatar ? (
+            <div className="relative w-6 h-6 rounded-full overflow-hidden shrink-0 ring-1 ring-black/10 dark:ring-white/10">
+              <Image unoptimized={true} src={uploaderAvatar} alt={uploaderName || "Uploader"} fill className="object-cover" sizes="24px" />
+            </div>
+          ) : (
+            <div className="w-6 h-6 rounded-full bg-accentColor shrink-0 flex items-center justify-center text-[10px] text-white font-bold ring-1 ring-accentColor/30">
+              {uploaderName?.charAt(0).toUpperCase() || "U"}
+            </div>
+          )}
+          <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">
+            {uploaderName || "Unknown"}
+          </p>
+        </div>
+      )}
     </div>
   )
 }

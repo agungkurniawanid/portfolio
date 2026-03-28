@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { insertNotification } from "@/lib/notificationUtils";
 
 function getSupabaseServer() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -60,6 +61,14 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (error) throw error;
+
+    // ── Notification ──────────────────────────────────────────────────────────
+    await insertNotification(supabase, {
+      type: "guestbook_entry",
+      title: `Buku Tamu Baru: ${name}`,
+      content: `${name} dari ${city} (${profession}) memberikan ulasan ${rating}★: "${message?.slice(0, 80)}${(message?.length ?? 0) > 80 ? "..." : ""}"`,
+      target_url: `/dashboard/guestbook?search=${encodeURIComponent(name)}`,
+    });
 
     return NextResponse.json({ data });
   } catch (err: unknown) {

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import {
     Search, Edit2, Trash2, Menu, AlertCircle,
@@ -22,7 +22,9 @@ interface ToastMsg {
     text: string
 }
 
-export default function GuestbookDashboardPage() {
+// ─── Main Content Component ───────────────────────────────────────────────────
+
+function GuestbookDashboardContent() {
     const { toggle: toggleSidebar } = useSidebar()
     const searchParams = useSearchParams()
 
@@ -137,7 +139,6 @@ export default function GuestbookDashboardPage() {
             const res = await toggleGuestbookApproval(id, !currentStatus)
             if (!res.success) throw new Error(res.error)
 
-            // Update state locally for fastest UI feedback
             setEntries(prev => prev.map(e => e.id === id ? { ...e, is_approved: !currentStatus } : e))
             setToast({ type: "success", text: !currentStatus ? "Entri disetujui untuk tampil ke publik." : "Entri disembunyikan dari publik." })
         } catch (err: any) {
@@ -242,7 +243,6 @@ export default function GuestbookDashboardPage() {
                                 <span className="sm:hidden">({selectedIds.length})</span>
                             </button>
                         )}
-                        {/* No Create button as requested */}
                     </div>
                 </div>
 
@@ -537,5 +537,28 @@ function EntryTableRow({ item, rowNum, onEdit, onDelete, isSelected, onToggle, o
                 </div>
             </td>
         </tr>
+    )
+}
+
+// ─── Suspense Fallback ────────────────────────────────────────────────────────
+
+function GuestbookLoadingFallback() {
+    return (
+        <div className="flex items-center justify-center h-full min-h-[400px]">
+            <div className="flex flex-col items-center gap-3">
+                <div className="w-6 h-6 border-2 border-accentColor border-t-transparent rounded-full animate-spin" />
+                <p className="text-xs text-gray-500">Memuat halaman...</p>
+            </div>
+        </div>
+    )
+}
+
+// ─── Default Export (with Suspense) ──────────────────────────────────────────
+
+export default function GuestbookDashboardPage() {
+    return (
+        <Suspense fallback={<GuestbookLoadingFallback />}>
+            <GuestbookDashboardContent />
+        </Suspense>
     )
 }

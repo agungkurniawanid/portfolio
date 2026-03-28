@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { 
   Search, Plus, Edit2, Trash2, Menu, AlertCircle, 
@@ -34,7 +34,9 @@ interface ToastMsg {
   text: string
 }
 
-export default function GalleryDashboardPage() {
+// ─── Main Content Component ───────────────────────────────────────────────────
+
+function GalleryDashboardContent() {
   const { toggle: toggleSidebar } = useSidebar()
   const searchParams = useSearchParams()
   
@@ -383,7 +385,6 @@ export default function GalleryDashboardPage() {
       if (!res.success) throw new Error(res.error)
 
       await fetchGuests()
-      // Karena cascade delete, kita update list foto dan album juga.
       await fetchPhotos()
       await fetchAlbums()
       
@@ -974,5 +975,28 @@ function GalleryTableRow({ item, rowNum, onEdit, onDelete, isSelected, onToggle 
         </div>
       </td>
     </tr>
+  )
+}
+
+// ─── Suspense Fallback ────────────────────────────────────────────────────────
+
+function GalleryLoadingFallback() {
+  return (
+    <div className="flex items-center justify-center h-full min-h-[400px]">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-6 h-6 border-2 border-accentColor border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs text-gray-500">Memuat halaman...</p>
+      </div>
+    </div>
+  )
+}
+
+// ─── Default Export (with Suspense) ──────────────────────────────────────────
+
+export default function GalleryDashboardPage() {
+  return (
+    <Suspense fallback={<GalleryLoadingFallback />}>
+      <GalleryDashboardContent />
+    </Suspense>
   )
 }

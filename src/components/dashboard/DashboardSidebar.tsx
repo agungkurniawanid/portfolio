@@ -2,13 +2,14 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Terminal, BookOpen, LayoutGrid, ShieldAlert, LogOut, FolderKanban, BarChart, Wrench, Rocket, Milestone, Briefcase, Image, Music, Gamepad2, MessageSquare } from "lucide-react"
+import { Terminal, BookOpen, LayoutGrid, ShieldAlert, LogOut, FolderKanban, BarChart, Wrench, Rocket, Milestone, Briefcase, Image, Music, Gamepad2, MessageSquare, BookMarked } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "./SidebarContext"
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Overview", icon: LayoutGrid, exact: true },
   { href: "/dashboard/blogs", label: "Blogs", icon: BookOpen },
+  { href: "/dashboard/diary", label: "Diary", icon: BookMarked },
   { href: "/dashboard/projects", label: "Projects", icon: FolderKanban },
   { href: "/dashboard/deploy-projects", label: "Deployed Projects", icon: Rocket },
   { href: "/dashboard/certificates", label: "Certificates", icon: ShieldAlert },

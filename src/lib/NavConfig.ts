@@ -1,4 +1,4 @@
-import { Home, User, Zap, FolderKanban, Newspaper, Mail, MoreHorizontal, ImageIcon, Award, Gamepad2, History, Wrench, BookOpen, Heart } from "lucide-react"
+import { Home, User, Zap, FolderKanban, Newspaper, Mail, MoreHorizontal, ImageIcon, Award, Gamepad2, History, Wrench, BookOpen, Heart, BookMarked } from "lucide-react"
 import { ComponentType } from "react"
 
 export interface SubMenuItem {
@@ -21,6 +21,7 @@ const navlinks: NavLink[] = [
   { titleKey: "skills", href: "/skills", icon: Zap },
   { titleKey: "projects", href: "/projects", icon: FolderKanban },
   { titleKey: "blog", href: "/blogs", icon: Newspaper },
+  { titleKey: "diary", href: "/diary", icon: BookMarked },
   { titleKey: "guestbook", href: "/guestbook", icon: BookOpen },
   {
     titleKey: "more",

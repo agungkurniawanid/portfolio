@@ -121,6 +121,17 @@ async function run() {
       console.error("❌ Auto-Seeding Project Thumbnails gagal dijalankan.")
     }
 
+    console.log("🌱 Menjalankan Seeding Diary...")
+    try {
+      execSync("node scripts/migrate-diary.mjs", { 
+        stdio: "inherit",
+        env: { ...process.env, SKIP_CONFIRMATION: "true" }
+      })
+      console.log("✅ Auto-Seeding Diary berhasil diselesaikan!\n")
+    } catch (err) {
+      console.error("❌ Auto-Seeding Diary gagal dijalankan.")
+    }
+
     console.log("🌱 Menjalankan Seeding Auth User (Supabase Auth + profiles)...")
     try {
       execSync("node scripts/create-auth-user.mjs", { stdio: "inherit" })
